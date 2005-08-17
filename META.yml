@@ -1,0 +1,12 @@
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         CORBA-Python
+version:      0.20
+version_from: class.pm
+installdirs:  site
+requires:
+    CORBA::C::include:             2.43
+    CORBA::IDL::node:              2.45
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.17
