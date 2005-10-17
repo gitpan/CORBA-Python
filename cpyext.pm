@@ -667,9 +667,8 @@ sub NameAttr {
 	my ($symbtab, $type, $attr, $name) = @_;
 	my $class = ref $type;
 	$class = "BasicType" if ($type->isa("BasicType"));
-	$class = "AnyType" if ($type->isa("AnyType"));
 	$class = "BaseInterface" if ($type->isa("BaseInterface"));
-	$class = "ForwardBaseInterface" if ($type->isa("ForwardBaseInterface"));
+	$class = "BaseInterface" if ($type->isa("ForwardBaseInterface"));
 	my $func = 'NameAttr' . $class;
 	if($proto->can($func)) {
 		return $proto->$func($symbtab, $type, $attr, $name);
@@ -691,22 +690,6 @@ sub NameAttrBaseInterface {
 		return $type->{c_name} . " " . $name;
 	} else {
 		warn __PACKAGE__,"::NameAttrBaseInterface : ERROR_INTERNAL $attr \n";
-	}
-}
-
-sub NameAttrForwardBaseInterface {
-	my $proto = shift;
-	my ($symbtab, $type, $attr, $name) = @_;
-	if (      $attr eq 'in' ) {
-		return $type->{c_name} . " " . $name;
-	} elsif ( $attr eq 'inout' ) {
-		return $type->{c_name} . " " . $name;
-	} elsif ( $attr eq 'out' ) {
-		return $type->{c_name} . " " . $name;
-	} elsif ( $attr eq 'return' ) {
-		return $type->{c_name} . " " . $name;
-	} else {
-		warn __PACKAGE__,"::NameAttrForwardBaseInterface : ERROR_INTERNAL $attr \n";
 	}
 }
 
@@ -911,9 +894,8 @@ sub NameAttr {
 	my ($symbtab, $type, $attr) = @_;
 	my $class = ref $type;
 	$class = "BasicType" if ($type->isa("BasicType"));
-	$class = "AnyType" if ($type->isa("AnyType"));
 	$class = "BaseInterface" if ($type->isa("BaseInterface"));
-	$class = "ForwardBaseInterface" if ($type->isa("ForwardBaseInterface"));
+	$class = "BaseInterface" if ($type->isa("ForwardBaseInterface"));
 	my $func = 'NameAttr' . $class;
 	if($proto->can($func)) {
 		return $proto->$func($symbtab, $type, $attr);
@@ -935,22 +917,6 @@ sub NameAttrBaseInterface {
 		return "";
 	} else {
 		warn __PACKAGE__,"::NameAttrBaseInterface : ERROR_INTERNAL $attr \n";
-	}
-}
-
-sub NameAttrForwardBaseInterface {
-	my $proto = shift;
-	my ($symbtab, $type, $attr) = @_;
-	if (      $attr eq 'in' ) {
-		return "";
-	} elsif ( $attr eq 'inout' ) {
-		return "&";
-	} elsif ( $attr eq 'out' ) {
-		return "&";
-	} elsif ( $attr eq 'return' ) {
-		return "";
-	} else {
-		warn __PACKAGE__,"::NameAttrForwardBaseInterface : ERROR_INTERNAL $attr \n";
 	}
 }
 
@@ -1137,9 +1103,8 @@ sub NameAttr {
 	my ($symbtab, $type, $attr) = @_;
 	my $class = ref $type;
 	$class = "BasicType" if ($type->isa("BasicType"));
-	$class = "AnyType" if ($type->isa("AnyType"));
 	$class = "BaseInterface" if ($type->isa("BaseInterface"));
-	$class = "ForwardBaseInterface" if ($type->isa("ForwardBaseInterface"));
+	$class = "BaseInterface" if ($type->isa("ForwardBaseInterface"));
 	my $func = 'NameAttr' . $class;
 	if($proto->can($func)) {
 		return $proto->$func($symbtab, $type, $attr);
@@ -1161,22 +1126,6 @@ sub NameAttrBaseInterface {
 		return "&";
 	} else {
 		warn __PACKAGE__,"::NameAttrBaseInterface : ERROR_INTERNAL $attr \n";
-	}
-}
-
-sub NameAttrForwardBaseInterface {
-	my $proto = shift;
-	my ($symbtab, $type, $attr) = @_;
-	if (      $attr eq 'in' ) {
-		return "&";
-	} elsif ( $attr eq 'inout' ) {
-		return "&";
-	} elsif ( $attr eq 'out' ) {
-		return "&";
-	} elsif ( $attr eq 'return' ) {
-		return "&";
-	} else {
-		warn __PACKAGE__,"::NameAttrForwardBaseInterface : ERROR_INTERNAL $attr \n";
 	}
 }
 
@@ -1376,9 +1325,8 @@ sub NameAttr {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	my $class = ref $type;
-	$class = "AnyType" if ($type->isa("AnyType"));
 	$class = "BaseInterface" if ($type->isa("BaseInterface"));
-	$class = "ForwardBaseInterface" if ($type->isa("ForwardBaseInterface"));
+	$class = "BaseInterface" if ($type->isa("ForwardBaseInterface"));
 	my $func = 'NameAttr' . $class;
 	if($proto->can($func)) {
 		return $proto->$func($symbtab, $type, $attr);
@@ -1400,22 +1348,6 @@ sub NameAttrBaseInterface {
 		return "";
 	} else {
 		warn __PACKAGE__,"::NameAttrBaseInterface : ERROR_INTERNAL $attr \n";
-	}
-}
-
-sub NameAttrForwardBaseInterface {
-	my $proto = shift;
-	my ($symbtab, $type, $attr) = @_;
-	if (      $attr eq 'in' ) {
-		return "";
-	} elsif ( $attr eq 'inout' ) {
-		return "";
-	} elsif ( $attr eq 'out' ) {
-		return "";
-	} elsif ( $attr eq 'return' ) {
-		return "";
-	} else {
-		warn __PACKAGE__,"::NameAttrForwardBaseInterface : ERROR_INTERNAL $attr \n";
 	}
 }
 

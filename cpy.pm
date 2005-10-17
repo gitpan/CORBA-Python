@@ -197,6 +197,8 @@ sub visitTypeDeclarator {
 			} 
 			print $FH "\t\t",$self->{error},";\n"; 
 			print $FH "\n";
+			print $FH "#define PYOBJ_AS_inout_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(val, obj)\n";
+			print $FH "#define PYOBJ_AS_out_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(val, obj)\n";
 		}
 		my @tab = ();
 		my $obj = "obj";
@@ -326,15 +328,15 @@ sub visitTypeDeclarator {
 				print $FH "\t\t\tFREE_inout_",$type->{c_name},"(",$node->{c_name},"_ptr);\\\n";
 				print $FH "\t\t}\\\n";
 				print $FH "\t}\n";
-				print $FH "#define FREE_out_",$node->{c_name},"(v) {\\\n";
-				print $FH "\t\t",$type->{c_name}," * ",$node->{c_name},"_ptr;\\\n";
-				print $FH "\t\tfor (",$node->{c_name},"_ptr = &(*(v))" . $start . ";\\\n";
-				print $FH "\t\t     ",$node->{c_name},"_ptr < &(*(v))" . $start . " + (",$nb,");\\\n";
-				print $FH "\t\t     ",$node->{c_name},"_ptr++) {\\\n";
-				print $FH "\t\t\tFREE_out_",$type->{c_name},"(",$node->{c_name},"_ptr);\\\n";
-				print $FH "\t\t}\\\n";
-				print $FH "\t}\n";
 			}
+			print $FH "#define FREE_out_",$node->{c_name},"(v) {\\\n";
+			print $FH "\t\t",$type->{c_name}," * ",$node->{c_name},"_ptr;\\\n";
+			print $FH "\t\tfor (",$node->{c_name},"_ptr = &(*(v))" . $start . ";\\\n";
+			print $FH "\t\t     ",$node->{c_name},"_ptr < &(*(v))" . $start . " + (",$nb,");\\\n";
+			print $FH "\t\t     ",$node->{c_name},"_ptr++) {\\\n";
+			print $FH "\t\t\tFREE_out_",$type->{c_name},"(",$node->{c_name},"_ptr);\\\n";
+			print $FH "\t\t}\\\n";
+			print $FH "\t}\n";
 			print $FH "#define FREE_",$node->{c_name},"(v) {\\\n";
 			print $FH "\t\t",$type->{c_name}," * ",$node->{c_name},"_ptr;\\\n";
 			print $FH "\t\tfor (",$node->{c_name},"_ptr = &(*(v))" . $start . ";\\\n";
@@ -348,6 +350,8 @@ sub visitTypeDeclarator {
 		if (CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type) eq "O") {
 			if (exists $self->{embedded}) {
 				print $FH "#define PYOBJ_CHECK_",$node->{c_name}," PYOBJ_CHECK_",$type->{c_name},"\n";
+				print $FH "#define PYOBJ_AS_inout_",$node->{c_name}," PYOBJ_AS_inout_",$type->{c_name},"\n";
+				print $FH "#define PYOBJ_AS_out_",$node->{c_name}," PYOBJ_AS_out_",$type->{c_name},"\n";
 			}
 			print $FH "#define PYOBJ_AS_",$node->{c_name}," PYOBJ_AS_",$type->{c_name},"\n";
 			print $FH "#define PYOBJ_FROM_",$node->{c_name}," PYOBJ_FROM_",$type->{c_name},"\n";
@@ -355,8 +359,8 @@ sub visitTypeDeclarator {
 				if (exists $self->{extended}) {
 					print $FH "#define FREE_in_",$node->{c_name}," FREE_in_",$type->{c_name},"\n";
 					print $FH "#define FREE_inout_",$node->{c_name}," FREE_inout_",$type->{c_name},"\n";
-					print $FH "#define FREE_out_",$node->{c_name}," FREE_out_",$type->{c_name},"\n";
 				}
+				print $FH "#define FREE_out_",$node->{c_name}," FREE_out_",$type->{c_name},"\n";
 				print $FH "#define FREE_",$node->{c_name}," FREE_",$type->{c_name},"\n";
 			}
 			print $FH "\n";
@@ -407,6 +411,22 @@ sub visitStructType {
 		print $FH "\tif (!PyObject_IsInstance((obj), _cls_",$node->{c_name},")) \\\n";
 		print $FH "\t\t",$self->{error},"; \\\n";
 		print $FH "\n";
+		print $FH "#define PYOBJ_AS_inout_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(*(val), obj)\n";
+		if (defined $node->{length}) {
+			print $FH "#define PYOBJ_AS_out_",$node->{c_name},"(val, obj) \\\n";
+			print $FH "\t{ \\\n";
+			print $FH "\t\tif (NULL == (val)) { \\\n";
+			print $FH "\t\t\t(val) = ",$node->{c_name},"__alloc(1); \\\n";
+			print $FH "\t\t\tif (NULL == (val)) { \\\n";
+			print $FH "\t\t\t\tPyErr_SetString(PyExc_MemoryError, NULL); \\\n";
+			print $FH "\t\t\t\t",$self->{error},"; \\\n";
+			print $FH "\t\t\t} \\\n";
+			print $FH "\t\t} \\\n";
+			print $FH "\t\tPYOBJ_AS_",$node->{c_name},"(*(val), obj); \\\n";
+			print $FH "\t} \n";
+		} else {
+			print $FH "#define PYOBJ_AS_out_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(*(val), obj)\n";
+		}
 	}
 	print $FH "#define PYOBJ_AS_",$node->{c_name},"(val, obj) \\\n";
 	print $FH "\t{ \\\n";
@@ -445,11 +465,9 @@ sub visitStructType {
 	print $FH "\t}\n";
 	print $FH "\n";                                             
 	print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
-#	if (exists $self->{embedded}) {
-		print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
-		print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
-		print $FH "\t} \\\n";
-#	}
+	print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
+	print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
+	print $FH "\t} \\\n";
 	print $FH "\tif (NULL == _cls_",$node->{c_name},") { \\\n";
 	print $FH "\t\t_cls_",$node->{c_name}," = find_class(_mod_",$c_mod,", \"",$classname,"\"); \\\n";
 	print $FH "\t} \\\n";
@@ -490,13 +508,13 @@ sub visitStructType {
 		if (exists $self->{extended}) {
 			print $FH "#define FREE_in_",$node->{c_name}," FREE_",$node->{c_name},"\n";
 			print $FH "#define FREE_inout_",$node->{c_name}," FREE_",$node->{c_name},"\n";
-			print $FH "#define FREE_out_",$node->{c_name},"(v) { \\\n";
-			print $FH "\t\tif (NULL != (v)) { \\\n";
-			print $FH "\t\t\tFREE_",$node->{c_name},"(v); \\\n";
-			print $FH "\t\t\tCORBA_free(v); \\\n";
-			print $FH "\t\t} \\\n";
-			print $FH "\t}\n";
 		}
+		print $FH "#define FREE_out_",$node->{c_name},"(v) { \\\n";
+		print $FH "\t\tif (NULL != (v)) { \\\n";
+		print $FH "\t\t\tFREE_",$node->{c_name},"(v); \\\n";
+		print $FH "\t\t\tCORBA_free(v); \\\n";
+		print $FH "\t\t} \\\n";
+		print $FH "\t}\n";
 		print $FH "#define FREE_",$node->{c_name},"(v) { \\\n";
 		foreach (@{$node->{list_member}}) {
 			my $defn = $self->_get_defn($_); 
@@ -741,6 +759,8 @@ sub visitUnionType {
 		print $FH "\tif (!PyObject_IsInstance((obj), _cls_",$node->{c_name},")) \\\n";
 		print $FH "\t\t",$self->{error},"; \\\n";
 		print $FH "\n";
+		print $FH "#define PYOBJ_AS_inout_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(*(val), obj)\n";
+		print $FH "#define PYOBJ_AS_out_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(*(val), obj)\n";
 	}
 	print $FH "#define PYOBJ_AS_",$node->{c_name},"(val, obj) \\\n";
 	print $FH "\t{ \\\n";
@@ -774,11 +794,9 @@ sub visitUnionType {
 	print $FH "\t}\n";
 	print $FH "\n";                                             
 	print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
-#	if (exists $self->{embedded}) {
-		print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
-		print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
-		print $FH "\t} \\\n";
-#	}
+	print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
+	print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
+	print $FH "\t} \\\n";
 	print $FH "\tif (NULL == _cls_",$node->{c_name},") { \\\n";
 	print $FH "\t\t_cls_",$node->{c_name}," = find_class(_mod_",$c_mod,", \"",$classname,"\"); \\\n";
 	print $FH "\t} \\\n";
@@ -820,12 +838,12 @@ sub visitUnionType {
 		if (exists $self->{extended}) {
 			print $FH "#define FREE_in_",$node->{c_name}," FREE_",$node->{c_name},"\n";
 			print $FH "#define FREE_inout_",$node->{c_name}," FREE_",$node->{c_name},"\n";
-			print $FH "#define FREE_out_",$node->{c_name},"(v) { \\\n";
-			print $FH "\t\tif (NULL != (v)) { \\\n";
-			print $FH "\t\t\tFREE_",$node->{c_name},"(v); \\\n";
-			print $FH "\t\t\tCORBA_free(v); \\\n";
-			print $FH "\t}\n";
 		}
+		print $FH "#define FREE_out_",$node->{c_name},"(v) { \\\n";
+		print $FH "\t\tif (NULL != (v)) { \\\n";
+		print $FH "\t\t\tFREE_",$node->{c_name},"(v); \\\n";
+		print $FH "\t\t\tCORBA_free(v); \\\n";
+		print $FH "\t}\n";
 		print $FH "#define FREE_",$node->{c_name},"(v) { \\\n";
 		print $FH "\t\tswitch ((v)->_d) { \\\n";
 		foreach my $case (@{$node->{list_expr}}) {
@@ -881,6 +899,8 @@ sub visitEnumType {
 		print $FH "\tif (!PyObject_IsInstance((obj), _cls_",$node->{c_name},")) \\\n";
 		print $FH "\t\t",$self->{error},"; \\\n";
 		print $FH "\n";
+		print $FH "#define PYOBJ_AS_inout_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(*(val), obj)\n";
+		print $FH "#define PYOBJ_AS_out_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(*(val), obj)\n";
 	}
 	print $FH "#define PYOBJ_AS_",$node->{c_name},"(val, obj) \\\n";
 	print $FH "\t{ \\\n";
@@ -890,11 +910,9 @@ sub visitEnumType {
 	print $FH "\t}\n";
 	print $FH "\n";                                             
 	print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
-#	if (exists $self->{embedded}) {
-		print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
-		print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
-		print $FH "\t} \\\n";
-#	}
+	print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
+	print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
+	print $FH "\t} \\\n";
 	print $FH "\tif (NULL == _cls_",$node->{c_name},") { \\\n";
 	print $FH "\t\t_cls_",$node->{c_name}," = find_class(_mod_",$c_mod,", \"",$classname,"\"); \\\n";
 	print $FH "\t} \\\n";
@@ -929,6 +947,7 @@ sub visitSequenceType {
 		$type->visit($self);
 	}
 	my $nb = "(val)._length";
+	$nb = $node->{max}->{c_literal} if (exists $node->{max});
 	if (exists $self->{extended}) {
 		print $FH "#ifndef _hpy_",$node->{c_name},"_defined\n";
 		print $FH "#define _hpy_",$node->{c_name},"_defined\n";
@@ -939,24 +958,67 @@ sub visitSequenceType {
 			print $FH "\tif (!PyString_Check(obj)) \\\n"; 
 			print $FH "\t\t",$self->{error},";\n"; 
 			print $FH "\n";
+			print $FH "#define PYOBJ_AS_inout_",$node->{c_name},"(val, obj) \\\n";
+			print $FH "\t{ \\\n";
+			if (exists $node->{max}) {
+				print $FH "\t\tif (PyString_Size(obj) > ",$node->{max}->{c_literal},") { \\\n";
+				print $FH "\t\t\tPyErr_SetString(PyExc_RuntimeError, NULL); \\\n";
+				print $FH "\t\t\t",$self->{error},"; \\\n";
+				print $FH "\t\t} \\\n";
+				print $FH "\t\t(val)->_length = PyString_Size(obj); \\\n";
+				print $FH "\t\tif (0 != (val)->_length) { \\\n";
+				print $FH "\t\t\tmemcpy((val)->_buffer, PyString_AsString(obj), (val)->_length); \\\n";
+				print $FH "\t\t} \\\n";
+			} else {
+				print $FH "\t\tif (PyString_Size(obj) > (val)->_maximum) { \\\n";
+				print $FH "\t\t\tfree((val)->_buffer); \\\n";
+				print $FH "\t\t\tPYOBJ_AS_",$node->{c_name},"(*(val), obj); \\\n";
+				print $FH "\t\t} else { \\\n";
+				print $FH "\t\t\t(val)->_length = PyString_Size(obj); \\\n";
+				print $FH "\t\t\tif (0 != (val)->_length) { \\\n";
+				print $FH "\t\t\t\tmemcpy((val)->_buffer, PyString_AsString(obj), (val)->_length); \\\n";
+				print $FH "\t\t\t} \\\n";
+				print $FH "\t\t} \\\n";
+			}
+			print $FH "\t}\n";
+			print $FH "#define PYOBJ_AS_out_",$node->{c_name},"(val, obj) \\\n";
+			print $FH "\t{ \\\n";
+			print $FH "\t\t(val) = ",$node->{c_name},"__alloc(1); \\\n";
+			print $FH "\t\tif (NULL == (val)) { \\\n";
+			print $FH "\t\t\tPyErr_SetString(PyExc_MemoryError, NULL); \\\n";
+			print $FH "\t\t\t",$self->{error},"; \\\n";
+			print $FH "\t\t} \\\n";
+			print $FH "\t\tPYOBJ_AS_",$node->{c_name},"(*(val), obj); \\\n";
+			print $FH "\t}\n";
 		}
 		print $FH "#define PYOBJ_AS_",$node->{c_name},"(val, obj) \\\n";
 		print $FH "\t{ \\\n";
 		print $FH "\t\t(val)._length = PyString_Size(obj); \\\n";
+		if (exists $self->{embedded}) {
+			print $FH "\t\t(val)._maximum = ",$nb,"; \\\n";
+		}
 		print $FH "\t\tif (0 != ",$nb,") { \\\n";
 		print $FH "\t\t\t(val)._buffer = ",$node->{c_name},"__allocbuf(",$nb,"); \\\n";
 		print $FH "\t\t\tif (NULL == (val)._buffer) { \\\n";
 		print $FH "\t\t\t\tPyErr_SetString(PyExc_MemoryError, NULL); \\\n";
 		print $FH "\t\t\t\t",$self->{error},"; \\\n";
 		print $FH "\t\t\t} \\\n";
-		print $FH "\t\t\tmemcpy((val)._buffer, PyString_AsString(obj), ",$nb,"); \\\n";
+		print $FH "\t\t\tmemcpy((val)._buffer, PyString_AsString(obj), (val)._length); \\\n";
 		print $FH "\t\t} else { \\\n";
 		print $FH "\t\t\t(val)._buffer = NULL; \\\n";
 		print $FH "\t\t} \\\n";
 		print $FH "\t}\n";
 		print $FH "\n";
 		print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
-		print $FH "\t(obj) = PyString_FromStringAndSize((val)._buffer, (val)._length); /* New reference */ \n";
+		if (exists $self->{embedded}) {
+			print $FH "\tif (NULL == &(val)) { \\\n";
+			print $FH "\t\t(obj) = Py_None; \\\n";
+			print $FH "\t} else { \\\n";
+		} else {
+			print $FH "\t{ \\\n";
+		}
+		print $FH "\t\t(obj) = PyString_FromStringAndSize((val)._buffer, (val)._length); /* New reference */ \\\n";
+		print $FH "\t}\n";
 		print $FH "\n";
 	} else {
 		if (exists $self->{embedded}) {
@@ -964,45 +1026,89 @@ sub visitSequenceType {
 			print $FH "\tif (!PySequence_Check(obj)) \\\n"; 
 			print $FH "\t\t",$self->{error},";\n"; 
 			print $FH "\n";
+			print $FH "#define PYOBJ_AS_inout_",$node->{c_name},"(val, obj) \\\n";
+			print $FH "\t{ \\\n";
+			print $FH "\t\tint pos; \\\n";
+			print $FH "\t\t",$type->{c_name}," * ",$node->{c_name},"_ptr; \\\n";
+			if (exists $node->{max}) {
+				print $FH "\t\tif (PySequence_Size(obj) > ",$node->{max}->{c_literal},") { \\\n";
+				print $FH "\t\t\tPyErr_SetString(PyExc_RuntimeError, NULL); \\\n";
+				print $FH "\t\t\t",$self->{error},"; \\\n";
+				print $FH "\t\t} \\\n";
+				print $FH "\t\t(val)->_length = PySequence_Size(obj); \\\n";
+				print $FH "\t\tCOPY_AS_",$node->{c_name},"(*(val), obj); \\\n";
+			} else {
+				print $FH "\t\tif (PySequence_Size(obj) > (val)->_maximum) { \\\n";
+				print $FH "\t\t\tfree((val)->_buffer); \\\n";
+				print $FH "\t\t\tPYOBJ_AS_",$node->{c_name},"(*(val), obj); \\\n";
+				print $FH "\t\t} else { \\\n";
+				print $FH "\t\t\t(val)->_length = PySequence_Size(obj); \\\n";
+				print $FH "\t\t\tCOPY_AS_",$node->{c_name},"(*(val), obj); \\\n";
+				print $FH "\t\t} \\\n";
+			}
+			print $FH "\t}\n";
+			print $FH "#define PYOBJ_AS_out_",$node->{c_name},"(val, obj) \\\n";
+			print $FH "\t{ \\\n";
+			print $FH "\t\t(val) = ",$node->{c_name},"__alloc(1); \\\n";
+			print $FH "\t\tif (NULL == (val)) { \\\n";
+			print $FH "\t\t\tPyErr_SetString(PyExc_MemoryError, NULL); \\\n";
+			print $FH "\t\t\t",$self->{error},"; \\\n";
+			print $FH "\t\t} \\\n";
+			print $FH "\t\tPYOBJ_AS_",$node->{c_name},"(*(val), obj); \\\n";
+			print $FH "\t}\n";
 		}
 		print $FH "#define PYOBJ_AS_",$node->{c_name},"(val, obj) \\\n";
 		print $FH "\t{ \\\n";
-		print $FH "\t\tint pos; \\\n";
-		print $FH "\t\t",$type->{c_name}," * ",$node->{c_name},"_ptr; \\\n";
 		print $FH "\t\t(val)._length = PySequence_Size(obj); \\\n";
+		if (exists $self->{embedded}) {
+			print $FH "\t\t(val)._maximum = ",$nb,"; \\\n";
+		}
 		print $FH "\t\tif (0 != ",$nb,") { \\\n";
 		print $FH "\t\t\t(val)._buffer = ",$node->{c_name},"__allocbuf(",$nb,"); \\\n";
 		print $FH "\t\t\tif (NULL == (val)._buffer) { \\\n";
 		print $FH "\t\t\t\tPyErr_SetString(PyExc_MemoryError, NULL); \\\n";
 		print $FH "\t\t\t\t",$self->{error},"; \\\n";
 		print $FH "\t\t\t} \\\n";
-		print $FH "\t\t\tfor (",$node->{c_name},"_ptr = (val)._buffer, pos = 0; \\\n";
-		print $FH "\t\t\t     ",$node->{c_name},"_ptr < (val)._buffer + (val)._length; \\\n";
-		print $FH "\t\t\t     ",$node->{c_name},"_ptr++, pos++) { \\\n";
-		print $FH "\t\t\t\tPyObject * _item = PySequence_GetItem(obj, pos); /* New reference */ \\\n";
-		print $FH "\t\t\t\tif (NULL == _item) ",$self->{error},"; \\\n";
-		my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
-		if ($fmt eq "O") {
-			if (exists $self->{embedded}) {
-			print $FH "\t\t\t\tPYOBJ_CHECK_",$type->{c_name},"(_item); \\\n";
-			}
-			print $FH "\t\t\t\tPYOBJ_AS_",$type->{c_name},"(*",$node->{c_name},"_ptr, _item); \\\n";
-		} else {
-			my $args = $node->{c_name} . "_ptr";
-			print $FH "\t\t\t\tif (!parse_object(_item, \"",$fmt,"\", ",$args,")) { \\\n";
-			print $FH "\t\t\t\t\tPy_DECREF(_item); \\\n";
-			print $FH "\t\t\t\t\t",$self->{error},"; \\\n";
-			print $FH "\t\t\t\t} \\\n";
-		}
-		print $FH "\t\t\t\tPy_DECREF(_item); \\\n";
-		print $FH "\t\t\t} \\\n";
+		print $FH "\t\t\tCOPY_AS_",$node->{c_name},"(val, obj); \\\n";
 		print $FH "\t\t} else { \\\n";
 		print $FH "\t\t\t(val)._buffer = NULL; \\\n";
 		print $FH "\t\t} \\\n";
 		print $FH "\t}\n";
 		print $FH "\n";
-		print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
+		print $FH "#define COPY_AS_",$node->{c_name},"(val, obj) \\\n";
 		print $FH "\t{ \\\n";
+		print $FH "\t\tint pos; \\\n";
+		print $FH "\t\t",$type->{c_name}," * ",$node->{c_name},"_ptr; \\\n";
+		print $FH "\t\tfor (",$node->{c_name},"_ptr = (val)._buffer, pos = 0; \\\n";
+		print $FH "\t\t     ",$node->{c_name},"_ptr < (val)._buffer + (val)._length; \\\n";
+		print $FH "\t\t     ",$node->{c_name},"_ptr++, pos++) { \\\n";
+		print $FH "\t\t\tPyObject * _item = PySequence_GetItem(obj, pos); /* New reference */ \\\n";
+		print $FH "\t\t\tif (NULL == _item) ",$self->{error},"; \\\n";
+		my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+		if ($fmt eq "O") {
+			if (exists $self->{embedded}) {
+			print $FH "\t\t\tPYOBJ_CHECK_",$type->{c_name},"(_item); \\\n";
+			}
+			print $FH "\t\t\tPYOBJ_AS_",$type->{c_name},"(*",$node->{c_name},"_ptr, _item); \\\n";
+		} else {
+			my $args = $node->{c_name} . "_ptr";
+			print $FH "\t\t\tif (!parse_object(_item, \"",$fmt,"\", ",$args,")) { \\\n";
+			print $FH "\t\t\t\tPy_DECREF(_item); \\\n";
+			print $FH "\t\t\t\t",$self->{error},"; \\\n";
+			print $FH "\t\t\t} \\\n";
+		}
+		print $FH "\t\t\tPy_DECREF(_item); \\\n";
+		print $FH "\t\t} \\\n";
+		print $FH "\t}\n";
+		print $FH "\n";
+		print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
+		if (exists $self->{embedded}) {
+			print $FH "\tif (NULL == &(val)) { \\\n";
+			print $FH "\t\t(obj) = Py_None; \\\n";
+			print $FH "\t} else { \\\n";
+		} else {
+			print $FH "\t{ \\\n";
+		}
 		print $FH "\t\tint pos; \\\n";
 		print $FH "\t\t",$type->{c_name}," * ",$node->{c_name},"_ptr; \\\n";
 		print $FH "\t\t(obj) = PyList_New((val)._length); /* New reference */ \\\n"; 
@@ -1024,14 +1130,14 @@ sub visitSequenceType {
 	if (exists $self->{extended}) {
 		print $FH "#define FREE_in_",$node->{c_name}," FREE_",$node->{c_name},"\n";
 		print $FH "#define FREE_inout_",$node->{c_name}," FREE_",$node->{c_name},"\n";
-		print $FH "#define FREE_out_",$node->{c_name},"(v) \\\n";
-		print $FH "\t{ \\\n";
-		print $FH "\t\tif (NULL != (v)) {\\\n";
-		print $FH "\t\t\tFREE_",$node->{c_name},"(v);\\\n";
-		print $FH "\t\t\tCORBA_free(v);\\\n";
-		print $FH "\t\t}\\\n";
-		print $FH "\t}\n";
 	}
+	print $FH "#define FREE_out_",$node->{c_name},"(v) \\\n";
+	print $FH "\t{ \\\n";
+	print $FH "\t\tif (NULL != (v)) {\\\n";
+	print $FH "\t\t\tFREE_",$node->{c_name},"(v);\\\n";
+	print $FH "\t\t\tCORBA_free(v);\\\n";
+	print $FH "\t\t}\\\n";
+	print $FH "\t}\n";
 	print $FH "#define FREE_",$node->{c_name},"(v) \\\n";
 	print $FH "\t{ \\\n";
 	print $FH "\t\tif (NULL != (v)->_buffer) {\\\n";
@@ -1063,8 +1169,8 @@ sub visitStringType {
 		print $FH "#define _hpy_",$node->{c_name},"_defined\n";
 		print $FH "#define FREE_in_",$node->{c_name}," FREE_",$node->{c_name},"\n";
 		print $FH "#define FREE_inout_",$node->{c_name}," FREE_",$node->{c_name},"\n";
-		print $FH "#define FREE_out_",$node->{c_name}," FREE_",$node->{c_name},"\n";
 	}
+	print $FH "#define FREE_out_",$node->{c_name}," FREE_",$node->{c_name},"\n";
 	print $FH "#define FREE_",$node->{c_name},"(v) CORBA_free(*(v))\n";
 	if (exists $self->{extended}) {
 		print $FH "#endif\n";
@@ -1083,8 +1189,8 @@ sub visitWideStringType {
 		print $FH "#define _hpy_",$node->{c_name},"_defined\n";
 		print $FH "#define FREE_in_",$node->{c_name}," FREE_",$node->{c_name},"\n";
 		print $FH "#define FREE_inout_",$node->{c_name}," FREE_",$node->{c_name},"\n";
-		print $FH "#define FREE_out_",$node->{c_name}," FREE_",$node->{c_name},"\n";
 	}
+	print $FH "#define FREE_out_",$node->{c_name}," FREE_",$node->{c_name},"\n";
 	print $FH "#define FREE_",$node->{c_name},"(v) CORBA_free(*(v))\n";
 	if (exists $self->{extended}) {
 		print $FH "#endif\n";
@@ -1283,7 +1389,7 @@ sub NameAttr {
 	my ($symbtab, $type) = @_;
 	my $class = ref $type;
 	$class = "BaseInterface" if ($type->isa("BaseInterface"));
-	$class = "ForwardBaseInterface" if ($type->isa("ForwardBaseInterface"));
+	$class = "BaseInterface" if ($type->isa("ForwardBaseInterface"));
 	my $func = 'NameAttr' . $class;
 	if ($proto->can($func)) {
 		return $proto->$func($symbtab, $type);
@@ -1293,10 +1399,6 @@ sub NameAttr {
 }
 
 sub NameAttrBaseInterface {
-	return "O";
-}
-
-sub NameAttrForwardBaseInterface {
 	return "O";
 }
 

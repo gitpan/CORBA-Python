@@ -1,6 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+0.21  Sat Oct 15 09:30:00 2005
+	- some improvements for non basic types
+
 0.20  Tue Aug 16 22:30:00 2005
 	- first release on CPAN
-
 

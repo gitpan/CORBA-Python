@@ -107,6 +107,6 @@ class Enum(object):
 			raise 'CORBA.MARSHAL'
 	demarshal = classmethod(demarshal)
 
-	def __str__(self):
+	def __repr__(self):
 		return self._enum_str[self._val]
 

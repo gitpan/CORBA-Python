@@ -9,7 +9,7 @@ use strict;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 package CORBA::Python::classVisitor;
 
@@ -531,7 +531,7 @@ sub visitTypeDeclarator {
 					if ($type->isa('OctetType')) {
 						print $FH $self->{indent},@tab,"CORBA.marshal(output, 'octet', ord(_e",$n,"))\n";
 					} elsif (exists $type->{full}) {
-						print $FH $self->{indent},@tab,"_e",$n,"marshal(output)\n";
+						print $FH $self->{indent},@tab,"_e",$n,".marshal(output)\n";
 					} else {
 						my $type_name = $type->{value};
 						$type_name =~ s/ /_/g;
@@ -593,7 +593,7 @@ sub visitTypeDeclarator {
 					if ($type->isa('OctetType')) {
 						print $FH $self->{indent},@tab,"CORBA.marshal(output, 'octet', ord(_e",$n,"))\n";
 					} elsif (exists $type->{full}) {
-						print $FH $self->{indent},@tab,"_e",$n,"marshal(output)\n";
+						print $FH $self->{indent},@tab,"_e",$n,".marshal(output)\n";
 					} else {
 						my $type_name = $type->{value};
 						$type_name =~ s/ /_/g;
