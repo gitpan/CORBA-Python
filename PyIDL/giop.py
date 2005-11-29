@@ -76,9 +76,10 @@ class Principal(str):
 
     def demarshal(cls, input):
         nb = CORBA.demarshal(input, 'long')
-        val = ''
+        lst = []
         for i in range(nb) :
-            val += chr(CORBA.demarshal(input, 'octet'))
+            lst.append(CORBA.demarshal(input, 'octet'))
+        val = ''.join(map(chr, lst))
         return cls(val)
     demarshal = classmethod(demarshal)
 

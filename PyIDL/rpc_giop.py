@@ -70,17 +70,17 @@ def RequestReply(sock, request_header, request_body):
 			reply = CDR.InputBuffer(_reply, endian)
 			reply_header = GIOP.ReplyHeader_1_2.demarshal(reply)
 			if request_header.request_id == reply_header.request_id :
-#				print "reply id %d" % reply_header.request_id 
+#				print "reply id %d" % reply_header.request_id
 				return (reply_header.reply_status, reply_header.service_context, reply)
 			elif request_id > reply_header.request_id :
 				print "bad request id %d (waiting %d).\n" % (reply_header.request_id, request_header.request_id)
 #				goto RETRY
 			else :
 				print "bad request id %d (waiting %d).\n" % (reply_header.request_id, request_header.request_id)
-				raise SystemException("IDL:CORBA/INTERNAL:1.0", 8, CORBA_COMPLETED_MAYBE)
+				raise CORBA.SystemException("IDL:CORBA/INTERNAL:1.0", 8, CORBA.CORBA_COMPLETED_MAYBE)
 		else :
 			print "bad header."
-			raise SystemException("IDL:CORBA/INTERNAL:1.0", 8, CORBA_COMPLETED_MAYBE)
+			raise CORBA.SystemException("IDL:CORBA/INTERNAL:1.0", 8, CORBA.CORBA_COMPLETED_MAYBE)
 
 class Servant(object):
 	def __init__(self):
@@ -111,7 +111,7 @@ class Servant(object):
 				reply_body = CDR.OutputBuffer()
 				CORBA.marshal(reply_body, 'string', 'IDL:CORBA/NO_IMPLEMENT:1.0')
 				CORBA.marshal(reply_body, 'unsigned_long', 11)
-				CORBA.marshal(reply_body, 'unsigned_long', 1)	# COMPLETED_NO 
+				CORBA.marshal(reply_body, 'unsigned_long', 1)	# COMPLETED_NO
 			else :
 				classname = self.itf[interface]
 				op = request_header.operation
@@ -121,7 +121,7 @@ class Servant(object):
 					reply_body = CDR.OutputBuffer()
 					CORBA.marshal(reply_body, 'string', 'IDL:CORBA/BAD_OPERATION:1.0')
 					CORBA.marshal(reply_body, 'unsigned_long', 13)
-					CORBA.marshal(reply_body, 'unsigned_long', 1)	# COMPLETED_NO 
+					CORBA.marshal(reply_body, 'unsigned_long', 1)	# COMPLETED_NO
 				else :
 					srv_op = '_skel_' + op
 					(reply_status, reply_body) = getattr(classname, srv_op)(message)

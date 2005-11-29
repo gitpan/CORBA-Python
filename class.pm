@@ -9,7 +9,7 @@ use strict;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 package CORBA::Python::classVisitor;
 
@@ -435,12 +435,13 @@ sub visitTypeDeclarator {
 			}
 			if ($self->{marshal}) {
 				print $FH $self->{indent},"    def demarshal(cls, input):\n";
-				print $FH $self->{indent},"        val = ''\n";
+				print $FH $self->{indent},"        lst = []\n";
 				print $FH $self->{indent},"        for i in range(",${$node->{array_size}}[0]->{py_literal},") :\n";
+				print $FH $self->{indent},"            lst.append(CORBA.demarshal(input, '",$type->{value},"'))\n";
 				if ($type->isa('OctetType')) {
-					print $FH $self->{indent},"            val += chr(CORBA.demarshal(input, 'octet'))\n";
+					print $FH $self->{indent},"        val = ''.join(map(chr, lst))\n";
 				} else {
-					print $FH $self->{indent},"            val += CORBA.demarshal(input, 'char')\n";
+					print $FH $self->{indent},"        val = ''.join(lst)\n";
 				}
 				print $FH $self->{indent},"        return cls(val)\n";
 				print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
@@ -711,12 +712,13 @@ sub visitTypeDeclarator {
 			if ($self->{marshal}) {
 				print $FH $self->{indent},"    def demarshal(cls, input):\n";
 				print $FH $self->{indent},"        nb = CORBA.demarshal(input, 'long')\n";
-				print $FH $self->{indent},"        val = ''\n";
+				print $FH $self->{indent},"        lst = []\n";
 				print $FH $self->{indent},"        for i in range(nb) :\n";
+				print $FH $self->{indent},"            lst.append(CORBA.demarshal(input, '",$type->{value},"'))\n";
 				if ($type->isa('OctetType')) {
-					print $FH $self->{indent},"            val += chr(CORBA.demarshal(input, 'octet'))\n";
+					print $FH $self->{indent},"        val = ''.join(map(chr, lst))\n";
 				} else {
-					print $FH $self->{indent},"            val += CORBA.demarshal(input, 'char')\n";
+					print $FH $self->{indent},"        val = ''.join(lst)\n";
 				}
 				print $FH $self->{indent},"        return cls(val)\n";
 				print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";

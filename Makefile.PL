@@ -35,3 +35,17 @@ WriteMakefile(
                         'SUFFIX'        => '.gz',
     },
 );
+
+sub MY::install {
+    package MY;
+    my $script = shift->SUPER::install(@_);
+    $script =~ s/install :: (.*)$/install :: $1 install_pyidl/m;
+    $script .= <<"INSTALL";
+
+install_pyidl :
+\t\@python setup.py install
+
+INSTALL
+
+    return $script;
+}

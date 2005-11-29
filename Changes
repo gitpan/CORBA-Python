@@ -1,5 +1,13 @@
 Revision history for Perl extension CORBA::Python.
 
+0.22  Mon Nov 28 22:30:00 2005
+	- Makefile.PL : install module PyIDL
+	- class.pm : improve demarshal sequence or array of char or octet
+	- literal.pm bug : scoping of constant (in array_size) 
+	- cpy.pm : typedef PYOBJ_FROM call constructor
+	- cdr.py & rpc_giop.py : SystemException in CORBA module
+	- giop.py : regenerated
+
 0.21  Sat Oct 15 09:30:00 2005
 	- some improvements for non basic types
 

@@ -56,22 +56,20 @@ sub _get_scoped_name {
 		}
 	} else { 
 		if ($scope_full) {
-			if ($node->isa('Constant')) {
+			if ($scope->isa('Constant')) {
 				while ($name !~ /^$scope_full/) {
 					my $defn = $self->_get_defn($scope_full);
 					last if ($defn->isa('Modules'));
 					$scope_full =~ s/::[0-9A-Z_a-z]+$//;
 					last unless ($scope_full);
 				}
-			} elsif ($node->isa('Enum')) {
+			} else {
 				my $defn = $self->_get_defn($scope_full);
 				while (!$defn->isa('Modules')) {
 					$scope_full =~ s/::[0-9A-Z_a-z]+$//;
 					last unless ($scope_full);
 					$defn = $self->_get_defn($scope_full);
 				}
-			} else {
-				warn __PACKAGE__,"::_get_scoped_name: INTERNAL ERROR ",ref $node,".\n";
 			}
 			$name =~ s/^$scope_full//;
 			$name =~ s/^:://;

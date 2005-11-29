@@ -180,6 +180,7 @@ sub visitTypeDeclarator {
 		$type->visit($self);
 	}
 	my $FH = $self->{out};
+	my ($c_mod, $py_mod, $classname) = $self->_split_name($node);
 	if (exists $node->{array_size}) {
 		warn __PACKAGE__,"::visitTypeDecalarator $node->{idf} : empty array_size.\n"
 				unless (@{$node->{array_size}});
@@ -188,6 +189,8 @@ sub visitTypeDeclarator {
 		if ( $type->isa("CharType") or $type->isa("OctetType") ) {
 			$size = pop @array;
 		}
+		print $FH "static PyObject * _cls_",$node->{c_name}," = NULL;\n";
+		print $FH "\n";
 		if (exists $self->{embedded}) {
 			print $FH "#define PYOBJ_CHECK_",$node->{c_name},"(obj) \\\n";
 			if (scalar @array) {
@@ -260,17 +263,24 @@ sub visitTypeDeclarator {
 		}
 		print $FH "\n";
 		$args = "(val)";
-		$obj = "obj";
+		$obj = "_obj";
 		print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
+		print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
+		print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
+		print $FH "\t} \\\n";
+		print $FH "\tif (NULL == _cls_",$node->{c_name},") { \\\n";
+		print $FH "\t\t_cls_",$node->{c_name}," = find_class(_mod_",$c_mod,", \"",$classname,"\"); \\\n";
+		print $FH "\t} \\\n";
+		print $FH "\tif (NULL == _cls_",$node->{c_name},") ",$self->{error},"; \\\n";
+		print $FH "\telse { \\\n";
+		print $FH @tab,"\t\tPyObject * ",$obj,"; \\\n";
+		print $FH @tab,"\t\tPyObject * _args; \\\n";
 		$nb = 0;
-		if (scalar @array) {
-			print $FH "\t\t{ \\\n";
-		}
 		foreach (@array) {
-			print $FH @tab,"\t\t\tint _pos",$nb,"; \\\n";
-			print $FH @tab,"\t\t\t",$obj," = PyList_New(",$_->{c_literal},"); /* New reference */ \\\n"; 
-			print $FH @tab,"\t\t\tfor (_pos",$nb," = 0; _pos",$nb," < ",$_->{c_literal},"; _pos",$nb,"++) { \\\n";
-			print $FH @tab,"\t\t\t\tPyObject * _item",$nb,"; \\\n";
+			print $FH @tab,"\t\tint _pos",$nb,"; \\\n";
+			print $FH @tab,"\t\t",$obj," = PyList_New(",$_->{c_literal},"); /* New reference */ \\\n"; 
+			print $FH @tab,"\t\tfor (_pos",$nb," = 0; _pos",$nb," < ",$_->{c_literal},"; _pos",$nb,"++) { \\\n";
+			print $FH @tab,"\t\t\tPyObject * _item",$nb,"; \\\n";
 			$args .= "[_pos" . $nb . "]"; 
 			push @tab, "\t";
 			$obj = "_item" . $nb;
@@ -278,28 +288,31 @@ sub visitTypeDeclarator {
 		}
 		$nb --;
 		if ( $type->isa("CharType") or $type->isa("OctetType") ) {
-			push @tab, "\t" if (scalar @array);
 			print $FH @tab,"\t\t",$obj," = PyString_FromStringAndSize(",$args,", ",$size->{c_literal},"); /* New reference */ \\\n";
-			pop @tab if (scalar @array);
 		} else {
 			my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
 			if ($fmt eq "O") {
-				print $FH @tab,"\t\t\tPYOBJ_FROM_",$type->{c_name},"(_item",$nb,", ",$args,"); \\\n";
+				print $FH @tab,"\t\tPYOBJ_FROM_",$type->{c_name},"(_item",$nb,", ",$args,"); \\\n";
 			} else {
-				print $FH @tab,"\t\t\t_item",$nb," = Py_BuildValue(\"",$fmt,"\", ",$args,"); /* New reference */ \\\n";
+				print $FH @tab,"\t\t_item",$nb," = Py_BuildValue(\"",$fmt,"\", ",$args,"); /* New reference */ \\\n";
 			}
-#			print $FH @tab,"\t\t\tPy_INCREF(_item",$nb,"); \\\n";
+#			print $FH @tab,"\t\tPy_INCREF(_item",$nb,"); \\\n";
 		}
 		foreach (@array) {
 			pop @tab;
-			$obj = $nb ? "_item" . ($nb-1) : "obj";
-			print $FH @tab,"\t\t\t\tPyList_SetItem(",$obj,", _pos",$nb,", _item",$nb,"); \\\n";  
-			print $FH @tab,"\t\t\t} \\\n";
+			$obj = $nb ? "_item" . ($nb-1) : "_obj";
+			print $FH @tab,"\t\t\tPyList_SetItem(",$obj,", _pos",$nb,", _item",$nb,"); \\\n";  
+			print $FH @tab,"\t\t} \\\n";
 			$nb --;
 		}   
-		if (scalar @array) {
-			print $FH "\t\t}\n";
-		}
+		print $FH "\t\t_args = Py_BuildValue(\"(O)\", ",$obj,"); \\\n";
+		if ($self->{old_object}) {
+			print $FH "\t\tobj = PyInstance_New(_cls_",$node->{c_name},", _args, NULL); /* New reference */ \\\n";
+		} else {  
+			print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
+		}  
+		print $FH "\t\tPy_DECREF(_obj); \\\n";
+		print $FH "\t}\n";
 		print $FH "\n";
 		if (defined $node->{length}) {
 			my $start = "";
@@ -348,13 +361,35 @@ sub visitTypeDeclarator {
 		}
 	} else {
 		if (CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type) eq "O") {
+			print $FH "static PyObject * _cls_",$node->{c_name}," = NULL;\n";
+			print $FH "\n";
 			if (exists $self->{embedded}) {
 				print $FH "#define PYOBJ_CHECK_",$node->{c_name}," PYOBJ_CHECK_",$type->{c_name},"\n";
 				print $FH "#define PYOBJ_AS_inout_",$node->{c_name}," PYOBJ_AS_inout_",$type->{c_name},"\n";
 				print $FH "#define PYOBJ_AS_out_",$node->{c_name}," PYOBJ_AS_out_",$type->{c_name},"\n";
 			}
 			print $FH "#define PYOBJ_AS_",$node->{c_name}," PYOBJ_AS_",$type->{c_name},"\n";
-			print $FH "#define PYOBJ_FROM_",$node->{c_name}," PYOBJ_FROM_",$type->{c_name},"\n";
+			print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
+			print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
+			print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
+			print $FH "\t} \\\n";
+			print $FH "\tif (NULL == _cls_",$node->{c_name},") { \\\n";
+			print $FH "\t\t_cls_",$node->{c_name}," = find_class(_mod_",$c_mod,", \"",$classname,"\"); \\\n";
+			print $FH "\t} \\\n";
+			print $FH "\tif (NULL == _cls_",$node->{c_name},") ",$self->{error},"; \\\n";
+			print $FH "\telse { \\\n";
+			print $FH "\t\tPyObject * _obj; \\\n";
+			print $FH "\t\tPyObject * _args; \\\n";
+			print $FH "\t\tPYOBJ_FROM_",$type->{c_name},"(_obj, val); \\\n";
+			print $FH "\t\t_args = Py_BuildValue(\"(O)\", _obj); \\\n";
+			if ($self->{old_object}) {
+				print $FH "\t\tobj = PyInstance_New(_cls_",$node->{c_name},", _args, NULL); /* New reference */ \\\n";
+			} else {  
+				print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
+			}  
+			print $FH "\t\tPy_DECREF(_obj); \\\n";
+			print $FH "\t} \n";
+			print $FH "\n";
 			if (defined $node->{length}) {
 				if (exists $self->{extended}) {
 					print $FH "#define FREE_in_",$node->{c_name}," FREE_in_",$type->{c_name},"\n";
@@ -1117,7 +1152,7 @@ sub visitSequenceType {
 		print $FH "\t\t     ",$node->{c_name},"_ptr++, pos++) { \\\n";
 		print $FH "\t\t\tPyObject * _item; \\\n";
 		if ($fmt eq "O") {
-			print $FH "\t\t\t\tPYOBJ_FROM_",$type->{c_name},"(_item, *",$node->{c_name},"_ptr); \\\n";
+			print $FH "\t\t\tPYOBJ_FROM_",$type->{c_name},"(_item, *",$node->{c_name},"_ptr); \\\n";
 		} else {
 			my $args = "*" . $node->{c_name} . "_ptr";
 			print $FH "\t\t\t_item = Py_BuildValue(\"",$fmt,"\", ",$args,"); /* New reference */ \\\n";

@@ -1,4 +1,5 @@
 
+import PyIDL as CORBA
 import struct
 import StringIO
 
@@ -6,11 +7,11 @@ class OutputBuffer(object):
 
 	def __init__(self, buf=None):
 		if buf is None :
-			buf = StringIO.StringIO() 
+			buf = StringIO.StringIO()
 		self._buf = buf
 		self._pos = 0
 		self._endian = 1	# little endian
-                          
+
 	def _get_endian(self):
 		return self._endian
 
@@ -28,12 +29,12 @@ class OutputBuffer(object):
 	def _align(self, size):
 		while (self._pos % size) != 0 :
 			self._buf.write(chr(0))
-			self._pos += 1 
+			self._pos += 1
 
 	def _pack(self, fmt, value):
 		str = struct.pack(fmt, value)
 		self._buf.write(str)
-		self._pos += len(str) 
+		self._pos += len(str)
 
 	def char__marshal(self, value):
 		self._pack('c', value)
@@ -126,14 +127,14 @@ class InputBuffer(object):
 	def _align(self, size):
 		while (self._pos % size) != 0 :
 			dummy = self._buf.read(1)
-			self._pos += 1 
+			self._pos += 1
 
 	def _unpack(self, fmt):
 		size = struct.calcsize(fmt)
 		chunk = self._buf.read(size)
 		if len(chunk) < size :
 			print "Not enough data!"
-			raise SystemException("IDL:CORBA/INTERNAL:1.0", 8, CORBA_COMPLETED_MAYBE)
+			raise CORBA.SystemException("IDL:CORBA/INTERNAL:1.0", 8, CORBA_COMPLETED_MAYBE)
 		self._pos += size
 		return struct.unpack(fmt, chunk)[0]
 
@@ -180,7 +181,7 @@ class InputBuffer(object):
 		raise NotImplementedError
 
 	def boolean__demarshal(self):
-		return self._unpack('B') == 1 
+		return self._unpack('B') == 1
 
 	def string__demarshal(self):
 		self._align(4)
