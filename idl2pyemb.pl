@@ -86,7 +86,7 @@ if (        exists $parser->YYData->{root}
 	$parser->YYData->{root}->visit(new CORBA::C::incdefVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::Python::nameVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::Python::importVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::Python::literalVisitor($parser, "server"));
+	$parser->YYData->{root}->visit(new CORBA::Python::literalVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::Python::cEmbeddedVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::Python::cPyEmbeddedVisitor($parser));
 }

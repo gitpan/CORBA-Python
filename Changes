@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+0.23  Tue Nov 29 09:30:00 2005
+	- idl2pyemb.pl : use mode client with literal
+
 0.22  Mon Nov 28 22:30:00 2005
 	- Makefile.PL : install module PyIDL
 	- class.pm : improve demarshal sequence or array of char or octet
