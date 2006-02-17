@@ -1,5 +1,9 @@
 Revision history for Perl extension CORBA::Python.
 
+0.24  Thu Feb 16 22:30:00 2006
+	- class.pm : replace range by xrange
+	- class.pm : add getter for Union
+
 0.23  Tue Nov 29 09:30:00 2005
 	- idl2pyemb.pl : use mode client with literal
 

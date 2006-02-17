@@ -9,7 +9,7 @@ use strict;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.23';
+$VERSION = '0.24';
 
 package CORBA::Python::classVisitor;
 
@@ -436,7 +436,7 @@ sub visitTypeDeclarator {
 			if ($self->{marshal}) {
 				print $FH $self->{indent},"    def demarshal(cls, input):\n";
 				print $FH $self->{indent},"        lst = []\n";
-				print $FH $self->{indent},"        for i in range(",${$node->{array_size}}[0]->{py_literal},") :\n";
+				print $FH $self->{indent},"        for i in xrange(",${$node->{array_size}}[0]->{py_literal},") :\n";
 				print $FH $self->{indent},"            lst.append(CORBA.demarshal(input, '",$type->{value},"'))\n";
 				if ($type->isa('OctetType')) {
 					print $FH $self->{indent},"        val = ''.join(map(chr, lst))\n";
@@ -609,7 +609,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    def demarshal(cls, input):\n";
 				foreach (@{$node->{array_size}}) {
 					print $FH $self->{indent},@tab,"_lst",$n," = []\n";
-					print $FH $self->{indent},@tab,"for _i",$n," in range(",$_->{py_literal},") :\n";
+					print $FH $self->{indent},@tab,"for _i",$n," in xrange(",$_->{py_literal},") :\n";
 					$n ++;
 					push @tab, "    ";
 				}
@@ -620,7 +620,7 @@ sub visitTypeDeclarator {
 						print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/MARSHAL:1.0\", 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
 					print $FH $self->{indent},@tab,"_lst",$n," = []\n";
-					print $FH $self->{indent},@tab,"for _i",$n," in range(_len",$n,") :\n";
+					print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,") :\n";
 					$n ++;
 					push @tab, "    ";
 				}
@@ -713,7 +713,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    def demarshal(cls, input):\n";
 				print $FH $self->{indent},"        nb = CORBA.demarshal(input, 'long')\n";
 				print $FH $self->{indent},"        lst = []\n";
-				print $FH $self->{indent},"        for i in range(nb) :\n";
+				print $FH $self->{indent},"        for i in xrange(nb) :\n";
 				print $FH $self->{indent},"            lst.append(CORBA.demarshal(input, '",$type->{value},"'))\n";
 				if ($type->isa('OctetType')) {
 					print $FH $self->{indent},"        val = ''.join(map(chr, lst))\n";
@@ -858,7 +858,7 @@ sub visitTypeDeclarator {
 						print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/MARSHAL:1.0\", 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
 					print $FH $self->{indent},@tab,"_lst",$n," = []\n";
-					print $FH $self->{indent},@tab,"for _i",$n," in range(_len",$n,") :\n";
+					print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,") :\n";
 					$n ++;
 					push @tab, "    ";
 				}
@@ -1591,7 +1591,7 @@ sub _member_demarshal {
 	if (exists $member->{array_size}) {
 		foreach (@{$member->{array_size}}) {
 			print $FH $self->{indent},@tab,"_lst",$n," = []\n";
-			print $FH $self->{indent},@tab,"for _i",$n," in range(",$_->{py_literal},") :\n";
+			print $FH $self->{indent},@tab,"for _i",$n," in xrange(",$_->{py_literal},") :\n";
 			$n ++;
 			push @tab, "    ";
 		}
@@ -1613,7 +1613,7 @@ sub _member_demarshal {
 			print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/MARSHAL:1.0\", 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 		print $FH $self->{indent},@tab,"_lst",$n," = []\n";
-		print $FH $self->{indent},@tab,"for _i",$n," in range(_len",$n,") :\n";
+		print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,") :\n";
 		$n ++;
 		push @tab, "    ";
 	}
@@ -1806,7 +1806,12 @@ sub visitUnionType {
 					print $FH $self->{indent},"        self.__d = ",$_->{py_literal},"\n";
 					print $FH $self->{indent},"        self.__v = ",$label,"\n";
 					print $FH "\n";
-					print $FH $self->{indent},"    ",$label," = property(fset=_set",$label,")\n";
+					print $FH $self->{indent},"    def _get",$label,"(self):\n";
+					print $FH $self->{indent},"        if self.__d == ",$_->{py_literal}," :\n";
+					print $FH $self->{indent},"            return self.__v\n";
+					print $FH $self->{indent},"        return None\n";
+					print $FH "\n";
+					print $FH $self->{indent},"    ",$label," = property(fset=_set",$label,", fget=_get",$label,")\n";
 					print $FH "\n";
 				}
 			}
