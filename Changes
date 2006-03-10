@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+0.25  Fri Mar 10 12:30:00 2006
+	- add some assert() in C/Python
+
 0.24  Thu Feb 16 22:30:00 2006
 	- class.pm : replace range by xrange
 	- class.pm : add getter for Union

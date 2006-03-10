@@ -27,6 +27,7 @@ sub new {
 	$self->{old_object} = exists $parser->YYData->{opt_O};
 	$self->{embedded} = 1;
 	$self->{error} = "goto err";
+	$self->{assert} = 1;
 	if (exists $parser->YYData->{opt_J}) {
 		$self->{base_package} = $parser->YYData->{opt_J};
 	} else {
@@ -55,6 +56,9 @@ sub visitSpecification {
 	print $FH "// From file : ",$self->{srcname},", ",$self->{srcname_size}," octets, ",POSIX::ctime($self->{srcname_mtime});
 	print $FH "\n";
 	print $FH "#include \"Python.h\"\n";
+	if ($self->{assert}) {
+		print $FH "#include <assert.h>\n";
+	}
 	print $FH "#include \"",$basename,".h\"\n";
 	print $FH "\n";
 	print $FH "extern PyObject *find_class(PyObject *module, char *classname);\n";
@@ -114,15 +118,23 @@ sub visitRegularInterface {
 		print $FH "PyObject * _new_",$node->{c_name},"(void)\n";
 		print $FH "{\n";
 		print $FH "\tPyObject* _cls_",$node->{c_name},";\n";
+		print $FH "\tPyObject* _obj_",$node->{c_name},";\n";
 		print $FH "\t_cls_",$node->{c_name}," = lookup_itf(\"",$node->{repos_id},"\"); // New reference\n";
+		if ($self->{assert}) {
+			print $FH "\tassert(NULL != _cls_",$node->{c_name},");\n";
+		}
 		print $FH "\tif (NULL == _cls_",$node->{c_name},") {\n";
 		print $FH "\t\treturn NULL;\n";
 		print $FH "\t} else {\n";
 		if ($self->{old_object}) {
-			print $FH "\t\treturn PyInstance_New(_cls_",$node->{c_name},", NULL, NULL); // New reference\n";
+			print $FH "\t\t_obj_",$node->{c_name}," = PyInstance_New(_cls_",$node->{c_name},", NULL, NULL); // New reference\n";
 		} else {  
-			print $FH "\t\treturn PyObject_Call(_cls_",$node->{c_name},", PyTuple_New(0), NULL);\n";
+			print $FH "\t\t_obj_",$node->{c_name}," = PyObject_Call(_cls_",$node->{c_name},", PyTuple_New(0), NULL);\n";
 		}  
+		if ($self->{assert}) {
+			print $FH "\t\tassert(NULL != _obj_",$node->{c_name},");\n";
+		}
+		print $FH "\t\treturn _obj_",$node->{c_name},";\n";
 		print $FH "\t}\n";
 		print $FH "}\n";
 		print $FH "\n";
@@ -319,6 +331,9 @@ sub visitOperation {
 		if (($type->isa("StructType") or $type->isa("UnionType"))
 		 and defined $type->{length}) {
 			print $FH "\t_ret = ",$type->{c_name},"__alloc(1);\n";
+			if ($self->{assert}) {
+				print $FH "\tassert(NULL != _ret);\n";
+			}
 			print $FH "\tif (NULL == _ret) {\n";
 			print $FH "\t\tCORBA_exception_set_system(_ev, ex_CORBA_NO_MEMORY, CORBA_COMPLETED_NO);\n";
 			print $FH "\t\tgoto err;\n";
@@ -347,6 +362,9 @@ sub visitOperation {
 			print $FH "\tif (NULL == _cls_",$defn->{c_name},") {\n";
 			print $FH "\t\t_cls_",$defn->{c_name}," = find_class(_mod_",$c_mod,", \"",$classname,"\"); // New reference\n";
 			print $FH "\t}\n";
+			if ($self->{assert}) {
+				print $FH "\tassert(NULL != _cls_",$defn->{c_name},");\n";
+			}
 			print $FH "\tif (NULL == _cls_",$defn->{c_name},") {\n";
 			print $FH "\t\tCORBA_exception_set_system(_ev, ex_CORBA_OBJECT_NOT_EXIST, CORBA_COMPLETED_NO);\n";
 			print $FH "\t\tgoto err;\n";
@@ -381,8 +399,14 @@ sub visitOperation {
 		} else {
 			if (scalar(@fmt_out) == 1) {
 				print $FH "\t\tif (!parse_object(_result, \"",@fmt_out,"\"",$args_out,")) {\n";
+				if ($self->{assert}) {
+					print $FH "\t\t\tassert(0 == \"",$self->{itf},"_",$node->{c_name}," parse_object\");\n";
+				}
 			} else {
 				print $FH "\t\tif (!PyArg_ParseTuple(_result, \"",@fmt_out,"\"",$args_out,")) {\n";
+				if ($self->{assert}) {
+					print $FH "\t\t\tassert(0 == \"",$self->{itf},"_",$node->{c_name}," PyArg_ParseTuple ",@fmt_out,"\");\n";
+				}
 			}
 			print $FH "\t\t\tgoto err;\n";
 			print $FH "\t\t}\n";
@@ -407,12 +431,21 @@ sub visitOperation {
 	print $FH "\t} else {\n";
 	print $FH "\t\t_exc = PyErr_Occurred(); // Borrowed reference\n";
 	print $FH "\t\tif (NULL == _exc) {\n";
+	if ($self->{assert}) {
+		print $FH "\t\t\tassert(0);\n";
+	}
 	print $FH "\t\t\tCORBA_exception_set_system(_ev, ex_CORBA_INTERNAL, CORBA_COMPLETED_MAYBE);\n";
 	print $FH "\t\t} else {\n";
 	print $FH "\t\t\tif (PyErr_GivenExceptionMatches(PyExc_AttributeError, _exc)) {\n";
+	if ($self->{assert}) {
+		print $FH "\t\t\t\tassert(0);\n";
+	}
 	print $FH "\t\t\t\tCORBA_exception_set_system(_ev, ex_CORBA_NO_IMPLEMENT, CORBA_COMPLETED_NO);\n";
 	print $FH "\t\t\t\tgoto err;\n";
 	print $FH "\t\t\t} else if (PyErr_GivenExceptionMatches(PyExc_TypeError, _exc)) {\n";
+	if ($self->{assert}) {
+		print $FH "\t\t\t\tassert(0);\n";
+	}
 	print $FH "\t\t\t\tCORBA_exception_set_system(_ev, ex_CORBA_BAD_PARAM, CORBA_COMPLETED_NO);\n";
 	print $FH "\t\t\t\tgoto err;\n";
 	if (exists $node->{list_raise}) {
@@ -424,6 +457,9 @@ sub visitOperation {
 			print $FH "\t\t\t\tPyObject * _traceback;\n";
 			print $FH "#ifdef CORBA_THREADED\n";
 			print $FH "\t\t\t\t_",$defn->{c_name}," = ",$defn->{c_name},"__alloc(1);\n";
+			if ($self->{assert}) {
+				print $FH "\t\t\t\tassert(_",$defn->{c_name}," != NULL);\n";
+			}
 			print $FH "\t\t\t\tif (_",$defn->{c_name}," == NULL) {\n";
 			print $FH "\t\t\t\t\tCORBA_exception_set_system(_ev, ex_CORBA_NO_MEMORY, CORBA_COMPLETED_MAYBE);\n";
 			print $FH "\t\t\t\t\tgoto end;\n";
@@ -435,8 +471,11 @@ sub visitOperation {
 		}
 	}
 	print $FH "\t\t\t} else {\n";
-	print $FH "\t\t\t\tCORBA_exception_set_system(_ev, ex_CORBA_INTERNAL, CORBA_COMPLETED_MAYBE);\n";
 	print $FH "\t\t\t\tPyErr_Print();\n";
+	if ($self->{assert}) {
+		print $FH "\t\t\t\tassert(0);\n";
+	}
+	print $FH "\t\t\t\tCORBA_exception_set_system(_ev, ex_CORBA_INTERNAL, CORBA_COMPLETED_MAYBE);\n";
 	print $FH "\t\t\t\tgoto err;\n";
 	print $FH "\t\t\t}\n";
 	print $FH "\t\t}\n";
