@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+0.26  Tue Aug  1 12:30:00 2006
+	- support module reopenning for C
+
 0.25  Fri Mar 10 12:30:00 2006
 	- add some assert() in C/Python
 

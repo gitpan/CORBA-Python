@@ -105,13 +105,27 @@ sub visitSpecification {
 sub visitModules {
 	my $self = shift;
 	my ($node) = @_;
-	my $defn = $self->{symbtab}->Lookup($node->{full});
+	unless (exists $node->{$self->{num_key}}) {
+		$node->{$self->{num_key}} = 0;
+	}
+	my $module = ${$node->{list_decl}}[$node->{$self->{num_key}}];
+	$module->visit($self);
+	$node->{$self->{num_key}} ++;
+}
+
+sub visitModule {
+	my $self = shift;
+	my ($node) = @_;
 	my $FH = $self->{out};
+	my $defn = $self->{symbtab}->Lookup($node->{full});
 	print $FH "/*\n";
 	print $FH " * begin of module ",$defn->{c_name},"\n";
 	print $FH " */\n";
 	print $FH "\n";
+	print $FH "#ifndef _mod_",$defn->{c_name},"_defined\n";
+	print $FH "#define _mod_",$defn->{c_name},"_defined\n";
 	print $FH "static PyObject* _mod_",$defn->{c_name}," = NULL;\n";
+	print $FH "#endif\n";
 	print $FH "\n";
 	foreach (@{$node->{list_decl}}) {
 		$self->_get_defn($_)->visit($self);
@@ -119,15 +133,6 @@ sub visitModules {
 	print $FH "/*\n";
 	print $FH " * end of module ",$defn->{c_name},"\n";
 	print $FH " */\n";
-	print $FH "\n";
-}
-
-sub visitModule {
-	my $self = shift;
-	my ($node) = @_;
-	foreach (@{$node->{list_decl}}) {
-		$self->_get_defn($_)->visit($self);
-	}
 }
 
 #

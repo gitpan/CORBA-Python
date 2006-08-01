@@ -646,6 +646,7 @@ sub new {
 	$self->open_stream($filename);
 	$self->{done_hash} = {};
 	$self->{extended} = 1;
+	$self->{num_key} = 'num_cpyext';
 	$self->{error} = "return NULL";
 	$basename =~ s/\./_/g;
 	$self->{root_module} = "_" . $basename;

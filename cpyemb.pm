@@ -26,6 +26,7 @@ sub new {
 	$self->{symbtab} = $parser->YYData->{symbtab};
 	$self->{old_object} = exists $parser->YYData->{opt_O};
 	$self->{embedded} = 1;
+	$self->{num_key} = 'num_cpyemb';
 	$self->{error} = "goto err";
 	$self->{assert} = 1;
 	if (exists $parser->YYData->{opt_J}) {

@@ -1,6 +1,8 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use strict;
+use warnings;
+
 use CORBA::IDL::parser30;
 use CORBA::IDL::symbtab;
 # visitors
