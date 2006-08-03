@@ -159,6 +159,11 @@ sub visitStateMember {
 	my ($node) = @_;
 	my $type = $self->_get_defn($node->{type});
 	$self->_import_type($type);
+	if (exists $node->{array_size}) {
+		foreach (@{$node->{array_size}}) {
+			$_->visit($self, $node);			# expression
+		}
+	}
 }
 
 sub visitInitializer {
@@ -201,6 +206,11 @@ sub visitTypeDeclarator {
 	my ($node) = @_;
 	my $type = $self->_get_defn($node->{type});
 	$self->_import_type($type);
+	if (exists $node->{array_size}) {
+		foreach (@{$node->{array_size}}) {
+			$_->visit($self, $node);			# expression
+		}
+	}
 }
 
 sub visitNativeType {
@@ -234,6 +244,11 @@ sub visitMember {
 	my ($node) = @_;
 	my $type = $self->_get_defn($node->{type});
 	$self->_import_type($type);
+	if (exists $node->{array_size}) {
+		foreach (@{$node->{array_size}}) {
+			$_->visit($self, $type);				# expression
+		}
+	}
 }
 
 #	3.11.2.2	Discriminated Unions

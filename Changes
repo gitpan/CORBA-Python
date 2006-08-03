@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+0.27  Thu Aug  3 12:30:00 2006
+	- fix import search
+
 0.26  Tue Aug  1 12:30:00 2006
 	- support module reopenning for C
 
