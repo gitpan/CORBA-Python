@@ -61,10 +61,10 @@ class Version(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct Version {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/Version:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class Principal(str):
     """ Typedef IDL:omg.org/GIOP/Principal:1.0 """
@@ -77,16 +77,16 @@ class Principal(str):
     def demarshal(cls, input):
         nb = CORBA.demarshal(input, 'long')
         lst = []
-        for i in range(nb) :
+        for i in xrange(nb) :
             lst.append(CORBA.demarshal(input, 'octet'))
         val = ''.join(map(chr, lst))
         return cls(val)
     demarshal = classmethod(demarshal)
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/Principal:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class MsgType_1_1(CORBA.Enum):
     """ Enum IDL:omg.org/GIOP/MsgType_1_1:1.0 """
@@ -94,10 +94,10 @@ class MsgType_1_1(CORBA.Enum):
     _enum_str = dict()
     _enum = dict()
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/MsgType_1_1:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 Request = MsgType_1_1('Request', 0)
 Reply = MsgType_1_1('Reply', 1)
@@ -184,7 +184,7 @@ class MessageHeader_1_0(object):
 
     def demarshal(cls, input):
             _lst0 = []
-            for _i0 in range(4) :
+            for _i0 in xrange(4) :
                 _lst0.append(CORBA.demarshal(input, 'char'))
             _lst0 = ''.join(_lst0)
             magic = _lst0
@@ -223,10 +223,10 @@ class MessageHeader_1_0(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct MessageHeader_1_0 {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_0:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class MessageHeader_1_1(object):
     """ Struct IDL:omg.org/GIOP/MessageHeader_1_1:1.0 """
@@ -298,7 +298,7 @@ class MessageHeader_1_1(object):
 
     def demarshal(cls, input):
             _lst0 = []
-            for _i0 in range(4) :
+            for _i0 in xrange(4) :
                 _lst0.append(CORBA.demarshal(input, 'char'))
             _lst0 = ''.join(_lst0)
             magic = _lst0
@@ -337,26 +337,26 @@ class MessageHeader_1_1(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct MessageHeader_1_1 {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_1:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class MessageHeader_1_2(MessageHeader_1_1):
     """ Typedef IDL:omg.org/GIOP/MessageHeader_1_2:1.0 """
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_2:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class MessageHeader_1_3(MessageHeader_1_1):
     """ Typedef IDL:omg.org/GIOP/MessageHeader_1_3:1.0 """
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_3:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class RequestHeader_1_0(object):
     """ Struct IDL:omg.org/GIOP/RequestHeader_1_0:1.0 """
@@ -443,7 +443,7 @@ class RequestHeader_1_0(object):
             response_expected = CORBA.demarshal(input, 'boolean')
             _len0 = CORBA.demarshal(input, 'long')
             _lst0 = []
-            for _i0 in range(_len0) :
+            for _i0 in xrange(_len0) :
                 _lst0.append(CORBA.demarshal(input, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             object_key = _lst0
@@ -483,10 +483,10 @@ class RequestHeader_1_0(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct RequestHeader_1_0 {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_0:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class RequestHeader_1_1(object):
     """ Struct IDL:omg.org/GIOP/RequestHeader_1_1:1.0 """
@@ -589,13 +589,13 @@ class RequestHeader_1_1(object):
             request_id = CORBA.demarshal(input, 'unsigned_long')
             response_expected = CORBA.demarshal(input, 'boolean')
             _lst0 = []
-            for _i0 in range(3) :
+            for _i0 in xrange(3) :
                 _lst0.append(CORBA.demarshal(input, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             reserved = _lst0
             _len0 = CORBA.demarshal(input, 'long')
             _lst0 = []
-            for _i0 in range(_len0) :
+            for _i0 in xrange(_len0) :
                 _lst0.append(CORBA.demarshal(input, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             object_key = _lst0
@@ -638,10 +638,10 @@ class RequestHeader_1_1(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct RequestHeader_1_1 {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_1:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class AddressingDisposition(int):
     """ Typedef IDL:omg.org/GIOP/AddressingDisposition:1.0 """
@@ -658,10 +658,10 @@ class AddressingDisposition(int):
         return cls(val)
     demarshal = classmethod(demarshal)
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/AddressingDisposition:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 # Constant: IDL:omg.org/GIOP/KeyAddr:1.0
 KeyAddr = 0
@@ -714,7 +714,7 @@ class IORAddressingInfo(object):
                 type_id = CORBA.demarshal(input, 'string')
                 _len0 = CORBA.demarshal(input, 'long')
                 _lst0 = []
-                for _i0 in range(_len0) :
+                for _i0 in xrange(_len0) :
                     _lst0.append(TaggedProfile.demarshal(input))
                 profiles = _lst0
                 return cls(type_id, profiles)
@@ -739,10 +739,10 @@ class IORAddressingInfo(object):
             inner = "\n".join(['   ' + line for line in inner.split("\n")])
             return "struct IOR {\n" + inner + "\n}"
 
-        def _get_id(self):
+        def _get_id(cls):
             return 'IDL:omg.org/IOP/IOR:1.0'
 
-        corba_id = property(fget=_get_id)
+        corba_id = classmethod(_get_id)
 
     def __init__(self, selected_profile_index, ior):
         self._setselected_profile_index(selected_profile_index)
@@ -795,10 +795,10 @@ class IORAddressingInfo(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct IORAddressingInfo {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/IORAddressingInfo:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class TargetAddress(object):
     """ Union IDL:omg.org/GIOP/TargetAddress:1.0 """
@@ -842,7 +842,7 @@ class TargetAddress(object):
                 tag = ProfileId.demarshal(input)
                 _len0 = CORBA.demarshal(input, 'long')
                 _lst0 = []
-                for _i0 in range(_len0) :
+                for _i0 in xrange(_len0) :
                     _lst0.append(CORBA.demarshal(input, 'octet'))
                 _lst0 = ''.join(map(chr, _lst0))
                 profile_data = _lst0
@@ -868,10 +868,10 @@ class TargetAddress(object):
             inner = "\n".join(['   ' + line for line in inner.split("\n")])
             return "struct TaggedProfile {\n" + inner + "\n}"
 
-        def _get_id(self):
+        def _get_id(cls):
             return 'IDL:omg.org/IOP/TaggedProfile:1.0'
 
-        corba_id = property(fget=_get_id)
+        corba_id = classmethod(_get_id)
 
     def __init__(self, *args, **kwargs):
         if len(args) == 2 :
@@ -924,21 +924,36 @@ class TargetAddress(object):
         self.__d = AddressingDisposition(KeyAddr)
         self.__v = object_key
 
-    object_key = property(fset=_setobject_key)
+    def _getobject_key(self):
+        if self.__d == AddressingDisposition(KeyAddr) :
+            return self.__v
+        return None
+
+    object_key = property(fset=_setobject_key, fget=_getobject_key)
 
     def _setprofile(self, profile):
         CORBA.check(IOP.TaggedProfile, profile)
         self.__d = AddressingDisposition(ProfileAddr)
         self.__v = profile
 
-    profile = property(fset=_setprofile)
+    def _getprofile(self):
+        if self.__d == AddressingDisposition(ProfileAddr) :
+            return self.__v
+        return None
+
+    profile = property(fset=_setprofile, fget=_getprofile)
 
     def _setior(self, ior):
         CORBA.check(IORAddressingInfo, ior)
         self.__d = AddressingDisposition(ReferenceAddr)
         self.__v = ior
 
-    ior = property(fset=_setior)
+    def _getior(self):
+        if self.__d == AddressingDisposition(ReferenceAddr) :
+            return self.__v
+        return None
+
+    ior = property(fset=_setior, fget=_getior)
 
     def marshal(self, output):
         self._d.marshal(output)
@@ -959,7 +974,7 @@ class TargetAddress(object):
         if _d == AddressingDisposition(KeyAddr) :
             _len0 = CORBA.demarshal(input, 'long')
             _lst0 = []
-            for _i0 in range(_len0) :
+            for _i0 in xrange(_len0) :
                 _lst0.append(CORBA.demarshal(input, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             object_key = _lst0
@@ -993,10 +1008,10 @@ class TargetAddress(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "union TargetAddress {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/TargetAddress:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class RequestHeader_1_2(object):
     """ Struct IDL:omg.org/GIOP/RequestHeader_1_2:1.0 """
@@ -1081,7 +1096,7 @@ class RequestHeader_1_2(object):
             request_id = CORBA.demarshal(input, 'unsigned_long')
             response_flags = CORBA.demarshal(input, 'octet')
             _lst0 = []
-            for _i0 in range(3) :
+            for _i0 in xrange(3) :
                 _lst0.append(CORBA.demarshal(input, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             reserved = _lst0
@@ -1122,18 +1137,18 @@ class RequestHeader_1_2(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct RequestHeader_1_2 {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_2:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class RequestHeader_1_3(RequestHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/RequestHeader_1_3:1.0 """
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_3:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class ReplyStatusType_1_2(CORBA.Enum):
     """ Enum IDL:omg.org/GIOP/ReplyStatusType_1_2:1.0 """
@@ -1141,10 +1156,10 @@ class ReplyStatusType_1_2(CORBA.Enum):
     _enum_str = dict()
     _enum = dict()
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/ReplyStatusType_1_2:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 NO_EXCEPTION = ReplyStatusType_1_2('NO_EXCEPTION', 0)
 USER_EXCEPTION = ReplyStatusType_1_2('USER_EXCEPTION', 1)
@@ -1222,18 +1237,18 @@ class ReplyHeader_1_2(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct ReplyHeader_1_2 {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/ReplyHeader_1_2:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class ReplyHeader_1_3(ReplyHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/ReplyHeader_1_3:1.0 """
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/ReplyHeader_1_3:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class SystemExceptionReplyBody(object):
     """ Struct IDL:omg.org/GIOP/SystemExceptionReplyBody:1.0 """
@@ -1304,10 +1319,10 @@ class SystemExceptionReplyBody(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct SystemExceptionReplyBody {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/SystemExceptionReplyBody:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class CancelRequestHeader(object):
     """ Struct IDL:omg.org/GIOP/CancelRequestHeader:1.0 """
@@ -1348,10 +1363,10 @@ class CancelRequestHeader(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct CancelRequestHeader {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/CancelRequestHeader:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class LocateRequestHeader_1_0(object):
     """ Struct IDL:omg.org/GIOP/LocateRequestHeader_1_0:1.0 """
@@ -1392,7 +1407,7 @@ class LocateRequestHeader_1_0(object):
             request_id = CORBA.demarshal(input, 'unsigned_long')
             _len0 = CORBA.demarshal(input, 'long')
             _lst0 = []
-            for _i0 in range(_len0) :
+            for _i0 in xrange(_len0) :
                 _lst0.append(CORBA.demarshal(input, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             object_key = _lst0
@@ -1418,18 +1433,18 @@ class LocateRequestHeader_1_0(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct LocateRequestHeader_1_0 {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_0:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class LocateRequestHeader_1_1(LocateRequestHeader_1_0):
     """ Typedef IDL:omg.org/GIOP/LocateRequestHeader_1_1:1.0 """
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_1:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class LocateRequestHeader_1_2(object):
     """ Struct IDL:omg.org/GIOP/LocateRequestHeader_1_2:1.0 """
@@ -1485,18 +1500,18 @@ class LocateRequestHeader_1_2(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct LocateRequestHeader_1_2 {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_2:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class LocateRequestHeader_1_3(LocateRequestHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/LocateRequestHeader_1_3:1.0 """
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_3:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class LocateStatusType_1_2(CORBA.Enum):
     """ Enum IDL:omg.org/GIOP/LocateStatusType_1_2:1.0 """
@@ -1504,10 +1519,10 @@ class LocateStatusType_1_2(CORBA.Enum):
     _enum_str = dict()
     _enum = dict()
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateStatusType_1_2:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 UNKNOWN_OBJECT = LocateStatusType_1_2('UNKNOWN_OBJECT', 0)
 OBJECT_HERE = LocateStatusType_1_2('OBJECT_HERE', 1)
@@ -1570,18 +1585,18 @@ class LocateReplyHeader_1_2(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct LocateReplyHeader_1_2 {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateReplyHeader_1_2:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class LocateReplyHeader_1_3(LocateReplyHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/LocateReplyHeader_1_3:1.0 """
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateReplyHeader_1_3:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class FragmentHeader_1_2(object):
     """ Struct IDL:omg.org/GIOP/FragmentHeader_1_2:1.0 """
@@ -1622,16 +1637,16 @@ class FragmentHeader_1_2(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct FragmentHeader_1_2 {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/FragmentHeader_1_2:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class FragmentHeader_1_3(FragmentHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/FragmentHeader_1_3:1.0 """
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/GIOP/FragmentHeader_1_3:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 

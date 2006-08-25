@@ -19,7 +19,7 @@ class Giopd(SocketServer.BaseRequestHandler):
 
 servant = RPC_GIOP.Servant()
 myCalc = MyCalc()
-servant.Register(myCalc.corba_id, myCalc)
+servant.Register(myCalc.corba_id(), myCalc)
 
 SocketServer.TCPServer.allow_reuse_address = True 
 srv = SocketServer.TCPServer(('', 12345), Giopd)

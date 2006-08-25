@@ -21,10 +21,10 @@ class ProfileId(long):
         return cls(val)
     demarshal = classmethod(demarshal)
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/IOP/ProfileId:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 # Constant: IDL:omg.org/IOP/TAG_INTERNET_IOP:1.0
 TAG_INTERNET_IOP = 0L
@@ -74,7 +74,7 @@ class TaggedProfile(object):
             tag = ProfileId.demarshal(input)
             _len0 = CORBA.demarshal(input, 'long')
             _lst0 = []
-            for _i0 in range(_len0) :
+            for _i0 in xrange(_len0) :
                 _lst0.append(CORBA.demarshal(input, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             profile_data = _lst0
@@ -100,10 +100,10 @@ class TaggedProfile(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct TaggedProfile {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/IOP/TaggedProfile:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class IOR(object):
     """ Struct IDL:omg.org/IOP/IOR:1.0 """
@@ -144,7 +144,7 @@ class IOR(object):
             type_id = CORBA.demarshal(input, 'string')
             _len0 = CORBA.demarshal(input, 'long')
             _lst0 = []
-            for _i0 in range(_len0) :
+            for _i0 in xrange(_len0) :
                 _lst0.append(TaggedProfile.demarshal(input))
             profiles = _lst0
             return cls(type_id, profiles)
@@ -169,10 +169,10 @@ class IOR(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct IOR {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/IOP/IOR:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class ComponentId(long):
     """ Typedef IDL:omg.org/IOP/ComponentId:1.0 """
@@ -189,10 +189,10 @@ class ComponentId(long):
         return cls(val)
     demarshal = classmethod(demarshal)
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/IOP/ComponentId:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class TaggedComponent(object):
     """ Struct IDL:omg.org/IOP/TaggedComponent:1.0 """
@@ -233,7 +233,7 @@ class TaggedComponent(object):
             tag = ComponentId.demarshal(input)
             _len0 = CORBA.demarshal(input, 'long')
             _lst0 = []
-            for _i0 in range(_len0) :
+            for _i0 in xrange(_len0) :
                 _lst0.append(CORBA.demarshal(input, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             component_data = _lst0
@@ -259,10 +259,10 @@ class TaggedComponent(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct TaggedComponent {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/IOP/TaggedComponent:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class MultipleComponentProfile(list):
     """ Typedef IDL:omg.org/IOP/MultipleComponentProfile:1.0 """
@@ -282,15 +282,15 @@ class MultipleComponentProfile(list):
     def demarshal(cls, input):
         _len0 = CORBA.demarshal(input, 'long')
         _lst0 = []
-        for _i0 in range(_len0) :
+        for _i0 in xrange(_len0) :
             _lst0.append(TaggedComponent.demarshal(input))
         return cls(_lst0)
     demarshal = classmethod(demarshal)
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/IOP/MultipleComponentProfile:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 # Constant: IDL:omg.org/IOP/TAG_ORB_TYPE:1.0
 TAG_ORB_TYPE = 0L
@@ -409,10 +409,10 @@ class ServiceId(long):
         return cls(val)
     demarshal = classmethod(demarshal)
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/IOP/ServiceId:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class ServiceContext(object):
     """ Struct IDL:omg.org/IOP/ServiceContext:1.0 """
@@ -453,7 +453,7 @@ class ServiceContext(object):
             context_id = ServiceId.demarshal(input)
             _len0 = CORBA.demarshal(input, 'long')
             _lst0 = []
-            for _i0 in range(_len0) :
+            for _i0 in xrange(_len0) :
                 _lst0.append(CORBA.demarshal(input, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             context_data = _lst0
@@ -479,10 +479,10 @@ class ServiceContext(object):
         inner = "\n".join(['   ' + line for line in inner.split("\n")])
         return "struct ServiceContext {\n" + inner + "\n}"
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/IOP/ServiceContext:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 class ServiceContextList(list):
     """ Typedef IDL:omg.org/IOP/ServiceContextList:1.0 """
@@ -502,15 +502,15 @@ class ServiceContextList(list):
     def demarshal(cls, input):
         _len0 = CORBA.demarshal(input, 'long')
         _lst0 = []
-        for _i0 in range(_len0) :
+        for _i0 in xrange(_len0) :
             _lst0.append(ServiceContext.demarshal(input))
         return cls(_lst0)
     demarshal = classmethod(demarshal)
 
-    def _get_id(self):
+    def _get_id(cls):
         return 'IDL:omg.org/IOP/ServiceContextList:1.0'
 
-    corba_id = property(fget=_get_id)
+    corba_id = classmethod(_get_id)
 
 # Constant: IDL:omg.org/IOP/TransactionService:1.0
 TransactionService = 0L

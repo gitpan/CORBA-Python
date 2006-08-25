@@ -9,7 +9,7 @@ use strict;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.27';
+$VERSION = '0.28';
 
 package CORBA::Python::classVisitor;
 
@@ -328,10 +328,10 @@ sub visitBaseInterface {
 		$defn->visit($self);
 	}
 	if ($self->{id}) {
-		print $FH "    def _get_id(self):\n";
+		print $FH "    def _get_id(cls):\n";
 		print $FH "        return '",$node->{repos_id},"'\n";
 		print $FH "\n";
-		print $FH "    corba_id = property(fget=_get_id)\n";
+		print $FH "    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	$self->{indent} = "";
@@ -1290,17 +1290,17 @@ sub visitTypeDeclarator {
 		return;
 	}
 	if ($self->{id}) {
-		print $FH $self->{indent},"    def _get_id(self):\n";
+		print $FH $self->{indent},"    def _get_id(cls):\n";
 		print $FH $self->{indent},"        return '",$node->{repos_id},"'\n";
 		print $FH "\n";
-		print $FH $self->{indent},"    corba_id = property(fget=_get_id)\n";
+		print $FH $self->{indent},"    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	if (exists $node->{serial_uid}) {
-		print $FH $self->{indent},"    def _get_uid(self):\n";
+		print $FH $self->{indent},"    def _get_uid(cls):\n";
 		print $FH $self->{indent},"        return 0x",$node->{serial_uid},"L\n";
 		print $FH "\n";
-		print $FH $self->{indent},"    serial_uid = property(fget=_get_uid)\n";
+		print $FH $self->{indent},"    serial_uid = classmethod(_get_uid)\n";
 		print $FH "\n";
 	}
 }
@@ -1422,17 +1422,17 @@ sub visitStructType {
 		print $FH "\n";
 	}
 	if ($self->{id}) {
-		print $FH $self->{indent},"    def _get_id(self):\n";
+		print $FH $self->{indent},"    def _get_id(cls):\n";
 		print $FH $self->{indent},"        return '",$node->{repos_id},"'\n";
 		print $FH "\n";
-		print $FH $self->{indent},"    corba_id = property(fget=_get_id)\n";
+		print $FH $self->{indent},"    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	if (exists $node->{serial_uid}) {
-		print $FH $self->{indent},"    def _get_uid(self):\n";
+		print $FH $self->{indent},"    def _get_uid(cls):\n";
 		print $FH $self->{indent},"        return 0x",$node->{serial_uid},"L\n";
 		print $FH "\n";
-		print $FH $self->{indent},"    serial_uid = property(fget=_get_uid)\n";
+		print $FH $self->{indent},"    serial_uid = classmethod(_get_uid)\n";
 		print $FH "\n";
 	}
 }
@@ -1912,17 +1912,17 @@ sub visitUnionType {
 		print $FH "\n";
 	}
 	if ($self->{id}) {
-		print $FH $self->{indent},"    def _get_id(self):\n";
+		print $FH $self->{indent},"    def _get_id(cls):\n";
 		print $FH $self->{indent},"        return '",$node->{repos_id},"'\n";
 		print $FH "\n";
-		print $FH $self->{indent},"    corba_id = property(fget=_get_id)\n";
+		print $FH $self->{indent},"    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	if (exists $node->{serial_uid}) {
-		print $FH $self->{indent},"    def _get_uid(self):\n";
+		print $FH $self->{indent},"    def _get_uid(cls):\n";
 		print $FH $self->{indent},"        return 0x",$node->{serial_uid},"L\n";
 		print $FH "\n";
-		print $FH $self->{indent},"    serial_uid = property(fget=_get_uid)\n";
+		print $FH $self->{indent},"    serial_uid = classmethod(_get_uid)\n";
 		print $FH "\n";
 	}
 }
@@ -1955,17 +1955,17 @@ sub visitEnumType {
 	print $FH $self->{indent},"    _enum = dict()\n";
 	print $FH "\n";
 	if ($self->{id}) {
-		print $FH $self->{indent},"    def _get_id(self):\n";
+		print $FH $self->{indent},"    def _get_id(cls):\n";
 		print $FH $self->{indent},"        return '",$node->{repos_id},"'\n";
 		print $FH "\n";
-		print $FH $self->{indent},"    corba_id = property(fget=_get_id)\n";
+		print $FH $self->{indent},"    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	if (exists $node->{serial_uid}) {
-		print $FH $self->{indent},"    def _get_uid(self):\n";
+		print $FH $self->{indent},"    def _get_uid(cls):\n";
 		print $FH $self->{indent},"        return 0x",$node->{serial_uid},"L\n";
 		print $FH "\n";
-		print $FH $self->{indent},"    serial_uid = property(fget=_get_uid)\n";
+		print $FH $self->{indent},"    serial_uid = classmethod(_get_uid)\n";
 		print $FH "\n";
 	}
 	my $value = 0;
@@ -2116,17 +2116,17 @@ sub visitException {
 		print $FH "\n";
 	}
 	if ($self->{id}) {
-		print $FH $self->{indent},"    def _get_id(self):\n";
+		print $FH $self->{indent},"    def _get_id(cls):\n";
 		print $FH $self->{indent},"        return '",$node->{repos_id},"'\n";
 		print $FH "\n";
-		print $FH $self->{indent},"    corba_id = property(fget=_get_id)\n";
+		print $FH $self->{indent},"    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	if (exists $node->{serial_uid}) {
-		print $FH $self->{indent},"    def _get_uid(self):\n";
+		print $FH $self->{indent},"    def _get_uid(cls):\n";
 		print $FH $self->{indent},"        return 0x",$node->{serial_uid},"L\n";
 		print $FH "\n";
-		print $FH $self->{indent},"    serial_uid = property(fget=_get_uid)\n";
+		print $FH $self->{indent},"    serial_uid = classmethod(_get_uid)\n";
 		print $FH "\n";
 	}
 }

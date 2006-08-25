@@ -153,10 +153,10 @@ sub visitRegularInterface {
 		$defn->visit($self);
 	}
 	if ($self->{id}) {
-		print $FH "    def _get_id(self):\n";
+		print $FH "    def _get_id(cls):\n";
 		print $FH "        return '",$node->{repos_id},"'\n";
 		print $FH "\n";
-		print $FH "    corba_id = property(fget=_get_id)\n";
+		print $FH "    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	foreach (sort keys %{$node->{hash_attribute_operation}}) {
@@ -253,7 +253,25 @@ sub visitOperation {
 			print $FH ", ",$_->{py_name};
 		}
 	}
-	print $FH "): pass\n";
+	print $FH "): ";
+	my @out = ();
+	my $type = $self->_get_defn($node->{type});
+	unless ($type->isa("VoidType")) {
+		push @out, "_ret";
+	}
+	foreach (@{$node->{list_param}}) {		# paramater
+		if ( $_->{attr} eq 'inout' or $_->{attr} eq 'out') {
+			push @out, $_->{py_name};
+		}
+	}
+	if      (scalar(@out) == 0) {
+		print $FH "pass";
+	} elsif (scalar(@out) == 1) {
+		print $FH "return ", @out;
+	} else {
+		print $FH "return(", join(", ",@out), ")";
+	}
+	print $FH "\n";
 }
 
 #

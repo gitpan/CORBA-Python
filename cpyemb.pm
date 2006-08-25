@@ -29,6 +29,7 @@ sub new {
 	$self->{num_key} = 'num_cpyemb';
 	$self->{error} = "goto err";
 	$self->{assert} = 1;
+	$self->{num_typedef} = 0;
 	if (exists $parser->YYData->{opt_J}) {
 		$self->{base_package} = $parser->YYData->{opt_J};
 	} else {

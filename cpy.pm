@@ -293,7 +293,7 @@ sub visitTypeDeclarator {
 		}
 		print $FH "\n";
 		$args = "(val)";
-		$obj = "_obj";
+		$obj = "_obj" . ++$self->{num_typedef};        
 		print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
 		print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
 		print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
@@ -334,7 +334,7 @@ sub visitTypeDeclarator {
 		}
 		foreach (@array) {
 			pop @tab;
-			$obj = $nb ? "_item" . ($nb-1) : "_obj";
+			$obj = $nb ? "_item" . ($nb-1) : "_obj" . $self->{num_typedef};
 			print $FH @tab,"\t\t\tPyList_SetItem(",$obj,", _pos",$nb,", _item",$nb,"); \\\n";  
 			print $FH @tab,"\t\t} \\\n";
 			$nb --;
@@ -345,7 +345,8 @@ sub visitTypeDeclarator {
 		} else {  
 			print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
 		}  
-		print $FH "\t\tPy_DECREF(_obj); \\\n";
+		$obj = "_obj" . $self->{num_typedef};
+		print $FH "\t\tPy_DECREF(",$obj,"); \\\n";
 		print $FH "\t}\n";
 		print $FH "\n";
 		if (defined $node->{length}) {
@@ -403,6 +404,7 @@ sub visitTypeDeclarator {
 				print $FH "#define PYOBJ_AS_out_",$node->{c_name}," PYOBJ_AS_out_",$type->{c_name},"\n";
 			}
 			print $FH "#define PYOBJ_AS_",$node->{c_name}," PYOBJ_AS_",$type->{c_name},"\n";
+			my $obj = "_obj" . ++$self->{num_typedef};        
 			print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
 			print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
 			print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
@@ -416,16 +418,16 @@ sub visitTypeDeclarator {
 			print $FH "\tif (NULL == _cls_",$node->{c_name},") { \\\n";
 			print $FH "\t\t",$self->{error},"; \\\n";
 			print $FH "\t} else { \\\n";
-			print $FH "\t\tPyObject * _obj; \\\n";
+			print $FH "\t\tPyObject * ",$obj,"; \\\n";
 			print $FH "\t\tPyObject * _args; \\\n";
-			print $FH "\t\tPYOBJ_FROM_",$type->{c_name},"(_obj, val); \\\n";
-			print $FH "\t\t_args = Py_BuildValue(\"(O)\", _obj); \\\n";
+			print $FH "\t\tPYOBJ_FROM_",$type->{c_name},"(",$obj,", val); \\\n";
+			print $FH "\t\t_args = Py_BuildValue(\"(O)\", ",$obj,"); \\\n";
 			if ($self->{old_object}) {
 				print $FH "\t\tobj = PyInstance_New(_cls_",$node->{c_name},", _args, NULL); /* New reference */ \\\n";
 			} else {  
 				print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
 			}  
-			print $FH "\t\tPy_DECREF(_obj); \\\n";
+			print $FH "\t\tPy_DECREF(",$obj,"); \\\n";
 			print $FH "\t} \n";
 			print $FH "\n";
 			if (defined $node->{length}) {

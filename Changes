@@ -1,5 +1,9 @@
 Revision history for Perl extension CORBA::Python.
 
+0.28  Fri Aug 25 18:30:00 2006
+	- fix nested typedef in C/Python
+	- corba_id & serial_uid become class method
+
 0.27  Thu Aug  3 12:30:00 2006
 	- fix import search
 

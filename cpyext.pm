@@ -648,6 +648,7 @@ sub new {
 	$self->{extended} = 1;
 	$self->{num_key} = 'num_cpyext';
 	$self->{error} = "return NULL";
+	$self->{num_typedef} = 0;
 	$basename =~ s/\./_/g;
 	$self->{root_module} = "_" . $basename;
 	return $self;

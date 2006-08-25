@@ -107,10 +107,10 @@ sub visitRegularInterface {
 		$self->_get_defn($_)->visit($self);
 	}
 	if ($self->{id}) {
-		print $FH "    def _get_id(self):\n";
+		print $FH "    def _get_id(cls):\n";
 		print $FH "        return '",$node->{repos_id},"'\n";
 		print $FH "\n";
-		print $FH "    corba_id = property(fget=_get_id)\n";
+		print $FH "    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	print $FH "\n";
