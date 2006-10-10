@@ -588,8 +588,70 @@ sub NameAttrTypeDeclarator {
 }
 
 sub NameAttrNativeType {
-	my $proto = shift;
 	warn __PACKAGE__,"::NameAttrNativeType : not supplied \n";
+}
+
+sub NameAttrFloatingPtType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if (      $attr eq 'in' ) {
+		return "";
+	} elsif ( $attr eq 'inout' ) {
+		return "*";
+	} else {
+		warn __PACKAGE__,"::NameAttrFloatingPtType : ERROR_INTERNAL $type->{value} \n";
+	}
+}
+
+sub NameAttrIntegerType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if (      $attr eq 'in' ) {
+		return "";
+	} elsif ( $attr eq 'inout' ) {
+		return "*";
+	} else {
+		warn __PACKAGE__,"::NameAttrIntegerType : ERROR_INTERNAL $type->{value} \n";
+	}
+}
+
+sub NameAttrOctetType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if (      $attr eq 'in' ) {
+		return "";
+	} elsif ( $attr eq 'inout' ) {
+		return "*";
+	} else {
+		warn __PACKAGE__,"::NameAttrOctetType : ERROR_INTERNAL $attr \n";
+	}
+}
+
+sub NameAttrCharType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if (      $attr eq 'in' ) {
+		return "";
+	} elsif ( $attr eq 'inout' ) {
+		return "*";
+	} else {
+		warn __PACKAGE__,"::NameAttrCharType : ERROR_INTERNAL $attr \n";
+	}
+}
+
+#sub NameAttrWideCharType {
+#}
+
+sub NameAttrBooleanType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if (      $attr eq 'in' ) {
+		return "";
+	} elsif ( $attr eq 'inout' ) {
+		return "*";
+	} else {
+		warn __PACKAGE__,"::NameAttrBooleanType : ERROR_INTERNAL $attr \n";
+	}
 }
 
 sub NameAttrAnyType {
@@ -643,6 +705,21 @@ sub NameAttrSequenceType {
 		warn __PACKAGE__,"::NameAttrSequenceType : ERROR_INTERNAL $attr \n";
 	}
 }
+
+sub NameAttrStringType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if (      $attr eq 'in' ) {
+		return "";
+	} elsif ( $attr eq 'inout' ) {
+		return "";
+	} else {
+		warn __PACKAGE__,"::NameAttrStringType : ERROR_INTERNAL $attr \n";
+	}
+}
+
+#sub NameAttrWideStringType {
+#}
 
 ##############################################################################
 
@@ -711,6 +788,79 @@ sub NameAttrNativeType {
 	warn __PACKAGE__,"::NameAttrNativeType : not supplied \n";
 }
 
+sub NameAttrFloatingPtType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if      ( $attr eq 'inout' ) {
+		return "";
+	} elsif ( $attr eq 'out' ) {
+		return "";
+	} elsif ( $attr eq 'return' ) {
+		return "";
+	} else {
+		warn __PACKAGE__,"::NameAttrFloatingPtType : ERROR_INTERNAL $type->{value} \n";
+	}
+}
+
+sub NameAttrIntegerType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if      ( $attr eq 'inout' ) {
+		return "";
+	} elsif ( $attr eq 'out' ) {
+		return "";
+	} elsif ( $attr eq 'return' ) {
+		return "";
+	} else {
+		warn __PACKAGE__,"::NameAttrIntegerType : ERROR_INTERNAL $type->{value} \n";
+	}
+}
+
+sub NameAttrOctetType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if      ( $attr eq 'inout' ) {
+		return "";
+	} elsif ( $attr eq 'out' ) {
+		return "";
+	} elsif ( $attr eq 'return' ) {
+		return "";
+	} else {
+		warn __PACKAGE__,"::NameAttrOctetType : ERROR_INTERNAL $attr \n";
+	}
+}
+
+sub NameAttrCharType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if      ( $attr eq 'inout' ) {
+		return "";
+	} elsif ( $attr eq 'out' ) {
+		return "";
+	} elsif ( $attr eq 'return' ) {
+		return "";
+	} else {
+		warn __PACKAGE__,"::NameAttrCharType : ERROR_INTERNAL $attr \n";
+	}
+}
+
+#sub NameAttrWideCharType {
+#}
+
+sub NameAttrBooleanType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if      ( $attr eq 'inout' ) {
+		return "";
+	} elsif ( $attr eq 'out' ) {
+		return "";
+	} elsif ( $attr eq 'return' ) {
+		return "";
+	} else {
+		warn __PACKAGE__,"::NameAttrBooleanType : ERROR_INTERNAL $attr \n";
+	}
+}
+
 sub NameAttrAnyType {
 	warn __PACKAGE__,"::NameAttrAnyType : not supplied \n";
 }
@@ -786,6 +936,23 @@ sub NameAttrSequenceType {
 		warn __PACKAGE__,"::NameAttrSequenceType : ERROR_INTERNAL $attr \n";
 	}
 }
+
+sub NameAttrStringType {
+	my $proto = shift;
+	my ($symbtab, $type, $attr) = @_;
+	if      ( $attr eq 'inout' ) {
+		return "";
+	} elsif ( $attr eq 'out' ) {
+		return "";
+	} elsif ( $attr eq 'return' ) {
+		return "";
+	} else {
+		warn __PACKAGE__,"::NameAttrStringType : ERROR_INTERNAL $attr \n";
+	}
+}
+
+#sub NameAttrWideStringType {
+#}
 
 ##############################################################################
 

@@ -9,7 +9,7 @@ use strict;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.28';
+$VERSION = '0.29';
 
 package CORBA::Python::classVisitor;
 
@@ -397,7 +397,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    def __init__(self, val):\n";
 				print $FH $self->{indent},"        self._value = str(val)\n";
 				print $FH $self->{indent},"        if len(self._value) != ",${$node->{array_size}}[0]->{py_literal}," :\n";
-				print $FH $self->{indent},"            raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				print $FH "\n";
 				print $FH $self->{indent},"    def __cmp__(self, val):\n";
 				print $FH $self->{indent},"        return cmp(self._value, val)\n";
@@ -420,7 +420,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    def __init__(self, val):\n";
 				print $FH $self->{indent},"        str.__init__(val)\n";
 				print $FH $self->{indent},"        if len(val) != ",${$node->{array_size}}[0]->{py_literal}," :\n";
-				print $FH $self->{indent},"            raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				print $FH "\n";
 				if ($self->{marshal}) {
 					print $FH $self->{indent},"    def marshal(self, output):\n";
@@ -468,7 +468,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},@tab,"_e",$n," = self._value\n";
 				foreach (@{$node->{array_size}}) {
 					print $FH $self->{indent},@tab,"if len(_e",$n,") != ",$_->{py_literal}," :\n";
-					print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+					print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
 					$n ++;
 					push @tab, "    ";
@@ -476,7 +476,7 @@ sub visitTypeDeclarator {
 				foreach (@array_max) {
 					if (defined $_) {
 						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal}," :\n";
-						print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+						print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
 					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
 					$n ++;
@@ -551,7 +551,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},@tab,"_e",$n," = list(*params)\n";
 				foreach (@{$node->{array_size}}) {
 					print $FH $self->{indent},@tab,"if len(_e",$n,") != ",$_->{py_literal}," :\n";
-					print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+					print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
 					$n ++;
 					push @tab, "    ";
@@ -559,7 +559,7 @@ sub visitTypeDeclarator {
 				foreach (@array_max) {
 					if (defined $_) {
 						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal}," :\n";
-						print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+						print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
 					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
 					$n ++;
@@ -617,7 +617,7 @@ sub visitTypeDeclarator {
 					print $FH $self->{indent},@tab,"_len",$n," = CORBA.demarshal(input, 'long')\n";
 					if (defined $_) {
 						print $FH $self->{indent},@tab,"if _len",$n," > ",$_->{py_literal}," :\n";
-						print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/MARSHAL:1.0\", 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
+						print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
 					print $FH $self->{indent},@tab,"_lst",$n," = []\n";
 					print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,") :\n";
@@ -669,7 +669,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"        self._value = str(val)\n";
 				if (defined $array_max[0]) {
 					print $FH $self->{indent},"        if len(self._value) > ",$array_max[0]->{py_literal}," :\n";
-					print $FH $self->{indent},"            raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+					print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				}
 				print $FH "\n";
 				print $FH $self->{indent},"    def __cmp__(self, val):\n";
@@ -694,7 +694,7 @@ sub visitTypeDeclarator {
 					print $FH $self->{indent},"    def __init__(self, val):\n";
 					print $FH $self->{indent},"        str.__init__(val)\n";
 					print $FH $self->{indent},"        if len(val) > ",$array_max[0]->{py_literal}," :\n";
-					print $FH $self->{indent},"            raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+					print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					print $FH "\n";
 				}
 				if ($self->{marshal}) {
@@ -737,7 +737,7 @@ sub visitTypeDeclarator {
 				foreach (@array_max) {
 					if (defined $_) {
 						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal}," :\n";
-							print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+							print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
 					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
 					$n ++;
@@ -808,7 +808,7 @@ sub visitTypeDeclarator {
 				foreach (@array_max) {
 					if (defined $_) {
 						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal}," :\n";
-							print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+							print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
 					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
 					$n ++;
@@ -855,7 +855,7 @@ sub visitTypeDeclarator {
 					print $FH $self->{indent},@tab,"_len",$n," = CORBA.demarshal(input, 'long')\n";
 					if (defined $_) {
 						print $FH $self->{indent},@tab,"if _len",$n," > ",$_->{py_literal}," :\n";
-						print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/MARSHAL:1.0\", 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
+						print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
 					print $FH $self->{indent},@tab,"_lst",$n," = []\n";
 					print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,") :\n";
@@ -907,7 +907,7 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"        self._value = str(val)\n";
 			if (exists $type->{max}) {
 				print $FH $self->{indent},"        if len(self._value) > ",$type->{max}->{py_literal}," :\n";
-				print $FH $self->{indent},"            raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 			}
 			print $FH "\n";
 			print $FH $self->{indent},"    def __cmp__(self, val):\n";
@@ -932,7 +932,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    def __init__(self, val):\n";
 				print $FH $self->{indent},"        str.__init__(val)\n";
 				print $FH $self->{indent},"        if len(val) > ",$type->{max}->{py_literal}," :\n";
-				print $FH $self->{indent},"            raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				print $FH "\n";
 			}
 			if ($self->{marshal}) {
@@ -958,7 +958,7 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"        self._value = str(val)\n";
 			if (exists $type->{max}) {
 				print $FH $self->{indent},"        if len(self._value) > ",$type->{max}->{py_literal}," :\n";
-				print $FH $self->{indent},"            raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 			}
 			print $FH "\n";
 			print $FH $self->{indent},"    def __cmp__(self, val):\n";
@@ -983,7 +983,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    def __init__(self, val):\n";
 				print $FH $self->{indent},"        unicode.__init__(val)\n";
 				print $FH $self->{indent},"        if len(val) > ",$type->{max}->{py_literal}," :\n";
-				print $FH $self->{indent},"            raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				print $FH "\n";
 			}
 			if ($self->{marshal}) {
@@ -1002,8 +1002,17 @@ sub visitTypeDeclarator {
 			print $FH "\n";
 		}
 	} elsif (  $type->isa('StructType')
-			or $type->isa('UnionType')
-			or $type->isa('TypeDeclarator') 
+			or $type->isa('UnionType')) {
+		print $FH $self->{indent},"class ",$node->{py_name},"(",$self->_get_scoped_name($type, $node, 1),"):\n";
+		print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
+		print $FH "\n";
+		print $FH $self->{indent},"    def __init__(self, *args, **kw):\n";
+		print $FH $self->{indent},"        if len(args) == 1 and isinstance(args[0], ",$self->_get_scoped_name($type, $node),"):\n";
+		print $FH $self->{indent},"            self.__dict__ = dict(args[0].__dict__)\n";
+		print $FH $self->{indent},"        else:\n";
+		print $FH $self->{indent},"            super(",$self->_get_scoped_name($node, $node),", self).__init__(*args, **kw)\n";
+		print $FH "\n";
+	} elsif (  $type->isa('TypeDeclarator') 
 			or $type->isa('BaseInterface') ) {
 		print $FH $self->{indent},"class ",$node->{py_name},"(",$self->_get_scoped_name($type, $node, 1),"):\n";
 		print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
@@ -1416,9 +1425,9 @@ sub visitStructType {
 			my $member = $self->_get_defn($_);
 			$self->_member_stringify($member);
 		}
-		print $FH $self->{indent},"        inner = \",\\n\".join(lst)\n";
-		print $FH $self->{indent},"        inner = \"\\n\".join(['   ' + line for line in inner.split(\"\\n\")])\n";
-		print $FH $self->{indent},"        return \"struct ",$node->{py_name}," {\\n\" + inner + \"\\n}\"\n";
+		print $FH $self->{indent},"        inner = ',\\n'.join(lst)\n";
+		print $FH $self->{indent},"        inner = '\\n'.join(['   ' + line for line in inner.split('\\n')])\n";
+		print $FH $self->{indent},"        return 'struct ",$node->{py_name}," {\\n' + inner + '\\n}'\n";
 		print $FH "\n";
 	}
 	if ($self->{id}) {
@@ -1451,7 +1460,7 @@ sub _member_check {
 		print $FH $self->{indent},@tab,"_e",$n," = ",$label,"\n";
 		foreach (@{$member->{array_size}}) {
 			print $FH $self->{indent},@tab,"if len(_e",$n,") != ",$_->{py_literal}," :\n";
-			print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+			print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 			print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
 			$n ++;
 			push @tab, "    ";
@@ -1507,7 +1516,7 @@ sub _member_check {
 		if ( ($type->isa('StringType') or $type->isa('WideStringType')) 
 				and exists $type->{max} ) {
 			print $FH $self->{indent},@tab,"if len(",$label,") > ",$type->{max}->{py_literal}," :\n";
-			print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+			print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 	}
 }
@@ -1610,7 +1619,7 @@ sub _member_demarshal {
 		print $FH $self->{indent},@tab,"_len",$n," = CORBA.demarshal(input, 'long')\n";
 		if (defined $_) {
 			print $FH $self->{indent},@tab,"if _len",$n," > ",$_->{py_literal}," :\n";
-			print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/MARSHAL:1.0\", 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
+			print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 		print $FH $self->{indent},@tab,"_lst",$n," = []\n";
 		print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,") :\n";
@@ -1650,7 +1659,7 @@ sub _member_demarshal {
 		if ( ($type->isa('StringType') or $type->isa('WideStringType')) 
 				and exists $type->{max} ) {
 			print $FH $self->{indent},@tab,"if len(",$name,") > ",$type->{max}->{py_literal}," :\n";
-			print $FH $self->{indent},@tab,"    raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+			print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 	}
 }
@@ -1745,7 +1754,7 @@ sub visitUnionType {
 		$self->_member_check($member, "_v", "                ", $node);
 	} else {
 		print $FH $self->{indent},"            else :\n";
-		print $FH $self->{indent},"                raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+		print $FH $self->{indent},"                raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 	}
 	print $FH $self->{indent},"            self.__d = _d\n";
 	print $FH $self->{indent},"            self.__v = _v\n";
@@ -1762,7 +1771,7 @@ sub visitUnionType {
 		}
 	}
 	print $FH $self->{indent},"        else :\n";
-	print $FH $self->{indent},"            raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+	print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 	print $FH "\n";
 	print $FH $self->{indent},"    def _get_d(self):\n";
 	print $FH $self->{indent},"        return self.__d\n";
@@ -1846,7 +1855,7 @@ sub visitUnionType {
 			$self->_member_marshal($member, "self.__v");
 		} else {
 			print $FH $self->{indent},"        else :\n";
-			print $FH $self->{indent},"            raise CORBA.SystemException(\"IDL:CORBA/BAD_PARAM:1.0\", 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+			print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 		print $FH "\n";
 		print $FH $self->{indent},"    def demarshal(cls, input):\n";
@@ -1879,7 +1888,7 @@ sub visitUnionType {
 			print $FH $self->{indent},"            return cls(_d, ",$member->{py_name},")\n";
 		} else {
 			print $FH $self->{indent},"        else :\n";
-			print $FH $self->{indent},"            raise CORBA.SystemException(\"IDL:CORBA/MARSHAL:1.0\", 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
+			print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 		print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
 		print $FH "\n";
@@ -1906,9 +1915,9 @@ sub visitUnionType {
 		print $FH $self->{indent},"        lst = []\n";
 		print $FH $self->{indent},"        lst.append('_d=' + repr(self._d))\n";
 		print $FH $self->{indent},"        lst.append('_v=' + repr(self._v))\n";
-		print $FH $self->{indent},"        inner = \",\\n\".join(lst)\n";
-		print $FH $self->{indent},"        inner = \"\\n\".join(['   ' + line for line in inner.split(\"\\n\")])\n";
-		print $FH $self->{indent},"        return \"union ",$node->{py_name}," {\\n\" + inner + \"\\n}\"\n";
+		print $FH $self->{indent},"        inner = ',\\n'.join(lst)\n";
+		print $FH $self->{indent},"        inner = '\\n'.join(['   ' + line for line in inner.split('\\n')])\n";
+		print $FH $self->{indent},"        return 'union ",$node->{py_name}," {\\n' + inner + '\\n}'\n";
 		print $FH "\n";
 	}
 	if ($self->{id}) {
@@ -2107,9 +2116,9 @@ sub visitException {
 				my $member = $self->_get_defn($_);
 				$self->_member_stringify($member);
 			}
-			print $FH $self->{indent},"        inner = \",\\n\".join(lst)\n";
-			print $FH $self->{indent},"        inner = \"\\n\".join(['   ' + line for line in inner.split(\"\\n\")])\n";
-			print $FH $self->{indent},"        return \"exception ",$node->{py_name}," {\\n\" + inner + \"\\n}\"\n";
+			print $FH $self->{indent},"        inner = ',\\n'.join(lst)\n";
+			print $FH $self->{indent},"        inner = '\\n'.join(['   ' + line for line in inner.split('\\n')])\n";
+			print $FH $self->{indent},"        return 'exception ",$node->{py_name}," {\\n' + inner + '\\n}'\n";
 		} else {
 			print $FH $self->{indent},"        return 'exception ",$node->{py_name}," {}'\n";
 		}

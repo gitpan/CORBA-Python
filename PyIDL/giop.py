@@ -57,9 +57,9 @@ class Version(object):
         lst = []
         lst.append('octet major=' + repr(self.major))
         lst.append('octet minor=' + repr(self.minor))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct Version {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct Version {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/Version:1.0'
@@ -127,7 +127,7 @@ class MessageHeader_1_0(object):
     def _setmagic(self, magic):
         _e0 = magic
         if len(_e0) != 4 :
-            raise CORBA.SystemException("IDL:CORBA/BAD_PARAM:1.0", 2, CORBA.CORBA_COMPLETED_MAYBE)
+            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
         for _e1 in _e0 :
             CORBA.check('char', _e1)
         self._magic = magic
@@ -219,9 +219,9 @@ class MessageHeader_1_0(object):
         lst.append('boolean byte_order=' + repr(self.byte_order))
         lst.append('octet message_type=' + repr(self.message_type))
         lst.append('unsigned_long message_size=' + repr(self.message_size))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct MessageHeader_1_0 {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct MessageHeader_1_0 {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_0:1.0'
@@ -241,7 +241,7 @@ class MessageHeader_1_1(object):
     def _setmagic(self, magic):
         _e0 = magic
         if len(_e0) != 4 :
-            raise CORBA.SystemException("IDL:CORBA/BAD_PARAM:1.0", 2, CORBA.CORBA_COMPLETED_MAYBE)
+            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
         for _e1 in _e0 :
             CORBA.check('char', _e1)
         self._magic = magic
@@ -333,9 +333,9 @@ class MessageHeader_1_1(object):
         lst.append('octet flags=' + repr(self.flags))
         lst.append('octet message_type=' + repr(self.message_type))
         lst.append('unsigned_long message_size=' + repr(self.message_size))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct MessageHeader_1_1 {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct MessageHeader_1_1 {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_1:1.0'
@@ -345,6 +345,12 @@ class MessageHeader_1_1(object):
 class MessageHeader_1_2(MessageHeader_1_1):
     """ Typedef IDL:omg.org/GIOP/MessageHeader_1_2:1.0 """
 
+    def __init__(self, *args, **kw):
+        if len(args) == 1 and isinstance(args[0], MessageHeader_1_1):
+            self.__dict__ = dict(args[0].__dict__)
+        else:
+            super(MessageHeader_1_2, self).__init__(*args, **kw)
+
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_2:1.0'
 
@@ -352,6 +358,12 @@ class MessageHeader_1_2(MessageHeader_1_1):
 
 class MessageHeader_1_3(MessageHeader_1_1):
     """ Typedef IDL:omg.org/GIOP/MessageHeader_1_3:1.0 """
+
+    def __init__(self, *args, **kw):
+        if len(args) == 1 and isinstance(args[0], MessageHeader_1_1):
+            self.__dict__ = dict(args[0].__dict__)
+        else:
+            super(MessageHeader_1_3, self).__init__(*args, **kw)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_3:1.0'
@@ -479,9 +491,9 @@ class RequestHeader_1_0(object):
         lst.append('octet<> object_key=' + repr(self.object_key))
         lst.append('string operation=' + repr(self.operation))
         lst.append('Principal requesting_principal=' + repr(self.requesting_principal))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct RequestHeader_1_0 {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct RequestHeader_1_0 {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_0:1.0'
@@ -530,7 +542,7 @@ class RequestHeader_1_1(object):
     def _setreserved(self, reserved):
         _e0 = reserved
         if len(_e0) != 3 :
-            raise CORBA.SystemException("IDL:CORBA/BAD_PARAM:1.0", 2, CORBA.CORBA_COMPLETED_MAYBE)
+            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
         for _e1 in _e0 :
             CORBA.check('octet', ord(_e1))
         self._reserved = reserved
@@ -634,9 +646,9 @@ class RequestHeader_1_1(object):
         lst.append('octet<> object_key=' + repr(self.object_key))
         lst.append('string operation=' + repr(self.operation))
         lst.append('Principal requesting_principal=' + repr(self.requesting_principal))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct RequestHeader_1_1 {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct RequestHeader_1_1 {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_1:1.0'
@@ -735,9 +747,9 @@ class IORAddressingInfo(object):
             lst = []
             lst.append('string type_id=' + repr(self.type_id))
             lst.append('TaggedProfile<> profiles=' + repr(self.profiles))
-            inner = ",\n".join(lst)
-            inner = "\n".join(['   ' + line for line in inner.split("\n")])
-            return "struct IOR {\n" + inner + "\n}"
+            inner = ',\n'.join(lst)
+            inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+            return 'struct IOR {\n' + inner + '\n}'
 
         def _get_id(cls):
             return 'IDL:omg.org/IOP/IOR:1.0'
@@ -791,9 +803,9 @@ class IORAddressingInfo(object):
         lst = []
         lst.append('unsigned_long selected_profile_index=' + repr(self.selected_profile_index))
         lst.append('IOR ior=' + repr(self.ior))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct IORAddressingInfo {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct IORAddressingInfo {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/IORAddressingInfo:1.0'
@@ -864,9 +876,9 @@ class TargetAddress(object):
             lst = []
             lst.append('ProfileId tag=' + repr(self.tag))
             lst.append('octet<> profile_data=' + repr(self.profile_data))
-            inner = ",\n".join(lst)
-            inner = "\n".join(['   ' + line for line in inner.split("\n")])
-            return "struct TaggedProfile {\n" + inner + "\n}"
+            inner = ',\n'.join(lst)
+            inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+            return 'struct TaggedProfile {\n' + inner + '\n}'
 
         def _get_id(cls):
             return 'IDL:omg.org/IOP/TaggedProfile:1.0'
@@ -887,7 +899,7 @@ class TargetAddress(object):
             elif _d == AddressingDisposition(ReferenceAddr) :
                 CORBA.check(IORAddressingInfo, _v)
             else :
-                raise CORBA.SystemException("IDL:CORBA/BAD_PARAM:1.0", 2, CORBA.CORBA_COMPLETED_MAYBE)
+                raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
             self.__d = _d
             self.__v = _v
         elif 'object_key' in kwargs :
@@ -897,7 +909,7 @@ class TargetAddress(object):
         elif 'ior' in kwargs :
             self._setior(kwargs['ior'])
         else :
-            raise CORBA.SystemException("IDL:CORBA/BAD_PARAM:1.0", 2, CORBA.CORBA_COMPLETED_MAYBE)
+            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
 
     def _get_d(self):
         return self.__d
@@ -967,7 +979,7 @@ class TargetAddress(object):
         elif self._d == AddressingDisposition(ReferenceAddr) :
             self.__v.marshal(output)
         else :
-            raise CORBA.SystemException("IDL:CORBA/BAD_PARAM:1.0", 2, CORBA.CORBA_COMPLETED_MAYBE)
+            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
 
     def demarshal(cls, input):
         _d = AddressingDisposition.demarshal(input)
@@ -986,7 +998,7 @@ class TargetAddress(object):
             ior = IORAddressingInfo.demarshal(input)
             return cls(_d, ior)
         else :
-            raise CORBA.SystemException("IDL:CORBA/MARSHAL:1.0", 9, CORBA.CORBA_COMPLETED_MAYBE)
+            raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
@@ -1004,9 +1016,9 @@ class TargetAddress(object):
         lst = []
         lst.append('_d=' + repr(self._d))
         lst.append('_v=' + repr(self._v))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "union TargetAddress {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'union TargetAddress {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/TargetAddress:1.0'
@@ -1045,7 +1057,7 @@ class RequestHeader_1_2(object):
     def _setreserved(self, reserved):
         _e0 = reserved
         if len(_e0) != 3 :
-            raise CORBA.SystemException("IDL:CORBA/BAD_PARAM:1.0", 2, CORBA.CORBA_COMPLETED_MAYBE)
+            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
         for _e1 in _e0 :
             CORBA.check('octet', ord(_e1))
         self._reserved = reserved
@@ -1133,9 +1145,9 @@ class RequestHeader_1_2(object):
         lst.append('TargetAddress target=' + repr(self.target))
         lst.append('string operation=' + repr(self.operation))
         lst.append('ServiceContextList service_context=' + repr(self.service_context))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct RequestHeader_1_2 {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct RequestHeader_1_2 {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_2:1.0'
@@ -1144,6 +1156,12 @@ class RequestHeader_1_2(object):
 
 class RequestHeader_1_3(RequestHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/RequestHeader_1_3:1.0 """
+
+    def __init__(self, *args, **kw):
+        if len(args) == 1 and isinstance(args[0], RequestHeader_1_2):
+            self.__dict__ = dict(args[0].__dict__)
+        else:
+            super(RequestHeader_1_3, self).__init__(*args, **kw)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_3:1.0'
@@ -1233,9 +1251,9 @@ class ReplyHeader_1_2(object):
         lst.append('unsigned_long request_id=' + repr(self.request_id))
         lst.append('ReplyStatusType_1_2 reply_status=' + repr(self.reply_status))
         lst.append('ServiceContextList service_context=' + repr(self.service_context))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct ReplyHeader_1_2 {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct ReplyHeader_1_2 {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/ReplyHeader_1_2:1.0'
@@ -1244,6 +1262,12 @@ class ReplyHeader_1_2(object):
 
 class ReplyHeader_1_3(ReplyHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/ReplyHeader_1_3:1.0 """
+
+    def __init__(self, *args, **kw):
+        if len(args) == 1 and isinstance(args[0], ReplyHeader_1_2):
+            self.__dict__ = dict(args[0].__dict__)
+        else:
+            super(ReplyHeader_1_3, self).__init__(*args, **kw)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/ReplyHeader_1_3:1.0'
@@ -1315,9 +1339,9 @@ class SystemExceptionReplyBody(object):
         lst.append('string exception_id=' + repr(self.exception_id))
         lst.append('unsigned_long minor_code_value=' + repr(self.minor_code_value))
         lst.append('unsigned_long completion_status=' + repr(self.completion_status))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct SystemExceptionReplyBody {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct SystemExceptionReplyBody {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/SystemExceptionReplyBody:1.0'
@@ -1359,9 +1383,9 @@ class CancelRequestHeader(object):
     def __repr__(self):
         lst = []
         lst.append('unsigned_long request_id=' + repr(self.request_id))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct CancelRequestHeader {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct CancelRequestHeader {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/CancelRequestHeader:1.0'
@@ -1429,9 +1453,9 @@ class LocateRequestHeader_1_0(object):
         lst = []
         lst.append('unsigned_long request_id=' + repr(self.request_id))
         lst.append('octet<> object_key=' + repr(self.object_key))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct LocateRequestHeader_1_0 {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct LocateRequestHeader_1_0 {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_0:1.0'
@@ -1440,6 +1464,12 @@ class LocateRequestHeader_1_0(object):
 
 class LocateRequestHeader_1_1(LocateRequestHeader_1_0):
     """ Typedef IDL:omg.org/GIOP/LocateRequestHeader_1_1:1.0 """
+
+    def __init__(self, *args, **kw):
+        if len(args) == 1 and isinstance(args[0], LocateRequestHeader_1_0):
+            self.__dict__ = dict(args[0].__dict__)
+        else:
+            super(LocateRequestHeader_1_1, self).__init__(*args, **kw)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_1:1.0'
@@ -1496,9 +1526,9 @@ class LocateRequestHeader_1_2(object):
         lst = []
         lst.append('unsigned_long request_id=' + repr(self.request_id))
         lst.append('TargetAddress target=' + repr(self.target))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct LocateRequestHeader_1_2 {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct LocateRequestHeader_1_2 {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_2:1.0'
@@ -1507,6 +1537,12 @@ class LocateRequestHeader_1_2(object):
 
 class LocateRequestHeader_1_3(LocateRequestHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/LocateRequestHeader_1_3:1.0 """
+
+    def __init__(self, *args, **kw):
+        if len(args) == 1 and isinstance(args[0], LocateRequestHeader_1_2):
+            self.__dict__ = dict(args[0].__dict__)
+        else:
+            super(LocateRequestHeader_1_3, self).__init__(*args, **kw)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_3:1.0'
@@ -1581,9 +1617,9 @@ class LocateReplyHeader_1_2(object):
         lst = []
         lst.append('unsigned_long request_id=' + repr(self.request_id))
         lst.append('LocateStatusType_1_2 locate_status=' + repr(self.locate_status))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct LocateReplyHeader_1_2 {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct LocateReplyHeader_1_2 {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateReplyHeader_1_2:1.0'
@@ -1592,6 +1628,12 @@ class LocateReplyHeader_1_2(object):
 
 class LocateReplyHeader_1_3(LocateReplyHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/LocateReplyHeader_1_3:1.0 """
+
+    def __init__(self, *args, **kw):
+        if len(args) == 1 and isinstance(args[0], LocateReplyHeader_1_2):
+            self.__dict__ = dict(args[0].__dict__)
+        else:
+            super(LocateReplyHeader_1_3, self).__init__(*args, **kw)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateReplyHeader_1_3:1.0'
@@ -1633,9 +1675,9 @@ class FragmentHeader_1_2(object):
     def __repr__(self):
         lst = []
         lst.append('unsigned_long request_id=' + repr(self.request_id))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct FragmentHeader_1_2 {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct FragmentHeader_1_2 {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/FragmentHeader_1_2:1.0'
@@ -1644,6 +1686,12 @@ class FragmentHeader_1_2(object):
 
 class FragmentHeader_1_3(FragmentHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/FragmentHeader_1_3:1.0 """
+
+    def __init__(self, *args, **kw):
+        if len(args) == 1 and isinstance(args[0], FragmentHeader_1_2):
+            self.__dict__ = dict(args[0].__dict__)
+        else:
+            super(FragmentHeader_1_3, self).__init__(*args, **kw)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/FragmentHeader_1_3:1.0'

@@ -100,7 +100,7 @@ sub visitRegularInterface {
 	print $FH "    def __init__(self, conn):\n";
 	print $FH "        self.conn = conn\n";
 	print $FH "        if hasattr(conn, 'send') == False :\n";
-	print $FH "            raise CORBA.SystemException(\"IDL:CORBA/INITIALIZE:1.0\", 10, CORBA.CORBA_COMPLETED_NO)\n";
+	print $FH "            raise CORBA.SystemException('IDL:CORBA/INITIALIZE:1.0', 10, CORBA.CORBA_COMPLETED_NO)\n";
 	print $FH "\n";
 	$self->{repos_id} = $node->{repos_id};
 	foreach (@{$node->{list_decl}}) {
@@ -157,7 +157,7 @@ sub visitAbstractInterface {
 	print $FH "    \"\"\" Abstract Interface: ",$node->{repos_id}," \"\"\"\n";
 	print $FH "\n";
 	print $FH "    def __init__(self, *args, **kwargs):\n";
-	print $FH "        raise CORBA.SystemException(\"IDL:CORBA/INITIALIZE:1.0\", 10, CORBA.CORBA_COMPLETED_NO)\n";
+	print $FH "        raise CORBA.SystemException('IDL:CORBA/INITIALIZE:1.0', 10, CORBA.CORBA_COMPLETED_NO)\n";
 	print $FH "\n";
 	$self->{repos_id} = $node->{repos_id};
 	foreach (@{$node->{list_decl}}) {
@@ -216,7 +216,7 @@ sub visitOperation {
 	} else {
 		print $FH "            response_flags=3,\t\t# WITH_TARGET\n";
 	}
-	print $FH "            reserved=\"\\0\\0\\0\",\n";
+	print $FH "            reserved='\\0\\0\\0',\n";
 	print $FH "            target=GIOP.TargetAddress(object_key='",$self->{repos_id},"'),\n";
 	print $FH "            operation='",$node->{idf},"',\n";
 	print $FH "            service_context=IOP.ServiceContextList([])\n";
@@ -292,9 +292,9 @@ sub visitOperation {
 				$if_elif = "elif";
 			}
 			print $FH "            else :\n";
-			print $FH "                raise CORBA.SystemException(\"IDL:CORBA/MARSHAL:1.0\", 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
+			print $FH "                raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		} else {
-			print $FH "            raise CORBA.SystemException(\"IDL:CORBA/MARSHAL:1.0\", 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
+			print $FH "            raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 		print $FH "        elif _status == GIOP.SYSTEM_EXCEPTION :\n";
 		print $FH "            _exception_id = CORBA.demarshal(_reply, 'string')\n";
@@ -306,7 +306,7 @@ sub visitOperation {
 		print $FH "                _completion_status\n";
 		print $FH "            )\n";
 		print $FH "        else :\n";
-		print $FH "            raise CORBA.SystemException(\"IDL:CORBA/MARSHAL:1.0\", 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
+		print $FH "            raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		print $FH "\n";
 	}
 }

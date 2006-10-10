@@ -345,6 +345,7 @@ sub visitTypeDeclarator {
 		} else {  
 			print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
 		}  
+		print $FH "\t\tassert(obj != NULL); \\\n";
 		$obj = "_obj" . $self->{num_typedef};
 		print $FH "\t\tPy_DECREF(",$obj,"); \\\n";
 		print $FH "\t}\n";
@@ -395,7 +396,8 @@ sub visitTypeDeclarator {
 			print $FH "\t}\n";
 		}
 	} else {
-		if (CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type) eq "O") {
+		my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+		if ($fmt eq "O") {
 			print $FH "static PyObject * _cls_",$node->{c_name}," = NULL;\n";
 			print $FH "\n";
 			if (exists $self->{embedded}) {
@@ -421,12 +423,13 @@ sub visitTypeDeclarator {
 			print $FH "\t\tPyObject * ",$obj,"; \\\n";
 			print $FH "\t\tPyObject * _args; \\\n";
 			print $FH "\t\tPYOBJ_FROM_",$type->{c_name},"(",$obj,", val); \\\n";
-			print $FH "\t\t_args = Py_BuildValue(\"(O)\", ",$obj,"); \\\n";
+			print $FH "\t\t_args = Py_BuildValue(\"(",$fmt,")\", ",$obj,"); \\\n";
 			if ($self->{old_object}) {
 				print $FH "\t\tobj = PyInstance_New(_cls_",$node->{c_name},", _args, NULL); /* New reference */ \\\n";
 			} else {  
 				print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
 			}  
+			print $FH "\t\tassert(obj != NULL); \\\n";
 			print $FH "\t\tPy_DECREF(",$obj,"); \\\n";
 			print $FH "\t} \n";
 			print $FH "\n";
@@ -438,6 +441,47 @@ sub visitTypeDeclarator {
 				print $FH "#define FREE_out_",$node->{c_name}," FREE_out_",$type->{c_name},"\n";
 				print $FH "#define FREE_",$node->{c_name}," FREE_",$type->{c_name},"\n";
 			}
+			print $FH "\n";
+		} else {
+			print $FH "static PyObject * _cls_",$node->{c_name}," = NULL;\n";
+			print $FH "\n";
+			if (exists $self->{embedded}) {
+				print $FH "#define PYOBJ_CHECK_",$node->{c_name},"\n";
+				print $FH "#define PYOBJ_AS_inout_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(*(val), obj)\n";
+				print $FH "#define PYOBJ_AS_out_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(*(val), obj)\n";
+			}
+			print $FH "#define PYOBJ_AS_",$node->{c_name},"(val, obj) \\\n";
+			print $FH "\tif (!parse_object(obj, \"",$fmt,"\", &val)) { \\\n";
+			if ($self->{assert}) {
+				print $FH "\t\tassert(0 == \"PYOBJ_AS_",$node->{c_name}," parse_object\"); \\\n";
+			}
+			print $FH "\t\tPy_DECREF(obj); \\\n";
+			print $FH "\t\t",$self->{error},"; \\\n";
+			print $FH "\t} \\\n";
+			print $FH "\n";
+			print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
+			print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
+			print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
+			print $FH "\t} \\\n";
+			print $FH "\tif (NULL == _cls_",$node->{c_name},") { \\\n";
+			print $FH "\t\t_cls_",$node->{c_name}," = find_class(_mod_",$c_mod,", \"",$classname,"\"); \\\n";
+			print $FH "\t} \\\n";
+			if ($self->{assert}) {
+				print $FH "\tassert(NULL != _cls_",$node->{c_name},"); \\\n";
+			}
+			print $FH "\tif (NULL == _cls_",$node->{c_name},") { \\\n";
+			print $FH "\t\t",$self->{error},"; \\\n";
+			print $FH "\t} else { \\\n";
+			print $FH "\t\tPyObject * _args; \\\n";
+			print $FH "\t\t_args = Py_BuildValue(\"(",$fmt,")\", val); \\\n";
+			if ($self->{old_object}) {
+				print $FH "\t\tobj = PyInstance_New(_cls_",$node->{c_name},", _args, NULL); /* New reference */ \\\n";
+			} else {  
+				print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
+			}  
+			print $FH "\t\tassert(obj != NULL); \\\n";
+			print $FH "\t} \n";
+			print $FH "\n";
 			print $FH "\n";
 		}
 	}
@@ -590,6 +634,7 @@ sub visitStructType {
 	} else {  
 		print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
 	}  
+	print $FH "\t\tassert(obj != NULL); \\\n";
 	foreach (@{$node->{list_member}}) {
 		my $defn = $self->_get_defn($_); 
 		my $fmt = $self->_member_fmt($defn); 
@@ -976,6 +1021,7 @@ sub visitUnionType {
 	} else {  
 		print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _duo, NULL); \\\n";
 	}  
+	print $FH "\t\tassert(obj != NULL); \\\n";
 	print $FH "\t}\n";
 	print $FH "\n";                                             
 	if (defined $node->{length}) {
@@ -1615,17 +1661,7 @@ sub NameAttrBaseInterface {
 }
 
 sub NameAttrTypeDeclarator {
-	my $proto = shift;
-	my ($symbtab, $type) = @_;
-	if (exists $type->{array_size}) {
-		return "O"; 
-	} else {
-		$type = $type->{type};
-		unless (ref $type) {
-			$type = $symbtab->Lookup($type);
-		}
-		return $proto->NameAttr($symbtab, $type);
-	}
+	return "O"; 
 }
 
 sub NameAttrNativeType {

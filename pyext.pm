@@ -282,7 +282,7 @@ sub visitAbstractInterface {
 	print $FH "    \"\"\" Abstract Interface: ",$node->{repos_id}," \"\"\"\n";
 	print $FH "\n";
 	print $FH "    def __init__(self, *args, **kwargs):\n";
-	print $FH "        raise CORBA.SystemException(\"IDL:CORBA/INITIALIZE:1.0\", 10, CORBA.CORBA_COMPLETED_NO)\n";
+	print $FH "        raise CORBA.SystemException('IDL:CORBA/INITIALIZE:1.0', 10, CORBA.CORBA_COMPLETED_NO)\n";
 	print $FH "\n";
 	$self->{repos_id} = $node->{repos_id};
 	foreach (@{$node->{list_decl}}) {

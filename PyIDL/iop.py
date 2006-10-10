@@ -96,9 +96,9 @@ class TaggedProfile(object):
         lst = []
         lst.append('ProfileId tag=' + repr(self.tag))
         lst.append('octet<> profile_data=' + repr(self.profile_data))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct TaggedProfile {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct TaggedProfile {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/TaggedProfile:1.0'
@@ -165,9 +165,9 @@ class IOR(object):
         lst = []
         lst.append('string type_id=' + repr(self.type_id))
         lst.append('TaggedProfile<> profiles=' + repr(self.profiles))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct IOR {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct IOR {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/IOR:1.0'
@@ -255,9 +255,9 @@ class TaggedComponent(object):
         lst = []
         lst.append('ComponentId tag=' + repr(self.tag))
         lst.append('octet<> component_data=' + repr(self.component_data))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct TaggedComponent {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct TaggedComponent {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/TaggedComponent:1.0'
@@ -475,9 +475,9 @@ class ServiceContext(object):
         lst = []
         lst.append('ServiceId context_id=' + repr(self.context_id))
         lst.append('octet<> context_data=' + repr(self.context_data))
-        inner = ",\n".join(lst)
-        inner = "\n".join(['   ' + line for line in inner.split("\n")])
-        return "struct ServiceContext {\n" + inner + "\n}"
+        inner = ',\n'.join(lst)
+        inner = '\n'.join(['   ' + line for line in inner.split('\n')])
+        return 'struct ServiceContext {\n' + inner + '\n}'
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/ServiceContext:1.0'
