@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+0.30  Tue Nov  9 15:30:00 2006
+	- client.pm : improve inheritance (TargetAddress)
+
 0.29  Tue Oct 10 12:30:00 2006
 	- improve typedef (Python & C/Python)
 

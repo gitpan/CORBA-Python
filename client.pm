@@ -217,7 +217,7 @@ sub visitOperation {
 		print $FH "            response_flags=3,\t\t# WITH_TARGET\n";
 	}
 	print $FH "            reserved='\\0\\0\\0',\n";
-	print $FH "            target=GIOP.TargetAddress(object_key='",$self->{repos_id},"'),\n";
+	print $FH "            target=GIOP.TargetAddress(object_key=self._get_id()),\n";
 	print $FH "            operation='",$node->{idf},"',\n";
 	print $FH "            service_context=IOP.ServiceContextList([])\n";
 	print $FH "        )\n";

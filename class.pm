@@ -9,7 +9,7 @@ use strict;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.29';
+$VERSION = '0.30';
 
 package CORBA::Python::classVisitor;
 
