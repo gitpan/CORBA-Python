@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 
 #
 #			Interface Definition Language (OMG IDL CORBA v3.0)
@@ -57,7 +58,7 @@ sub _setup_py {
 			if ($self->{setup_Extension});
 	print $FH "setup(\n";
 	print $FH "    name = '",$self->{setup_name},"',\n";
-	print $FH "    py_modules = [ '",$self->{setup_py_modules},"' ],\n" 
+	print $FH "    py_modules = [ '",$self->{setup_py_modules},"' ],\n"
 			if ($self->{setup_py_modules});
 	print $FH "    packages = [ '",join("', '", @{$self->{setup_packages}}),"' ],\n"
 			if (scalar @{$self->{setup_packages}});
@@ -82,12 +83,12 @@ sub visitSpecification {
 	$self->{setup_ext_modules} = [];
 	$self->{setup_Extension} = "";
 	if ($self->{base_package}) {
-		$setup_name = $self->{base_package}; 
+		$setup_name = $self->{base_package};
 		$filename = $setup_name . "/__init__.py";
 		$self->{setup_name} = $setup_name;
-		push @{$self->{setup_packages}}, $setup_name; 
+		push @{$self->{setup_packages}}, $setup_name;
 	} else {
-		my $basename = basename($self->{srcname}, ".idl"); 
+		my $basename = basename($self->{srcname}, ".idl");
 		$basename =~ s/\./_/g;
 		$setup_name = "_" . $basename;
 		$filename = $setup_name . ".py";
@@ -101,7 +102,7 @@ sub visitSpecification {
 		}
 		unless ($empty) {
 			$self->{setup_name} = $setup_name;
-			$self->{setup_py_modules} = $setup_name; 
+			$self->{setup_py_modules} = $setup_name;
 		}
 	}
 	unless ($empty) {
@@ -112,10 +113,10 @@ sub visitSpecification {
 		$self->_get_defn($_)->visit($self);
 	}
 	if ($self->{has_itf}) {
-		my $c_name = basename($self->{srcname}, ".idl"); 
+		my $c_name = basename($self->{srcname}, ".idl");
 		my $ext_name = "ext_" . $setup_name;
 		push @{$self->{setup_ext_modules}}, $ext_name;
-		$self->{setup_Extension} .= $ext_name . " = Extension('c" . $setup_name . "',\n"; 
+		$self->{setup_Extension} .= $ext_name . " = Extension('c" . $setup_name . "',\n";
 		$self->{setup_Extension} .= "    sources = [ 'c" . $setup_name . "module.c', '" . $c_name . ".c', 'corba.c', 'cpyhelper.c' ],\n";
 		$self->{setup_Extension} .= ")\n";
 	}
@@ -145,7 +146,7 @@ sub visitModules {
 	}
 	$self->{setup_name} = $setup_name unless ($self->{setup_name});
 	push @{$self->{setup_packages}}, $setup_name;
-	my $filename = $setup_name . "/__init__.py";  
+	my $filename = $setup_name . "/__init__.py";
 	$self->open_stream($filename, $node);
 	my $FH = $self->{out};
 	my $defn = $self->{symbtab}->Lookup($node->{full});
@@ -157,14 +158,14 @@ sub visitModules {
 		$_->visit($self);
 	}
 	if ($self->{has_itf}) {
-		my $c_name = basename($self->{srcname}, ".idl"); 
+		my $c_name = basename($self->{srcname}, ".idl");
 		my $ext_name = "ext_" . $setup_name;
 		$ext_name =~ s/\//_/g;
 		my @name = split /::/, $node->{full};
-		shift @name;  
+		shift @name;
 		$name[-1] = "c" . $name[-1];
 		push @{$self->{setup_ext_modules}}, $ext_name;
-		$self->{setup_Extension} .= $ext_name . " = Extension('" . join(".", @name) . "',\n"; 
+		$self->{setup_Extension} .= $ext_name . " = Extension('" . join(".", @name) . "',\n";
 		$self->{setup_Extension} .= "    include_dirs = [ '.' ],\n";
 		$self->{setup_Extension} .= "    sources = [ '" . join("/", @name) . "module.c', '" . $c_name . ".c', 'corba.c', 'cpyhelper.c' ],\n";
 		$self->{setup_Extension} .= ")\n";
@@ -172,7 +173,7 @@ sub visitModules {
 	$self->{has_itf} = $save_has_itf;
 	close $FH;
 	$self->{out} = $save_out;
-}                                        
+}
 
 #
 #	3.8		Interface Declaration
@@ -193,7 +194,7 @@ sub visitRegularInterface {
 			my $first = 1;
 			foreach (@{$node->{inheritance}->{list_interface}}) {
 				print $FH ", " unless ($first);
-				my $base = $self->_get_defn($_); 
+				my $base = $self->_get_defn($_);
 				print $FH $self->_get_scoped_name($base, $node);
 				$first = 0;
 			}
@@ -206,7 +207,7 @@ sub visitRegularInterface {
 			my $first = 1;
 			foreach (@{$node->{inheritance}->{list_interface}}) {
 				print $FH ", " unless ($first);
-				my $base = $self->_get_defn($_); 
+				my $base = $self->_get_defn($_);
 				print $FH $self->_get_scoped_name($base, $node);
 				$first = 0;
 			}
@@ -257,7 +258,7 @@ sub visitAbstractInterface {
 			my $first = 1;
 			foreach (@{$node->{inheritance}->{list_interface}}) {
 				print $FH ", " unless ($first);
-				my $base = $self->_get_defn($_); 
+				my $base = $self->_get_defn($_);
 				print $FH $self->_get_scoped_name($base, $node);
 				$first = 0;
 			}
@@ -270,7 +271,7 @@ sub visitAbstractInterface {
 			my $first = 1;
 			foreach (@{$node->{inheritance}->{list_interface}}) {
 				print $FH ", " unless ($first);
-				my $base = $self->_get_defn($_); 
+				my $base = $self->_get_defn($_);
 				print $FH $self->_get_scoped_name($base, $node);
 				$first = 0;
 			}
@@ -326,7 +327,7 @@ sub visitOperation {
 
 	foreach (@{$node->{list_param}}) {		# paramater
 		next if ($_->{attr} eq 'out');
-		$self->_member_check($_, $_->{py_name}, "    ", $self->{itf}); 
+		$self->_member_check($_, $_->{py_name}, "    ", $self->{itf});
 	}
 	print $FH "        return self._native.",$node->{py_name},"(";
 	my $first = 1;

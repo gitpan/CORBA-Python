@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 use UNIVERSAL;
 
 #
@@ -74,7 +75,7 @@ sub _get_name {
 		return $name;
 	}
 	return $name;
-}                                
+}
 
 #
 #	3.5		OMG IDL Specification
@@ -217,7 +218,7 @@ sub visitStructType {
 	}
 }
 
-sub visitMember { 
+sub visitMember {
 	my $self = shift;
 	my ($node) = @_;
 	$node->{py_name} = $self->_get_name($node);
@@ -321,7 +322,7 @@ sub visitException {
 	my $self = shift;
 	my ($node) = @_;
 	$node->{py_name} = $self->_get_name($node);
-	if (exists $node->{list_member}) { 
+	if (exists $node->{list_member}) {
 		foreach (@{$node->{list_member}}) {
 			$self->_get_defn($_)->visit($self);		# member
 		}
@@ -355,7 +356,7 @@ sub visitVoidType {
 }
 
 #
-#	3.14	Attribute Declaration 
+#	3.14	Attribute Declaration
 #
 
 sub visitAttribute {

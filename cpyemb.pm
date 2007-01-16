@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 use POSIX qw(ctime);
 
 #
@@ -36,7 +37,7 @@ sub new {
 		$self->{base_package} = "";
 	}
 	$self->{done_hash} = {};
-	my $basename = basename($self->{srcname}, ".idl"); 
+	my $basename = basename($self->{srcname}, ".idl");
 	my $filename = $basename . ".c";
 	$self->open_stream($filename);
 	return $self;
@@ -49,7 +50,7 @@ sub new {
 sub visitSpecification {
 	my $self = shift;
 	my($node) = @_;
-	my $basename = basename($self->{srcname}, ".idl"); 
+	my $basename = basename($self->{srcname}, ".idl");
 	my $py_name = "_" . $basename;
 	$py_name =~ s/\./_/g;
 	$self->{root_module} = $py_name;
@@ -130,9 +131,9 @@ sub visitRegularInterface {
 		print $FH "\t} else {\n";
 		if ($self->{old_object}) {
 			print $FH "\t\t_obj_",$node->{c_name}," = PyInstance_New(_cls_",$node->{c_name},", NULL, NULL); // New reference\n";
-		} else {  
+		} else {
 			print $FH "\t\t_obj_",$node->{c_name}," = PyObject_Call(_cls_",$node->{c_name},", PyTuple_New(0), NULL);\n";
-		}  
+		}
 		if ($self->{assert}) {
 			print $FH "\t\tassert(NULL != _obj_",$node->{c_name},");\n";
 		}
@@ -248,13 +249,13 @@ sub visitOperation {
 		print $FH "#ifdef CORBA_THREADED\n";
 		foreach (@{$node->{list_raise}}) {	# exception
 			my $defn = $self->_get_defn($_);
-			print $FH "\t",$defn->{c_name}," *_",$defn->{c_name}," NULL;\n";
+			print $FH "\t",$defn->{c_name}," *_ex_",$defn->{c_name}," = NULL;\n";
 		}
 		print $FH "#else\n";
 		foreach (@{$node->{list_raise}}) {	# exception
 			my $defn = $self->_get_defn($_);
 			print $FH "\tstatic ",$defn->{c_name}," __",$defn->{c_name},";\n";
-			print $FH "\t",$defn->{c_name}," *_",$defn->{c_name}," = &__",$defn->{c_name},";\n";
+			print $FH "\t",$defn->{c_name}," *_ex_",$defn->{c_name}," = &__",$defn->{c_name},";\n";
 		}
 		print $FH "#endif\n";
 	}
@@ -270,7 +271,7 @@ sub visitOperation {
 	print $FH "\tPyObject * _result = NULL;\n";
 	print $FH "\tPyObject * _exc = NULL;\n";
 	my @fmt_in = ();
-	my @fmt_out = ();         
+	my @fmt_out = ();
 	my $args_in = "";
 	my $args_out = "";
 	unless ($type->isa("VoidType")) {
@@ -287,19 +288,19 @@ sub visitOperation {
 		my $type = $self->_get_defn($_->{type});
 		my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
 		if ($fmt eq "O") {
-			print $FH "\tPyObject * _",$_->{c_name}," = NULL;\n";
+			print $FH "\tPyObject * _arg_",$_->{c_name}," = NULL;\n";
 		}
 		if      ($_->{attr} eq "in") {
 			if ($fmt eq "O") {
-				$args_in .= ", _" . $_->{c_name};
+				$args_in .= ", _arg_" . $_->{c_name};
 			} else {
 				$args_in .= ", " . $_->{c_name};
 			}
 			push @fmt_in, $fmt;
 		} elsif ($_->{attr} eq "inout") {
 			if ($fmt eq "O") {
-				$args_in .= ", _" . $_->{c_name};
-				$args_out .= ", &_" . $_->{c_name};
+				$args_in .= ", _arg_" . $_->{c_name};
+				$args_out .= ", &_arg_" . $_->{c_name};
 			} else {
 				$args_in .= ", *" . $_->{c_name};
 				$args_out .= ", " . $_->{c_name};
@@ -308,7 +309,7 @@ sub visitOperation {
 			push @fmt_out, $fmt;
 		} elsif ($_->{attr} eq "out") {
 			if ($fmt eq "O") {
-				$args_out .= ", &_" . $_->{c_name};
+				$args_out .= ", &_arg_" . $_->{c_name};
 			} else {
 				$args_out .= ", " . $_->{c_name};
 			}
@@ -378,7 +379,7 @@ sub visitOperation {
 		my $type = $self->_get_defn($_->{type});
 		my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
 		if ($fmt eq "O") {
-			print $FH "\tPYOBJ_FROM_",$type->{c_name},"(_",$_->{c_name},", ",CORBA::Python::Cobj_from->NameAttr($self->{symbtab}, $type, $_->{attr}), $_->{c_name},");\n";
+			print $FH "\tPYOBJ_FROM_",$type->{c_name},"(_arg_",$_->{c_name},", ",CORBA::Python::Cobj_from->NameAttr($self->{symbtab}, $type, $_->{attr}), $_->{c_name},");\n";
 		}
 	}
 	print $FH "\n";
@@ -394,7 +395,7 @@ sub visitOperation {
 		print $FH "\t\t\tCORBA_exception_set_system(_ev, ex_CORBA_NO_IMPLEMENT, CORBA_COMPLETED_MAYBE);\n";
 		print $FH "\t\t\tgoto err;\n";
 		print $FH "\t\t}\n";
-		my $fmt_out = join "", @fmt_out; 
+		my $fmt_out = join "", @fmt_out;
 		if ($fmt_out eq "O") {
 			 $args_out =~ s/^, &//;
 			print $FH "\t\t",$args_out," = _result;\n";
@@ -426,8 +427,8 @@ sub visitOperation {
 			my $type = $self->_get_defn($_->{type});
 			my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
 			if ($fmt eq "O") {
-				print $FH "\t\tPYOBJ_CHECK_",$type->{c_name},"(_",$_->{c_name},");\n";
-				print $FH "\t\tPYOBJ_AS_",$_->{attr},"_",$type->{c_name},"(",CORBA::Python::Cobj_as->NameAttr($self->{symbtab}, $type, $_->{attr}), $_->{c_name},", _",$_->{c_name},");\n";
+				print $FH "\t\tPYOBJ_CHECK_",$type->{c_name},"(_arg_",$_->{c_name},");\n";
+				print $FH "\t\tPYOBJ_AS_",$_->{attr},"_",$type->{c_name},"(",CORBA::Python::Cobj_as->NameAttr($self->{symbtab}, $type, $_->{attr}), $_->{c_name},", _arg_",$_->{c_name},");\n";
 			}
 	}
 	print $FH "\t} else {\n";
@@ -458,18 +459,18 @@ sub visitOperation {
 			print $FH "\t\t\t\tPyObject * _value;\n";
 			print $FH "\t\t\t\tPyObject * _traceback;\n";
 			print $FH "#ifdef CORBA_THREADED\n";
-			print $FH "\t\t\t\t_",$defn->{c_name}," = ",$defn->{c_name},"__alloc(1);\n";
+			print $FH "\t\t\t\t_ex_",$defn->{c_name}," = ",$defn->{c_name},"__alloc(1);\n";
 			if ($self->{assert}) {
-				print $FH "\t\t\t\tassert(_",$defn->{c_name}," != NULL);\n";
+				print $FH "\t\t\t\tassert(_ex_",$defn->{c_name}," != NULL);\n";
 			}
-			print $FH "\t\t\t\tif (_",$defn->{c_name}," == NULL) {\n";
+			print $FH "\t\t\t\tif (_ex_",$defn->{c_name}," == NULL) {\n";
 			print $FH "\t\t\t\t\tCORBA_exception_set_system(_ev, ex_CORBA_NO_MEMORY, CORBA_COMPLETED_MAYBE);\n";
 			print $FH "\t\t\t\t\tgoto end;\n";
 			print $FH "\t\t\t\t}\n";
 			print $FH "#endif\n";
 			print $FH "\t\t\t\tPyErr_Fetch(&_type, &_value, &_traceback);\n";
-			print $FH "\t\t\t\tPYOBJ_AS_",$defn->{c_name},"(*_",$defn->{c_name},", _value);\n";
-			print $FH "\t\t\t\tCORBA_exception_set(_ev, CORBA_USER_EXCEPTION, ex_",$defn->{c_name},", _",$defn->{c_name},");\n";
+			print $FH "\t\t\t\tPYOBJ_AS_",$defn->{c_name},"(*_ex_",$defn->{c_name},", _value);\n";
+			print $FH "\t\t\t\tCORBA_exception_set(_ev, CORBA_USER_EXCEPTION, ex_",$defn->{c_name},", _ex_",$defn->{c_name},");\n";
 		}
 	}
 	print $FH "\t\t\t} else {\n";
@@ -512,14 +513,14 @@ sub visitOperation {
 		foreach (@{$node->{list_raise}}) {	# exception
 			my $defn = $self->_get_defn($_);
 			if (defined $defn->{length}) {
-				print $FH "\tFREE_",$defn->{c_name},"(*_",$defn->{c_name},");\n";
+				print $FH "\tFREE_",$defn->{c_name},"(*_ex_",$defn->{c_name},");\n";
 			}
 		}
 		print $FH "#ifdef CORBA_THREADED\n";
 		foreach (@{$node->{list_raise}}) {	# exception
 			my $defn = $self->_get_defn($_);
-			print $FH "\tif (_",$defn->{c_name}," != NULL) {\n";
-			print $FH "\t\tCORBA_free(_",$defn->{c_name},");\n";
+			print $FH "\tif (_ex_",$defn->{c_name}," != NULL) {\n";
+			print $FH "\t\tCORBA_free(_ex_",$defn->{c_name},");\n";
 			print $FH "\t}\n";
 		}
 		print $FH "#endif\n";

@@ -264,12 +264,10 @@ sub visitOperation {
 			push @out, $_->{py_name};
 		}
 	}
-	if      (scalar(@out) == 0) {
-		print $FH "pass";
-	} elsif (scalar(@out) == 1) {
-		print $FH "return ", @out;
+	if (scalar(@out)) {
+		print $FH "return ", join(", ",@out);
 	} else {
-		print $FH "return(", join(", ",@out), ")";
+		print $FH "pass";
 	}
 	print $FH "\n";
 }

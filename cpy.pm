@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 
 #
 #			Interface Definition Language (OMG IDL CORBA v3.0)
@@ -12,7 +13,7 @@ use POSIX qw(ctime);
 sub open_stream {
 	my $self = shift;
 	my ($filename) = @_;
-	open(OUT, "> $filename")
+	open(OUT, '>', $filename)
 			or die "can't open $filename ($!).\n";
 	$self->{out} = \*OUT;
 	$self->{filename} = $filename;
@@ -43,7 +44,7 @@ sub _split_name {
 	}
 	if ($full) {
 		$c_mod = $node->{c_name};
-		$py_mod = $node->{full}; 
+		$py_mod = $node->{full};
 		$py_mod =~ s/^:://;
 		$py_mod =~ s/::/\./g;
 	} else {
@@ -190,7 +191,7 @@ sub visitTypeDeclarator {
 		warn __PACKAGE__,"::visitTypeDecalarator $node->{idf} : empty array_size.\n"
 				unless (@{$node->{array_size}});
 		my @array = @{$node->{array_size}};
-		my $size; 
+		my $size;
 		if ( $type->isa("CharType") or $type->isa("OctetType") ) {
 			$size = pop @array;
 		}
@@ -201,15 +202,15 @@ sub visitTypeDeclarator {
 			if (scalar @array) {
 				print $FH "\tif (!PySequence_Check(obj)) { \\\n";
 				if ($self->{assert}) {
-					print $FH "\t\tassert(0 == \"PYOBJ_CHECK_",$node->{c_name}," PySequence_Check\"); \\\n"; 
+					print $FH "\t\tassert(0 == \"PYOBJ_CHECK_",$node->{c_name}," PySequence_Check\"); \\\n";
 				}
 			} else {
 				print $FH "\tif (!PyString_Check(obj)) { \\\n";
 				if ($self->{assert}) {
-					print $FH "\t\tassert(0 == \"PYOBJ_CHECK_",$node->{c_name}," PyString_Check\"); \\\n"; 
+					print $FH "\t\tassert(0 == \"PYOBJ_CHECK_",$node->{c_name}," PyString_Check\"); \\\n";
 				}
-			} 
-			print $FH "\t\t",$self->{error},"; \\\n"; 
+			}
+			print $FH "\t\t",$self->{error},"; \\\n";
 			print $FH "\t}\n";
 			print $FH "\n";
 			print $FH "#define PYOBJ_AS_inout_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(val, obj)\n";
@@ -246,7 +247,7 @@ sub visitTypeDeclarator {
 				print $FH @tab,"\t\t\t\t\t",$self->{error},"; \\\n";
 				print $FH @tab,"\t\t\t\t} \\\n";
 			}
-			$args .= "[_pos" . $nb . "]"; 
+			$args .= "[_pos" . $nb . "]";
 			push @tab, "\t";
 			$obj = "_item" . $nb;
 			$nb ++;
@@ -279,6 +280,9 @@ sub visitTypeDeclarator {
 				print $FH @tab,"\t\t\t\tPy_DECREF(_item",$nb,"); \\\n";
 				print $FH @tab,"\t\t\t\t",$self->{error},"; \\\n";
 				print $FH @tab,"\t\t\t} \\\n";
+				if (exists $self->{embedded} and $fmt eq "s") {
+					print $FH @tab,"\t\t\t{ CORBA_char *p = CORBA_string__alloc(strlen(",$args,")); if (p != NULL) strcpy(p, ",$args,"); ",$args,"= p; } \\\n";
+				}
 			}
 		}
 		foreach (@array) {
@@ -293,7 +297,7 @@ sub visitTypeDeclarator {
 		}
 		print $FH "\n";
 		$args = "(val)";
-		$obj = "_obj" . ++$self->{num_typedef};        
+		$obj = "_obj" . ++$self->{num_typedef};
 		print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
 		print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
 		print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
@@ -312,10 +316,10 @@ sub visitTypeDeclarator {
 		$nb = 0;
 		foreach (@array) {
 			print $FH @tab,"\t\tint _pos",$nb,"; \\\n";
-			print $FH @tab,"\t\t",$obj," = PyList_New(",$_->{c_literal},"); /* New reference */ \\\n"; 
+			print $FH @tab,"\t\t",$obj," = PyList_New(",$_->{c_literal},"); /* New reference */ \\\n";
 			print $FH @tab,"\t\tfor (_pos",$nb," = 0; _pos",$nb," < ",$_->{c_literal},"; _pos",$nb,"++) { \\\n";
 			print $FH @tab,"\t\t\tPyObject * _item",$nb,"; \\\n";
-			$args .= "[_pos" . $nb . "]"; 
+			$args .= "[_pos" . $nb . "]";
 			push @tab, "\t";
 			$obj = "_item" . $nb;
 			$nb ++;
@@ -335,16 +339,16 @@ sub visitTypeDeclarator {
 		foreach (@array) {
 			pop @tab;
 			$obj = $nb ? "_item" . ($nb-1) : "_obj" . $self->{num_typedef};
-			print $FH @tab,"\t\t\tPyList_SetItem(",$obj,", _pos",$nb,", _item",$nb,"); \\\n";  
+			print $FH @tab,"\t\t\tPyList_SetItem(",$obj,", _pos",$nb,", _item",$nb,"); \\\n";
 			print $FH @tab,"\t\t} \\\n";
 			$nb --;
-		}   
+		}
 		print $FH "\t\t_args = Py_BuildValue(\"(O)\", ",$obj,"); \\\n";
 		if ($self->{old_object}) {
 			print $FH "\t\tobj = PyInstance_New(_cls_",$node->{c_name},", _args, NULL); /* New reference */ \\\n";
-		} else {  
+		} else {
 			print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
-		}  
+		}
 		print $FH "\t\tassert(obj != NULL); \\\n";
 		$obj = "_obj" . $self->{num_typedef};
 		print $FH "\t\tPy_DECREF(",$obj,"); \\\n";
@@ -406,7 +410,7 @@ sub visitTypeDeclarator {
 				print $FH "#define PYOBJ_AS_out_",$node->{c_name}," PYOBJ_AS_out_",$type->{c_name},"\n";
 			}
 			print $FH "#define PYOBJ_AS_",$node->{c_name}," PYOBJ_AS_",$type->{c_name},"\n";
-			my $obj = "_obj" . ++$self->{num_typedef};        
+			my $obj = "_obj" . ++$self->{num_typedef};
 			print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
 			print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
 			print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
@@ -426,9 +430,9 @@ sub visitTypeDeclarator {
 			print $FH "\t\t_args = Py_BuildValue(\"(",$fmt,")\", ",$obj,"); \\\n";
 			if ($self->{old_object}) {
 				print $FH "\t\tobj = PyInstance_New(_cls_",$node->{c_name},", _args, NULL); /* New reference */ \\\n";
-			} else {  
+			} else {
 				print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
-			}  
+			}
 			print $FH "\t\tassert(obj != NULL); \\\n";
 			print $FH "\t\tPy_DECREF(",$obj,"); \\\n";
 			print $FH "\t} \n";
@@ -457,7 +461,13 @@ sub visitTypeDeclarator {
 			}
 			print $FH "\t\tPy_DECREF(obj); \\\n";
 			print $FH "\t\t",$self->{error},"; \\\n";
-			print $FH "\t} \\\n";
+			if (exists $self->{embedded} and $fmt eq "s") {
+				print $FH "\t} \\\n";
+				print $FH "\t{ CORBA_char *p = CORBA_string__alloc(strlen(val)); if (p != NULL) strcpy(p, (val)); (val) = p; } \n";
+			}
+			else {
+				print $FH "\t} \n";
+			}
 			print $FH "\n";
 			print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
 			print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
@@ -476,9 +486,9 @@ sub visitTypeDeclarator {
 			print $FH "\t\t_args = Py_BuildValue(\"(",$fmt,")\", val); \\\n";
 			if ($self->{old_object}) {
 				print $FH "\t\tobj = PyInstance_New(_cls_",$node->{c_name},", _args, NULL); /* New reference */ \\\n";
-			} else {  
+			} else {
 				print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
-			}  
+			}
 			print $FH "\t\tassert(obj != NULL); \\\n";
 			print $FH "\t} \n";
 			print $FH "\n";
@@ -567,7 +577,7 @@ sub visitStructType {
 	my $args_out = "";
 	foreach (@{$node->{list_member}}) {
 		my $defn = $self->_get_defn($_);
-		my $fmt = $self->_member_fmt($defn); 
+		my $fmt = $self->_member_fmt($defn);
 		if ($fmt eq "O") {
 			print $FH "\t\tPyObject * _",$defn->{c_name},"; \\\n";
 			$args_in .= ", &_" . $defn->{c_name};
@@ -581,7 +591,7 @@ sub visitStructType {
 	print $FH "\t\tPyObject * _args = PyTuple_New(",scalar(@{$node->{list_member}}),"); /* New reference */ \\\n";
 	my $i = 0;
 	foreach (@{$node->{list_member}}) {
-		my $defn = $self->_get_defn($_); 
+		my $defn = $self->_get_defn($_);
 		my $type = $self->_get_defn($defn->{type});
 		print $FH "\t\t_member = PyObject_GetAttrString((obj), \"",$defn->{py_name},"\"); /* New reference */ \\\n";
 		print $FH "\t\tPyTuple_SetItem(_args, ",$i,", _member); \\\n";
@@ -594,11 +604,11 @@ sub visitStructType {
 	print $FH "\t\t\t",$self->{error},"; \\\n";
 	print $FH "\t\t} \\\n";
 	foreach (@{$node->{list_member}}) {
-		my $defn = $self->_get_defn($_); 
+		my $defn = $self->_get_defn($_);
 		$self->_member_as($defn);
 	}
 	print $FH "\t}\n";
-	print $FH "\n";                                             
+	print $FH "\n";
 	print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
 	print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
 	print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
@@ -613,15 +623,15 @@ sub visitStructType {
 	print $FH "\t\t",$self->{error},"; \\\n";
 	print $FH "\t} else { \\\n";
 	foreach (@{$node->{list_member}}) {
-		my $defn = $self->_get_defn($_); 
-		my $fmt = $self->_member_fmt($defn); 
+		my $defn = $self->_get_defn($_);
+		my $fmt = $self->_member_fmt($defn);
 		if ($fmt eq "O") {
 			print $FH "\t\tPyObject * _",$defn->{c_name},"; \\\n";
 		}
 	}
 	print $FH "\t\tPyObject * _args; \\\n";
 	foreach (@{$node->{list_member}}) {
-		my $defn = $self->_get_defn($_); 
+		my $defn = $self->_get_defn($_);
 		$self->_member_from($defn);
 	}
 	if (scalar(@fmt_inout) == 1) {
@@ -631,19 +641,19 @@ sub visitStructType {
 	}
 	if ($self->{old_object}) {
 		print $FH "\t\tobj = PyInstance_New(_cls_",$node->{c_name},", _args, NULL); /* New reference */ \\\n";
-	} else {  
+	} else {
 		print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
-	}  
+	}
 	print $FH "\t\tassert(obj != NULL); \\\n";
 	foreach (@{$node->{list_member}}) {
-		my $defn = $self->_get_defn($_); 
-		my $fmt = $self->_member_fmt($defn); 
+		my $defn = $self->_get_defn($_);
+		my $fmt = $self->_member_fmt($defn);
 		if ($fmt eq "O") {
 			print $FH "\t\tPy_DECREF(_",$defn->{c_name},"); \\\n";
 		}
 	}
 	print $FH "\t}\n";
-	print $FH "\n";                                             
+	print $FH "\n";
 	if (defined $node->{length}) {
 		if (exists $self->{extended}) {
 			print $FH "#define FREE_in_",$node->{c_name}," FREE_",$node->{c_name},"\n";
@@ -657,7 +667,7 @@ sub visitStructType {
 		print $FH "\t}\n";
 		print $FH "#define FREE_",$node->{c_name},"(v) { \\\n";
 		foreach (@{$node->{list_member}}) {
-			my $defn = $self->_get_defn($_); 
+			my $defn = $self->_get_defn($_);
 			$self->_member_free($defn);
 		}
 		print $FH "\t}\n";
@@ -669,11 +679,11 @@ sub _member_fmt {
 	my ($member) = @_;
 
 	if (exists $member->{array_size}) {
-		return "O"; 
+		return "O";
 	} else {
 		my $type = $self->_get_defn($member->{type});
 		return CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
-	} 
+	}
 }
 
 sub _member_as {
@@ -684,16 +694,16 @@ sub _member_as {
 	my $obj = (defined $union) ? "_v" : "_" . $member->{c_name};
 	$union = "" unless (defined $union);
 	my $args = "(val)." . $union . $member->{c_name};
-	my $fmt = $self->_member_fmt($member); 
+	my $fmt = $self->_member_fmt($member);
 	my $FH = $self->{out};
 	if ($fmt eq "O") {
 		my $type = $self->_get_defn($member->{type});
 		if (exists $member->{array_size}) {
 			my @array = @{$member->{array_size}};
-			my $size; 
+			my $size;
 			if ( $type->isa("CharType") or $type->isa("OctetType") ) {
 				$size = pop @array;
-			} 
+			}
 			my $nb = 0;
 			if (scalar @array) {
 				print $FH @tab,"\t\t{ \\\n";
@@ -721,7 +731,7 @@ sub _member_as {
 					print $FH @tab,"\t\t\t\t\t",$self->{error},"; \\\n";
 					print $FH @tab,"\t\t\t\t} \\\n";
 				}
-				$args .= "[_pos" . $nb . "]"; 
+				$args .= "[_pos" . $nb . "]";
 				push @tab, "\t";
 				$obj = "_item" . $nb;
 				$nb ++;
@@ -778,6 +788,9 @@ sub _member_as {
 			print $FH @tab,"\t\t\t",$self->{error},"; \\\n";
 			print $FH @tab,"\t\t} \\\n";
 		}
+		if (exists $self->{embedded} and $fmt eq "s") {
+			print $FH @tab,"\t\t{ CORBA_char *p = CORBA_string__alloc(strlen(",$args,")); if (p != NULL) strcpy(p, ",$args,"); ",$args,"= p; } \\\n";
+		}
 	}
 }
 
@@ -789,26 +802,26 @@ sub _member_from {
 	my $obj = (defined $union) ? "_v" : "_" . $member->{c_name};
 	$union = "" unless (defined $union);
 	my $args = "(val)." . $union . $member->{c_name};
-	my $fmt = $self->_member_fmt($member); 
+	my $fmt = $self->_member_fmt($member);
 	my $FH = $self->{out};
 	if ($fmt eq "O") {
 		my $type = $self->_get_defn($member->{type});
 		if (exists $member->{array_size}) {
 			my @array = @{$member->{array_size}};
-			my $size; 
+			my $size;
 			if ( $type->isa("CharType") or $type->isa("OctetType") ) {
 				$size = pop @array;
-			} 
+			}
 			my $nb = 0;
 			if (scalar @array) {
 				print $FH @tab,"\t\t{ \\\n";
 			}
 			foreach (@array) {
 				print $FH @tab,"\t\t\tint _pos",$nb,"; \\\n";
-				print $FH @tab,"\t\t\t",$obj," = PyList_New(",$_->{c_literal},"); /* New reference */ \\\n"; 
+				print $FH @tab,"\t\t\t",$obj," = PyList_New(",$_->{c_literal},"); /* New reference */ \\\n";
 				print $FH @tab,"\t\t\tfor (_pos",$nb," = 0; _pos",$nb," < ",$_->{c_literal},"; _pos",$nb,"++) { \\\n";
 				print $FH @tab,"\t\t\t\tPyObject * _item",$nb,"; \\\n";
-				$args .= "[_pos" . $nb . "]"; 
+				$args .= "[_pos" . $nb . "]";
 				push @tab, "\t";
 				$obj = "_item" . $nb;
 				$nb ++;
@@ -830,11 +843,11 @@ sub _member_from {
 			foreach (@array) {
 				pop @tab;
 				$obj = $nb ? "_item" . ($nb-1) : $union ? "_v" : "_" . $member->{c_name};
-				print $FH @tab,"\t\t\t\tPyList_SetItem(",$obj,", _pos",$nb,", _item",$nb,"); \\\n";  
+				print $FH @tab,"\t\t\t\tPyList_SetItem(",$obj,", _pos",$nb,", _item",$nb,"); \\\n";
 				print $FH @tab,"\t\t\t} \\\n";
 				$nb --;
-			}   
-			if (scalar @array) {                       
+			}
+			if (scalar @array) {
 				print $FH @tab,"\t\t} \\\n";
 			}
 		} else {
@@ -950,11 +963,11 @@ sub visitUnionType {
 	}
 	print $FH "\t\t\t",$self->{error},"; \\\n";
 	print $FH "\t\t} \\\n";
-	my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type); 
+	my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
 	if ($fmt eq "O") {
 		print $FH "\t\tPYOBJ_AS_",$type->{c_name},"((val)._d, _d); \\\n";
 	} else {
-		my $args = "&(val)._d"; 
+		my $args = "&(val)._d";
 		print $FH "\t\tif (!parse_object(_d, \"",$fmt,"\", ",$args,")) { \\\n";
 		if ($self->{assert}) {
 			print $FH "\t\tassert(0 == \"PYOBJ_AS_",$node->{c_name}," parse_object\"); \\\n";
@@ -977,7 +990,7 @@ sub visitUnionType {
 	}
 	print $FH "\t\t} \\\n";
 	print $FH "\t}\n";
-	print $FH "\n";                                             
+	print $FH "\n";
 	print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
 	print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
 	print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
@@ -997,7 +1010,7 @@ sub visitUnionType {
 	if ($fmt eq "O") {
 		print $FH "\t\tPYOBJ_FROM_",$type->{c_name},"(_d, (val)._d); \\\n";
 	} else {
-		my $args = "(val)._d"; 
+		my $args = "(val)._d";
 		print $FH "\t\t_d = Py_BuildValue(\"",$fmt,"\", ",$args,"); /* New reference */ \\\n";
 	}
 	print $FH "\t\tPyTuple_SetItem(_duo, 0, _d); \\\n";
@@ -1018,12 +1031,12 @@ sub visitUnionType {
 	print $FH "\t\tPyTuple_SetItem(_duo, 1, _v); \\\n";
 	if ($self->{old_object}) {
 		print $FH "\t\tobj = PyInstance_New(_cls_",$node->{c_name},", _duo, NULL); /* New reference */ \\\n";
-	} else {  
+	} else {
 		print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _duo, NULL); \\\n";
-	}  
+	}
 	print $FH "\t\tassert(obj != NULL); \\\n";
 	print $FH "\t}\n";
-	print $FH "\n";                                             
+	print $FH "\n";
 	if (defined $node->{length}) {
 		if (exists $self->{extended}) {
 			print $FH "#define FREE_in_",$node->{c_name}," FREE_",$node->{c_name},"\n";
@@ -1112,7 +1125,7 @@ sub visitEnumType {
 	print $FH "\t\t} \\\n";
 	print $FH "\t\t(val) = PyInt_AsLong(_val); \\\n";
 	print $FH "\t}\n";
-	print $FH "\n";                                             
+	print $FH "\n";
 	print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
 	print $FH "\tif (NULL == _mod_",$c_mod,") { \\\n";
 	print $FH "\t\t_mod_",$c_mod," = PyImport_ImportModule(\"",$py_mod,"\"); /* New reference */ \\\n";
@@ -1142,7 +1155,7 @@ sub visitEnumType {
 	print $FH "\t\t\t",$self->{error},"; \\\n";
 	print $FH "\t\t} \\\n";
 	print $FH "\t}\n";
-	print $FH "\n";                                             
+	print $FH "\n";
 }
 
 #
@@ -1173,10 +1186,10 @@ sub visitSequenceType {
 			print $FH "#define PYOBJ_CHECK_",$node->{c_name},"(obj) \\\n";
 			print $FH "\tif (!PyString_Check(obj)) { \\\n";
 			if ($self->{assert}) {
-				print $FH "\t\tassert(0 == \"PYOBJ_CHECK_",$node->{c_name}," PyString_Check\"); \\\n"; 
-			} 
-			print $FH "\t\t",$self->{error},"; \\\n"; 
-			print $FH "\t} \\\n"; 
+				print $FH "\t\tassert(0 == \"PYOBJ_CHECK_",$node->{c_name}," PyString_Check\"); \\\n";
+			}
+			print $FH "\t\t",$self->{error},"; \\\n";
+			print $FH "\t} \\\n";
 			print $FH "\n";
 			print $FH "#define PYOBJ_AS_inout_",$node->{c_name},"(val, obj) \\\n";
 			print $FH "\t{ \\\n";
@@ -1184,8 +1197,8 @@ sub visitSequenceType {
 				print $FH "\t\tif (PyString_Size(obj) > ",$node->{max}->{c_literal},") { \\\n";
 				print $FH "\t\t\tPyErr_SetString(PyExc_RuntimeError, NULL); \\\n";
 				if ($self->{assert}) {
-					print $FH "\t\t\tassert(0 == \"PYOBJ_AS_inout_",$node->{c_name}," PyString_Size\"); \\\n"; 
-				} 
+					print $FH "\t\t\tassert(0 == \"PYOBJ_AS_inout_",$node->{c_name}," PyString_Size\"); \\\n";
+				}
 				print $FH "\t\t\t",$self->{error},"; \\\n";
 				print $FH "\t\t} \\\n";
 				print $FH "\t\t(val)->_length = PyString_Size(obj); \\\n";
@@ -1209,8 +1222,8 @@ sub visitSequenceType {
 			print $FH "\t\t(val) = ",$node->{c_name},"__alloc(1); \\\n";
 			print $FH "\t\tif (NULL == (val)) { \\\n";
 			if ($self->{assert}) {
-				print $FH "\t\t\tassert(0 == \"PYOBJ_AS_out_",$node->{c_name}," alloc\"); \\\n"; 
-			} 
+				print $FH "\t\t\tassert(0 == \"PYOBJ_AS_out_",$node->{c_name}," alloc\"); \\\n";
+			}
 			print $FH "\t\t\tPyErr_SetString(PyExc_MemoryError, NULL); \\\n";
 			print $FH "\t\t\t",$self->{error},"; \\\n";
 			print $FH "\t\t} \\\n";
@@ -1227,8 +1240,8 @@ sub visitSequenceType {
 		print $FH "\t\t\t(val)._buffer = ",$node->{c_name},"__allocbuf(",$nb,"); \\\n";
 		print $FH "\t\t\tif (NULL == (val)._buffer) { \\\n";
 		if ($self->{assert}) {
-			print $FH "\t\t\t\tassert(0 == \"PYOBJ_AS_",$node->{c_name}," alloc\"); \\\n"; 
-		} 
+			print $FH "\t\t\t\tassert(0 == \"PYOBJ_AS_",$node->{c_name}," alloc\"); \\\n";
+		}
 		print $FH "\t\t\t\tPyErr_SetString(PyExc_MemoryError, NULL); \\\n";
 		print $FH "\t\t\t\t",$self->{error},"; \\\n";
 		print $FH "\t\t\t} \\\n";
@@ -1254,10 +1267,10 @@ sub visitSequenceType {
 			print $FH "#define PYOBJ_CHECK_",$node->{c_name},"(obj) \\\n";
 			print $FH "\tif (!PySequence_Check(obj)) { \\\n";
 			if ($self->{assert}) {
-				print $FH "\t\tassert(0 == \"PYOBJ_CHECK_",$node->{c_name}," PySequence_Check\"); \\\n"; 
-			} 
-			print $FH "\t\t",$self->{error},"; \\\n"; 
-			print $FH "\t}\n"; 
+				print $FH "\t\tassert(0 == \"PYOBJ_CHECK_",$node->{c_name}," PySequence_Check\"); \\\n";
+			}
+			print $FH "\t\t",$self->{error},"; \\\n";
+			print $FH "\t}\n";
 			print $FH "\n";
 			print $FH "#define PYOBJ_AS_inout_",$node->{c_name},"(val, obj) \\\n";
 			print $FH "\t{ \\\n";
@@ -1267,8 +1280,8 @@ sub visitSequenceType {
 				print $FH "\t\tif (PySequence_Size(obj) > ",$node->{max}->{c_literal},") { \\\n";
 				print $FH "\t\t\tPyErr_SetString(PyExc_RuntimeError, NULL); \\\n";
 				if ($self->{assert}) {
-					print $FH "\t\t\tassert(0 == \"PYOBJ_AS_inout_",$node->{c_name},"\"); \\\n"; 
-				} 
+					print $FH "\t\t\tassert(0 == \"PYOBJ_AS_inout_",$node->{c_name},"\"); \\\n";
+				}
 				print $FH "\t\t\t",$self->{error},"; \\\n";
 				print $FH "\t\t} \\\n";
 				print $FH "\t\t(val)->_length = PySequence_Size(obj); \\\n";
@@ -1288,8 +1301,8 @@ sub visitSequenceType {
 			print $FH "\t\t(val) = ",$node->{c_name},"__alloc(1); \\\n";
 			print $FH "\t\tif (NULL == (val)) { \\\n";
 			if ($self->{assert}) {
-				print $FH "\t\t\tassert(0 == \"PYOBJ_AS_out_",$node->{c_name}," alloc\"); \\\n"; 
-			} 
+				print $FH "\t\t\tassert(0 == \"PYOBJ_AS_out_",$node->{c_name}," alloc\"); \\\n";
+			}
 			print $FH "\t\t\tPyErr_SetString(PyExc_MemoryError, NULL); \\\n";
 			print $FH "\t\t\t",$self->{error},"; \\\n";
 			print $FH "\t\t} \\\n";
@@ -1306,8 +1319,8 @@ sub visitSequenceType {
 		print $FH "\t\t\t(val)._buffer = ",$node->{c_name},"__allocbuf(",$nb,"); \\\n";
 		print $FH "\t\t\tif (NULL == (val)._buffer) { \\\n";
 		if ($self->{assert}) {
-			print $FH "\t\t\t\tassert(0 == \"PYOBJ_AS_",$node->{c_name}," alloc\"); \\\n"; 
-		} 
+			print $FH "\t\t\t\tassert(0 == \"PYOBJ_AS_",$node->{c_name}," alloc\"); \\\n";
+		}
 		print $FH "\t\t\t\tPyErr_SetString(PyExc_MemoryError, NULL); \\\n";
 		print $FH "\t\t\t\t",$self->{error},"; \\\n";
 		print $FH "\t\t\t} \\\n";
@@ -1327,8 +1340,8 @@ sub visitSequenceType {
 		print $FH "\t\t\tPyObject * _item = PySequence_GetItem(obj, pos); /* New reference */ \\\n";
 		print $FH "\t\t\tif (NULL == _item) { \\\n";
 		if ($self->{assert}) {
-			print $FH "\t\t\t\tassert(0 == \"COPY_AS_",$node->{c_name}," PySequence_GetItem\"); \\\n"; 
-		} 
+			print $FH "\t\t\t\tassert(0 == \"COPY_AS_",$node->{c_name}," PySequence_GetItem\"); \\\n";
+		}
 		print $FH "\t\t\t\t",$self->{error},"; \\\n";
 		print $FH "\t\t\t} \\\n";
 		my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
@@ -1341,8 +1354,8 @@ sub visitSequenceType {
 			my $args = $node->{c_name} . "_ptr";
 			print $FH "\t\t\tif (!parse_object(_item, \"",$fmt,"\", ",$args,")) { \\\n";
 			if ($self->{assert}) {
-				print $FH "\t\t\t\tassert(0 == \"COPY_AS_",$node->{c_name}," parse_object\"); \\\n"; 
-			} 
+				print $FH "\t\t\t\tassert(0 == \"COPY_AS_",$node->{c_name}," parse_object\"); \\\n";
+			}
 			print $FH "\t\t\t\tPy_DECREF(_item); \\\n";
 			print $FH "\t\t\t\t",$self->{error},"; \\\n";
 			print $FH "\t\t\t} \\\n";
@@ -1361,7 +1374,7 @@ sub visitSequenceType {
 		}
 		print $FH "\t\tint pos; \\\n";
 		print $FH "\t\t",$type->{c_name}," * ",$node->{c_name},"_ptr; \\\n";
-		print $FH "\t\t(obj) = PyList_New((val)._length); /* New reference */ \\\n"; 
+		print $FH "\t\t(obj) = PyList_New((val)._length); /* New reference */ \\\n";
 		print $FH "\t\tfor (",$node->{c_name},"_ptr = (val)._buffer, pos = 0; \\\n";
 		print $FH "\t\t     ",$node->{c_name},"_ptr < (val)._buffer + (val)._length; \\\n";
 		print $FH "\t\t     ",$node->{c_name},"_ptr++, pos++) { \\\n";
@@ -1372,7 +1385,7 @@ sub visitSequenceType {
 			my $args = "*" . $node->{c_name} . "_ptr";
 			print $FH "\t\t\t_item = Py_BuildValue(\"",$fmt,"\", ",$args,"); /* New reference */ \\\n";
 		}
-		print $FH "\t\t\tPyList_SetItem((obj), pos, _item); \\\n";  
+		print $FH "\t\t\tPyList_SetItem((obj), pos, _item); \\\n";
 		print $FH "\t\t} \\\n";
 		print $FH "\t}\n";
 		print $FH "\n";
@@ -1501,8 +1514,8 @@ sub visitException {
 			my @fmt_out = ();
 			my $args_out = "";
 			foreach (@{$node->{list_member}}) {
-				my $defn = $self->_get_defn($_); 
-				my $fmt = $self->_member_fmt($defn); 
+				my $defn = $self->_get_defn($_);
+				my $fmt = $self->_member_fmt($defn);
 				if ($fmt eq "O") {
 					print $FH "\t\tPyObject* _",$defn->{c_name},"; \\\n";
 					$args_out .= ", _" . $defn->{c_name};
@@ -1513,7 +1526,7 @@ sub visitException {
 			}
 			print $FH "\t\tPyObject* _args; \\\n";
 			foreach (@{$node->{list_member}}) {
-				my $defn = $self->_get_defn($_); 
+				my $defn = $self->_get_defn($_);
 				$self->_member_from($defn);
 			}
 			print $FH "\t\t_args = Py_BuildValue(\"",@fmt_out,"\"",$args_out,"); /* New reference */ \\\n";
@@ -1522,7 +1535,7 @@ sub visitException {
 			print $FH "\t\tPyErr_SetObject(_cls_",$node->{c_name},", PyTuple_New(0)); \\\n";
 		}
 		print $FH "\t}\n";
-	} else {                                  
+	} else {
 		print $FH "#define PYOBJ_AS_",$node->{c_name},"(val, obj) \\\n";
 		print $FH "\t{ \\\n";
 		if ($len) {
@@ -1531,8 +1544,8 @@ sub visitException {
 			my $args_in = "";
 			my $args_out = "";
 			foreach (@{$node->{list_member}}) {
-				my $defn = $self->_get_defn($_); 
-				my $fmt = $self->_member_fmt($defn); 
+				my $defn = $self->_get_defn($_);
+				my $fmt = $self->_member_fmt($defn);
 				if ($fmt eq "O") {
 					print $FH "\t\tPyObject * _",$defn->{c_name},"; \\\n";
 					$args_in .= ", &_" . $defn->{c_name};
@@ -1546,7 +1559,7 @@ sub visitException {
 			print $FH "\t\tPyObject * _args = PyTuple_New(",scalar(@{$node->{list_member}}),"); /* New reference */ \\\n";
 			my $i = 0;
 			foreach (@{$node->{list_member}}) {
-				my $defn = $self->_get_defn($_); 
+				my $defn = $self->_get_defn($_);
 				my $type = $self->_get_defn($defn->{type});
 				print $FH "\t\t_member = PyObject_GetAttrString((obj), \"",$defn->{py_name},"\"); /* New reference */ \\\n";
 				print $FH "\t\tPyTuple_SetItem(_args, ",$i,", _member); \\\n";
@@ -1559,7 +1572,7 @@ sub visitException {
 			print $FH "\t\t\t",$self->{error},"; \\\n";
 			print $FH "\t\t} \\\n";
 			foreach (@{$node->{list_member}}) {
-				my $defn = $self->_get_defn($_); 
+				my $defn = $self->_get_defn($_);
 				$self->_member_as($defn);
 			}
 		}
@@ -1568,13 +1581,13 @@ sub visitException {
 		if (defined $node->{length}) {
 			print $FH "#define FREE_",$node->{c_name},"(v) { \\\n";
 			foreach (@{$node->{list_member}}) {
-				my $defn = $self->_get_defn($_); 
+				my $defn = $self->_get_defn($_);
 				$self->_member_free($defn);
 			}
 			print $FH "\t}\n";
 		}
 	}
-	print $FH "\n";                                             
+	print $FH "\n";
 }
 
 #
@@ -1661,7 +1674,7 @@ sub NameAttrBaseInterface {
 }
 
 sub NameAttrTypeDeclarator {
-	return "O"; 
+	return "O";
 }
 
 sub NameAttrNativeType {

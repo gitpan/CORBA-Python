@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 
 #
 #			Interface Definition Language (OMG IDL CORBA v3.0)
@@ -9,7 +10,7 @@ use strict;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.30';
+$VERSION = '0.31';
 
 package CORBA::Python::classVisitor;
 
@@ -92,7 +93,7 @@ sub open_stream {
 				}
 				$name =~ s/\//\./g;
 			} else {
-				my $basename = basename($self->{srcname}, ".idl"); 
+				my $basename = basename($self->{srcname}, ".idl");
 				$basename =~ s/\./_/g;
 				if (exists $self->{server}) {
 					$name = "_" . $basename . "_skel";
@@ -137,7 +138,7 @@ sub _get_scoped_name {
 		$name = $node->{py_name};
 	} elsif ($name =~ /^::[0-9A-Z_a-z]+$/) {
 		if ($scope_full) {
-			my $basename = basename($self->{srcname}, ".idl"); 
+			my $basename = basename($self->{srcname}, ".idl");
 			$basename =~ s/\./_/g;
 			if (exists $self->{server}) {
 				$name = "_" . $basename . "_skel." . $node->{py_name};
@@ -147,7 +148,7 @@ sub _get_scoped_name {
 		} else {
 			$name = $node->{py_name};
 		}
-	} else { 
+	} else {
 		if ($scope_full) {
 			my $defn = $self->{symbtab}->Lookup($scope_full);
 			while (!$defn->isa('Modules') and !$flag) {
@@ -192,7 +193,7 @@ sub _setup_py {
 	print $FH "\n";
 	print $FH "setup(\n";
 	print $FH "    name = '",$self->{setup_name},"',\n";
-	print $FH "    py_modules = [ '",$self->{setup_py_modules},"' ],\n" 
+	print $FH "    py_modules = [ '",$self->{setup_py_modules},"' ],\n"
 			if ($self->{setup_py_modules});
 	print $FH "    packages = [ '",join("', '", @{$self->{setup_packages}}),"' ],\n"
 			if (scalar @{$self->{setup_packages}});
@@ -213,15 +214,15 @@ sub visitSpecification {
 	my $empty;
 	$self->{setup_packages} = [];
 	if ($self->{base_package}) {
-		$setup_name = $self->{base_package}; 
+		$setup_name = $self->{base_package};
 		if (exists $self->{server}) {
-			$setup_name .= "_skel"; 
+			$setup_name .= "_skel";
 		}
 		$filename = $setup_name . "/__init__.py";
 		$self->{setup_name} = $setup_name;
-		push @{$self->{setup_packages}}, $setup_name; 
+		push @{$self->{setup_packages}}, $setup_name;
 	} else {
-		my $basename = basename($self->{srcname}, ".idl"); 
+		my $basename = basename($self->{srcname}, ".idl");
 		$basename =~ s/\./_/g;
 		$setup_name = "_" . $basename;
 		if (exists $self->{server}) {
@@ -238,7 +239,7 @@ sub visitSpecification {
 		}
 		unless ($empty) {
 			$self->{setup_name} = $setup_name;
-			$self->{setup_py_modules} = $setup_name; 
+			$self->{setup_py_modules} = $setup_name;
 		}
 	}
 	unless ($empty) {
@@ -279,7 +280,7 @@ sub visitModules {
 	}
 	$self->{setup_name} = $setup_name unless ($self->{setup_name});
 	push @{$self->{setup_packages}}, $setup_name;
-	my $filename = $setup_name . "/__init__.py";  
+	my $filename = $setup_name . "/__init__.py";
 	$self->open_stream($filename, $node);
 	my $FH = $self->{out};
 	print $FH "\"\"\" Module ",$defn->{repos_id}," \"\"\"\n";
@@ -289,7 +290,7 @@ sub visitModules {
 	}
 	close $FH;
 	$self->{out} = $save_out;
-}                                        
+}
 
 sub visitModule {
 	my $self = shift;
@@ -320,8 +321,8 @@ sub visitBaseInterface {
 	foreach (@{$node->{list_decl}}) {
 		my $defn = $self->_get_defn($_);
 		if (	   $defn->isa('Operation')
-				or $defn->isa('Attributes') 
-				or $defn->isa('Initializer') 
+				or $defn->isa('Attributes')
+				or $defn->isa('Initializer')
 				or $defn->isa('StateMembers') ) {
 			next;
 		}
@@ -447,7 +448,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
 				print $FH "\n";
 			}
-		} else {  
+		} else {
 			my @array_max = ();
 			while ($type->isa('SequenceType')) {
 				if (exists $type->{max}) {
@@ -635,7 +636,7 @@ sub visitTypeDeclarator {
 				pop @tab;
 				if ($type->isa('CharType')) {
 					print $FH $self->{indent},@tab,"_lst",$n," = ''.join(_lst",$n,")\n";
-				} 
+				}
 				if ($type->isa('OctetType')) {
 					print $FH $self->{indent},@tab,"_lst",$n," = ''.join(map(chr, _lst",$n,"))\n";
 				}
@@ -724,7 +725,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
 				print $FH "\n";
 			}
-		} else {  
+		} else {
 			if ($self->{old_object}) {
 				print $FH $self->{indent},"class ",$node->{py_name},":\n";
 				print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
@@ -747,7 +748,7 @@ sub visitTypeDeclarator {
 					print $FH $self->{indent},@tab,"CORBA.check('octet', ord(_e",$n,"))\n";
 				} elsif (exists $type->{full}) {
 					print $FH $self->{indent},@tab,"CORBA.check(",$self->_get_scoped_name($type, $node),", _e",$n,")\n";
-				} else {                                        
+				} else {
 					my $type_name = $type->{value};
 					$type_name =~ s/ /_/g;
 					print $FH $self->{indent},@tab,"CORBA.check('",$type_name,"', _e",$n,")\n";
@@ -818,7 +819,7 @@ sub visitTypeDeclarator {
 					print $FH $self->{indent},@tab,"CORBA.check('octet', ord(_e",$n,"))\n";
 				} elsif (exists $type->{full}) {
 					print $FH $self->{indent},@tab,"CORBA.check(",$self->_get_scoped_name($type, $node),", _e",$n,")\n";
-				} else {                                        
+				} else {
 					my $type_name = $type->{value};
 					$type_name =~ s/ /_/g;
 					print $FH $self->{indent},@tab,"CORBA.check('",$type_name,"', _e",$n,")\n";
@@ -873,7 +874,7 @@ sub visitTypeDeclarator {
 				pop @tab;
 				if ($type->isa('CharType')) {
 					print $FH $self->{indent},@tab,"_lst",$n," = ''.join(_lst",$n,")\n";
-				} 
+				}
 				if ($type->isa('OctetType')) {
 					print $FH $self->{indent},@tab,"_lst",$n," = ''.join(map(chr, _lst",$n,"))\n";
 				}
@@ -1012,7 +1013,7 @@ sub visitTypeDeclarator {
 		print $FH $self->{indent},"        else:\n";
 		print $FH $self->{indent},"            super(",$self->_get_scoped_name($node, $node),", self).__init__(*args, **kw)\n";
 		print $FH "\n";
-	} elsif (  $type->isa('TypeDeclarator') 
+	} elsif (  $type->isa('TypeDeclarator')
 			or $type->isa('BaseInterface') ) {
 		print $FH $self->{indent},"class ",$node->{py_name},"(",$self->_get_scoped_name($type, $node, 1),"):\n";
 		print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
@@ -1035,7 +1036,7 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"        return str(self._value)\n";
 			print $FH "\n";
 			if ($self->{marshal}) {
-				my $value = $type->{value}; 
+				my $value = $type->{value};
 				$value =~ s/ /_/g;
 				print $FH $self->{indent},"    def marshal(self, output):\n";
 				print $FH $self->{indent},"        CORBA.marshal(output, '",$value,"', self._value)\n";
@@ -1046,7 +1047,7 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
 			if ($self->{marshal}) {
-				my $value = $type->{value}; 
+				my $value = $type->{value};
 				$value =~ s/ /_/g;
 				print $FH $self->{indent},"    def marshal(self, output):\n";
 				print $FH $self->{indent},"        CORBA.marshal(output, '",$value,"', self)\n";
@@ -1054,7 +1055,7 @@ sub visitTypeDeclarator {
 			}
 		}
 		if ($self->{marshal}) {
-			my $value = $type->{value}; 
+			my $value = $type->{value};
 			$value =~ s/ /_/g;
 			print $FH $self->{indent},"    def demarshal(cls, input):\n";
 			print $FH $self->{indent},"        val = CORBA.demarshal(input, '",$value,"')\n";
@@ -1063,14 +1064,14 @@ sub visitTypeDeclarator {
 			print $FH "\n";
 		}
 	} elsif ($type->isa('IntegerType')) {
-		my $value = $type->{value}; 
+		my $value = $type->{value};
 		$value =~ s/ /_/g;
 		if ($self->{old_object}) {
 			print $FH $self->{indent},"class ",$node->{py_name},":\n";
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __init__(self, val):\n";
-			if (       $value eq 'short' 
+			if (       $value eq 'short'
 					or $value eq 'unsigned_short'
 					or $value eq 'long' ) {
 				print $FH $self->{indent},"        self._value = int(val)\n";
@@ -1094,7 +1095,7 @@ sub visitTypeDeclarator {
 				print $FH "\n";
 			}
 		} else {
-			if (       $value eq 'short' 
+			if (       $value eq 'short'
 					or $value eq 'unsigned_short'
 					or $value eq 'long' ) {
 				print $FH $self->{indent},"class ",$node->{py_name},"(int):\n";
@@ -1364,7 +1365,7 @@ sub visitStructType {
 	foreach (@{$node->{list_member}}) {
 		my $member = $self->_get_defn($_);			# member
 		print $FH $self->{indent},"    def _set",$member->{py_name},"(self, ",$member->{py_name},"):\n";
-		$self->_member_check($member, $member->{py_name}, "        ", $node); 
+		$self->_member_check($member, $member->{py_name}, "        ", $node);
 		print $FH $self->{indent},"        self._",$member->{py_name}," = ",$member->{py_name},"\n";
 		print $FH "\n";
 		print $FH $self->{indent},"    def _get",$member->{py_name},"(self):\n";
@@ -1445,9 +1446,9 @@ sub visitStructType {
 		print $FH "\n";
 	}
 }
-                                                                            
+
 sub _member_check {
-	my $self = shift;                                                                               
+	my $self = shift;
 	my ($member, $label, $tab, $node) = @_;
 
 	my $type = $self->_get_defn($member->{type});
@@ -1469,7 +1470,7 @@ sub _member_check {
 					print $FH $self->{indent},@tab,"CORBA.check('octet', ord(_e",$n,"))\n";
 					return;
 				}
-			} 
+			}
 		}
 		$m = $n;
 	}
@@ -1494,7 +1495,7 @@ sub _member_check {
 					print $FH $self->{indent},@tab,"CORBA.check('octet', ord(_e",$n,"))\n";
 					return;
 				}
-			} 
+			}
 		}
 	}
 	if ($n) {
@@ -1513,7 +1514,7 @@ sub _member_check {
 			$type_name =~ s/ /_/g;
 			print $FH $self->{indent},@tab,"CORBA.check('",$type_name,"', ",$label,")\n";
 		}
-		if ( ($type->isa('StringType') or $type->isa('WideStringType')) 
+		if ( ($type->isa('StringType') or $type->isa('WideStringType'))
 				and exists $type->{max} ) {
 			print $FH $self->{indent},@tab,"if len(",$label,") > ",$type->{max}->{py_literal}," :\n";
 			print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
@@ -1542,7 +1543,7 @@ sub _member_marshal {
 					print $FH $self->{indent},@tab,"CORBA.marshal(output, 'octet', ord(_e",$n,"))\n";
 					return;
 				}
-			} 
+			}
 		}
 		$m = $n;
 	}
@@ -1567,7 +1568,7 @@ sub _member_marshal {
 					print $FH $self->{indent},@tab,"CORBA.marshal(output, 'octet', ord(_e",$n,"))\n";
 					return;
 				}
-			} 
+			}
 		}
 	}
 	if ($n) {
@@ -1638,7 +1639,7 @@ sub _member_demarshal {
 		pop @tab;
 		if ($type->isa('CharType')) {
 			print $FH $self->{indent},@tab,"_lst",$n," = ''.join(_lst",$n,")\n";
-		} 
+		}
 		if ($type->isa('OctetType')) {
 			print $FH $self->{indent},@tab,"_lst",$n," = ''.join(map(chr, _lst",$n,"))\n";
 		}
@@ -1656,7 +1657,7 @@ sub _member_demarshal {
 			$type_name =~ s/ /_/g;
 			print $FH $self->{indent},@tab,$name," = CORBA.demarshal(input, '",$type_name,"')\n";
 		}
-		if ( ($type->isa('StringType') or $type->isa('WideStringType')) 
+		if ( ($type->isa('StringType') or $type->isa('WideStringType'))
 				and exists $type->{max} ) {
 			print $FH $self->{indent},@tab,"if len(",$name,") > ",$type->{max}->{py_literal}," :\n";
 			print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
@@ -1748,7 +1749,7 @@ sub visitUnionType {
 	if ($elif eq "if") {
 		print $FH $self->{indent},"            if False : pass\n";
 	}
-	if (defined $default) {                                      
+	if (defined $default) {
 		print $FH $self->{indent},"            else :\t# default\n";
 		my $member = $self->_get_defn($default->{element}->{value});
 		$self->_member_check($member, "_v", "                ", $node);
@@ -1763,7 +1764,7 @@ sub visitUnionType {
 			foreach (@{$case->{list_label}}) {	# default or expression
 				unless ($_->isa('Default')) {
 					my $elt = $self->_get_defn($case->{element});
-					my $label = ${$elt->{list_expr}}[0]; 
+					my $label = ${$elt->{list_expr}}[0];
 					print $FH $self->{indent},"        elif '",$label,"' in kwargs :\n";
 					print $FH $self->{indent},"            self._set",$label,"(kwargs['",$label,"'])\n";
 				}
@@ -1809,7 +1810,7 @@ sub visitUnionType {
 			foreach (@{$case->{list_label}}) {	# default or expression
 				unless ($_->isa('Default')) {
 					my $elt = $self->_get_defn($case->{element});
-					my $label = ${$elt->{list_expr}}[0]; 
+					my $label = ${$elt->{list_expr}}[0];
 					print $FH $self->{indent},"    def _set",$label,"(self, ",$label,"):\n";
 					$self->_member_check($elt, $label, "        ", $node);
 					print $FH $self->{indent},"        self.__d = ",$_->{py_literal},"\n";
@@ -1834,7 +1835,7 @@ sub visitUnionType {
 			my $type_name = $type->{value};
 			$type_name =~ s/ /_/g;
 			print $FH $self->{indent},"        CORBA.marshal(output, '",$type_name,"', self._d)\n";
-		}                                                            
+		}
 		$elif = "if";
 		foreach my $case (@{$node->{list_expr}}) {	# case
 			foreach (@{$case->{list_label}}) {	# default or expression

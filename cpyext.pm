@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 
 #
 #			Interface Definition Language (OMG IDL CORBA v3.0)
@@ -70,14 +71,14 @@ sub _import_module {
 		$modulename = $full;
 		$modulename =~ s/^:://;
 		$modulename =~ s/::/\./g;
-		$c_mod = $mod->{c_name}; 
+		$c_mod = $mod->{c_name};
 	} else {
 		$modulename = $self->{root_module};
-		$c_mod = $modulename; 
+		$c_mod = $modulename;
 	}
 	unless (exists $self->{imp_mod}->{$modulename}) {
 		$self->{imp_mod}->{$modulename} = 1;
-		$self->{init} .= "\t_mod_" . $c_mod . " = PyImport_ImportModule(\"" . $modulename . "\"); // New reference\n";  
+		$self->{init} .= "\t_mod_" . $c_mod . " = PyImport_ImportModule(\"" . $modulename . "\"); // New reference\n";
 	}
 }
 
@@ -88,7 +89,7 @@ sub _import_module {
 sub visitSpecification {
 	my $self = shift;
 	my ($node) = @_;
-	my $basename = basename($self->{srcname}, ".idl"); 
+	my $basename = basename($self->{srcname}, ".idl");
 	my $py_name = "_" . $basename;
 	$py_name =~ s/\./_/g;
 	$self->{root_module} = $py_name;
@@ -148,13 +149,13 @@ sub visitSpecification {
 sub visitModules {
 	my $self = shift;
 	my ($node) = @_;
-	my $basename = basename($self->{srcname}, ".idl"); 
+	my $basename = basename($self->{srcname}, ".idl");
 	my @name = split /::/, $node->{full};
-	shift @name;  
+	shift @name;
 	my $py_name = join "_", @name;
 	$name[-1] = "c" . $name[-1];
 	my $filename = join "/", @name;
-	$filename .= "module.c"; 
+	$filename .= "module.c";
 	my $save_out = $self->{out};
 	my $save_init = $self->{init};
 	my $save_methods = $self->{methods};
@@ -196,7 +197,7 @@ sub visitModules {
 	$self->{out} = $save_out;
 	$self->{init} = $save_init;
 	$self->{imp_mod} = $save_imp_mod;
-	$self->{methods} = $save_methods;  
+	$self->{methods} = $save_methods;
 }
 
 sub visitModule {
@@ -232,12 +233,12 @@ sub visitRegularInterface {
 	print $FH "} ",$node->{c_name},"Object;\n";
 	print $FH "\n";
 	$self->{itf} = $node;
-	my $save_methods = $self->{methods}; 
+	my $save_methods = $self->{methods};
 	$self->{methods} = "";
-	$self->{init} .= "\t" . $node->{c_name} . "Type.tp_new = PyType_GenericNew;\n";  
-	$self->{init} .= "\tif (PyType_Ready(&" . $node->{c_name} . "Type) < 0)\n";   
-	$self->{init} .= "\t\treturn;\n";  
-	$self->{init} .= "\tPy_INCREF(&" . $node->{c_name} . "Type);\n";   
+	$self->{init} .= "\t" . $node->{c_name} . "Type.tp_new = PyType_GenericNew;\n";
+	$self->{init} .= "\tif (PyType_Ready(&" . $node->{c_name} . "Type) < 0)\n";
+	$self->{init} .= "\t\treturn;\n";
+	$self->{init} .= "\tPy_INCREF(&" . $node->{c_name} . "Type);\n";
 	$self->{init} .= "\tPyModule_AddObject(m, \"" . $node->{py_name} . "\", (PyObject*)&" . $node->{c_name} . "Type);\n";
 	foreach (values %{$node->{hash_attribute_operation}}) {
 		$self->_get_defn($_)->visit($self);
@@ -245,7 +246,7 @@ sub visitRegularInterface {
 	delete $self->{itf};
 	print $FH "PyDoc_STRVAR(",$node->{c_name},"__doc__,";
 	if (exists $node->{doc}) {
-		print $FH "\n"; 
+		print $FH "\n";
 		print $FH "\"",$node->{doc},"\");\n";
 	} else {
 		print $FH " \"interface '",$node->{repos_id},"'\");\n";
@@ -304,7 +305,7 @@ sub visitRegularInterface {
 	print $FH " * end of interface ",$node->{py_name},"\n";
 	print $FH " */\n";
 	print $FH "\n";
-	$self->{methods} = $save_methods;    
+	$self->{methods} = $save_methods;
 }
 
 #
@@ -330,7 +331,7 @@ sub visitTypeDeclarators {
 sub visitStructType {
 	# empty
 }
-                                                                            
+
 sub visitUnionType {
 	# empty
 }
@@ -375,10 +376,10 @@ sub visitOperation {
 	my $self = shift;
 	my ($node) = @_;
 	my $FH = $self->{out};
-	my $name = $self->{itf}->{c_name} . "_" . $node->{c_name}; 
+	my $name = $self->{itf}->{c_name} . "_" . $node->{c_name};
 	print $FH "PyDoc_STRVAR(",$name,"__doc__,";
 	if (exists $node->{doc}) {
-		print $FH "\n"; 
+		print $FH "\n";
 		print $FH "\"",$node->{doc},"\");\n";
 	} else {
 		print $FH " \"\");\n";
@@ -641,7 +642,7 @@ sub new {
 	$self->{srcname_mtime} = $parser->YYData->{srcname_mtime};
 	$self->{symbtab} = $parser->YYData->{symbtab};
 	$self->{inc} = {};
-	my $basename = basename($self->{srcname}, ".idl"); 
+	my $basename = basename($self->{srcname}, ".idl");
 	my $filename = $self->{prefix} . $basename . ".h";
 	$self->open_stream($filename);
 	$self->{done_hash} = {};

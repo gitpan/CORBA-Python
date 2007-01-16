@@ -1,5 +1,9 @@
 Revision history for Perl extension CORBA::Python.
 
+0.31  Tue Jan 16 12:30:00 2007
+	- cpyemb.pm: avoid conflit name between operation parameter and struct member
+	- cpy.pm: strdup (embedded)
+
 0.30  Tue Nov  9 15:30:00 2006
 	- client.pm : improve inheritance (TargetAddress)
 

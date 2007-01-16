@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 use UNIVERSAL;
 
 #
@@ -22,7 +23,7 @@ sub new {
 	$self->{symbtab} = $parser->YYData->{symbtab};
 	$self->{module} = undef;
 	$self->{cpy_ext} = $cpy_ext;
-	my $basename = basename($parser->YYData->{srcname}, ".idl"); 
+	my $basename = basename($parser->YYData->{srcname}, ".idl");
 	$basename =~ s/\./_/g;
 	$self->{root_module} = "c_" . $basename;
 	return $self;
@@ -50,11 +51,11 @@ sub _import {
 	if ($flag_c) {
 		if ($full) {
 			my @name = split /::/, $full;
-			$name[-1] = "c" . $name[-1]; 
+			$name[-1] = "c" . $name[-1];
 			$full = join "::", @name;
 		} else {
 			$full = $self->{root_module};
-		} 
+		}
 		$self->{module}->{py_import}->{$full} = 1;
 		return;
 	}
@@ -131,7 +132,7 @@ sub visitBaseInterface {
 		$self->_import($node, 1);
 	}
 	foreach ($node->getInheritance()) {
-		my $base = $self->_get_defn($_); 
+		my $base = $self->_get_defn($_);
 		$self->_import($base);
 	}
 	foreach (@{$node->{list_export}}) {
@@ -173,7 +174,7 @@ sub visitInitializer {
 		$_->visit($self);			# parameter
 	}
 }
-       
+
 #
 #	3.10	Constant Declaration
 #
@@ -239,7 +240,7 @@ sub visitStructType {
 	}
 }
 
-sub visitMember { 
+sub visitMember {
 	my $self = shift;
 	my ($node) = @_;
 	my $type = $self->_get_defn($node->{type});
@@ -321,7 +322,7 @@ sub visitFixedPtConstType {
 sub visitException {
 	my $self = shift;
 	my ($node) = @_;
-	if (exists $node->{list_member}) { 
+	if (exists $node->{list_member}) {
 		foreach (@{$node->{list_member}}) {
 			$self->_get_defn($_)->visit($self);		# member
 		}
@@ -354,7 +355,7 @@ sub visitVoidType {
 }
 
 #
-#	3.14	Attribute Declaration 
+#	3.14	Attribute Declaration
 #
 
 sub visitAttribute {

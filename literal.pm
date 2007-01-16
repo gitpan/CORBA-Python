@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 use UNIVERSAL;
 
 #
@@ -8,7 +9,7 @@ use UNIVERSAL;
 #
 
 package CORBA::Python::literalVisitor;
-                          
+
 use File::Basename;
 
 # builds $node->{py_literal}
@@ -44,7 +45,7 @@ sub _get_scoped_name {
 	my $name = $node->{full};
 	if ($name =~ /^::[0-9A-Z_a-z]+$/) {
 		if ($scope_full) {
-			my $basename = basename($self->{srcname}, ".idl"); 
+			my $basename = basename($self->{srcname}, ".idl");
 			$basename =~ s/\./_/g;
 			if (exists $self->{server}) {
 				$name = "_" . $basename . "_skel." . $node->{py_name};
@@ -54,7 +55,7 @@ sub _get_scoped_name {
 		} else {
 			$name = $node->{py_name};
 		}
-	} else { 
+	} else {
 		if ($scope_full) {
 			if ($scope->isa('Constant')) {
 				while ($name !~ /^$scope_full/) {
@@ -220,7 +221,7 @@ sub visitExpression {
 		$type = $self->_get_defn($type->{type});
 	}
 	my @list_expr = @{$node->{list_expr}};		# create a copy
-	my $str = $self->_Eval(\@list_expr, $type, $scope); 
+	my $str = $self->_Eval(\@list_expr, $type, $scope);
 	$type = $self->_get_defn($node->{type});
 	if ($type->isa('TypeDeclarator')) {
 		my $type2 = $self->_get_defn($type->{type});
@@ -263,8 +264,8 @@ sub visitIntegerLiteral {
 		} else {
 			$str = sprintf("%d", $node->{value});
 		}
-		if (       $type->{value} eq 'unsigned long' 
-				or $type->{value} eq 'long long' 
+		if (       $type->{value} eq 'unsigned long'
+				or $type->{value} eq 'long long'
 				or $type->{value} eq 'unsigned long long' ) {
 			$str .= "L";
 		}
@@ -439,7 +440,7 @@ sub visitCase {
 		$_->visit($self, $type);				# default or expression
 	}
 	$node->{element}->visit($self, $type);
-}      
+}
 
 sub visitDefault {
 	# empty

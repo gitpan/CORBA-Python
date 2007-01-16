@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 
 #
 #			Interface Definition Language (OMG IDL CORBA v3.0)
@@ -73,7 +74,7 @@ sub visitRegularInterface {
 			my $first = 1;
 			foreach (@{$node->{inheritance}->{list_interface}}) {
 				print $FH ", " unless ($first);
-				my $base = $self->_get_defn($_); 
+				my $base = $self->_get_defn($_);
 				print $FH $self->_get_scoped_name($base, $node);
 				$first = 0;
 			}
@@ -86,7 +87,7 @@ sub visitRegularInterface {
 			my $first = 1;
 			foreach (@{$node->{inheritance}->{list_interface}}) {
 				print $FH ", " unless ($first);
-				my $base = $self->_get_defn($_); 
+				my $base = $self->_get_defn($_);
 				print $FH $self->_get_scoped_name($base, $node);
 				$first = 0;
 			}
@@ -132,7 +133,7 @@ sub visitAbstractInterface {
 			my $first = 1;
 			foreach (@{$node->{inheritance}->{list_interface}}) {
 				print $FH ", " unless ($first);
-				my $base = $self->_get_defn($_); 
+				my $base = $self->_get_defn($_);
 				print $FH $self->_get_scoped_name($base, $node);
 				$first = 0;
 			}
@@ -145,7 +146,7 @@ sub visitAbstractInterface {
 			my $first = 1;
 			foreach (@{$node->{inheritance}->{list_interface}}) {
 				print $FH ", " unless ($first);
-				my $base = $self->_get_defn($_); 
+				my $base = $self->_get_defn($_);
 				print $FH $self->_get_scoped_name($base, $node);
 				$first = 0;
 			}
