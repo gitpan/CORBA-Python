@@ -79,6 +79,7 @@ sub visitSpecification {
 	my $setup_name;
 	my $filename;
 	my $empty;
+	$self->empty_modules();
 	$self->{setup_packages} = [];
 	$self->{setup_ext_modules} = [];
 	$self->{setup_Extension} = "";

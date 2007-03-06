@@ -72,7 +72,7 @@ def RequestReply(sock, request_header, request_body):
             if request_header.request_id == reply_header.request_id:
 #                print "reply id %d" % reply_header.request_id
                 return (reply_header.reply_status, reply_header.service_context, reply)
-            elif request_id > reply_header.request_id:
+            elif request_header.request_id > reply_header.request_id:
                 print "bad request id %d (waiting %d).\n" % (reply_header.request_id, request_header.request_id)
 #                goto RETRY
             else:

@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='PyIDL',
-    version='0.31',
+    version='0.32',
     description='CORBA-IDL runtime',
     author='Francois Perrad',
     author_email='francois.perrad@gadz.org',

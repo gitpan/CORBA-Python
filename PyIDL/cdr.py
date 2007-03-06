@@ -62,10 +62,12 @@ class OutputBuffer(object):
         self._pack('L', value)
 
     def long_long__marshal(self, value):
-        raise NotImplementedError
+        self._align(8)
+        self._pack('q', value)
 
     def unsigned_long_long__marshal(self, value):
-        raise NotImplementedError
+        self._align(8)
+        self._pack('Q', value)
 
     def float__marshal(self, value):
         self._align(4)
@@ -134,7 +136,7 @@ class InputBuffer(object):
         chunk = self._buf.read(size)
         if len(chunk) < size:
             print "Not enough data!"
-            raise CORBA.SystemException('IDL:CORBA/INTERNAL:1.0', 8, CORBA_COMPLETED_MAYBE)
+            raise CORBA.SystemException('IDL:CORBA/INTERNAL:1.0', 8, CORBA.CORBA_COMPLETED_MAYBE)
         self._pos += size
         return struct.unpack(fmt, chunk)[0]
 
@@ -164,10 +166,12 @@ class InputBuffer(object):
         return self._unpack('L')
 
     def long_long__demarshal(self):
-        raise NotImplementedError
+        self._align(8)
+        return self._unpack('q')
 
     def unsigned_long_long__demarshal(self):
-        raise NotImplementedError
+        self._align(8)
+        return self._unpack('Q')
 
     def float__demarshal(self):
         self._align(4)

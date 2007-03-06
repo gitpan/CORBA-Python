@@ -10,7 +10,7 @@ use warnings;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.31';
+$VERSION = '0.32';
 
 package CORBA::Python::classVisitor;
 
@@ -202,6 +202,25 @@ sub _setup_py {
 	close $FH;
 }
 
+sub empty_modules {
+	my $self = shift;
+	return unless ($self->{base_package});
+	my $dirname = $self->{base_package};
+	unless (-d $dirname) {
+		mkpath($dirname)
+				or die "can't create $dirname ($!).\n";
+	}
+	while ($dirname ne '.') {
+		my $filename = $dirname . "/__init__.py";
+		unless (-e $filename) {
+			open my $FH, '>', $filename
+					or die "can't open $filename ($!).\n";
+			close $FH;
+		}
+		$dirname = dirname($dirname);
+	}
+}
+
 #
 #	3.5		OMG IDL Specification		(could be specialized)
 #
@@ -212,6 +231,7 @@ sub visitSpecification {
 	my $setup_name;
 	my $filename;
 	my $empty;
+	$self->empty_modules();
 	$self->{setup_packages} = [];
 	if ($self->{base_package}) {
 		$setup_name = $self->{base_package};
