@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+0.33  Thu Mar 15 12:30:00 2007
+	- generate __ne__ when already __eq__
+
 0.32  Mon Mar  5 21:30:00 2007
 	- PyIDL: some fix
 

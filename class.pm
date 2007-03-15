@@ -10,7 +10,7 @@ use warnings;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.32';
+$VERSION = '0.33';
 
 package CORBA::Python::classVisitor;
 
@@ -1434,6 +1434,9 @@ sub visitStructType {
 		}
 		print $FH $self->{indent},"        return True\n";
 		print $FH "\n";
+		print $FH $self->{indent},"    def __ne__(self, obj):\n";
+		print $FH $self->{indent},"        return not self.__eq__(obj)\n";
+		print $FH "\n";
 	}
 	if ($self->{stringify}) {
 		if ($self->{old_object}) {
@@ -1926,6 +1929,9 @@ sub visitUnionType {
 		print $FH $self->{indent},"        else :\n";
 		print $FH $self->{indent},"            return False\n";
 		print $FH "\n";
+		print $FH $self->{indent},"    def __ne__(self, obj):\n";
+		print $FH $self->{indent},"        return not self.__eq__(obj)\n";
+		print $FH "\n";
 	}
 	if ($self->{stringify}) {
 		if ($self->{old_object}) {
@@ -2127,6 +2133,9 @@ sub visitException {
 			print $FH $self->{indent},"            return False\n";
 		}
 		print $FH $self->{indent},"        return True\n";
+		print $FH "\n";
+		print $FH $self->{indent},"    def __ne__(self, obj):\n";
+		print $FH $self->{indent},"        return not self.__eq__(obj)\n";
 		print $FH "\n";
 	}
 	if ($self->{stringify}) {
