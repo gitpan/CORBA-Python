@@ -10,7 +10,7 @@ use warnings;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.33';
+$VERSION = '0.34';
 
 package CORBA::Python::classVisitor;
 
@@ -105,6 +105,7 @@ sub open_stream {
 			$name =~ s/^:://;
 			if (exists $self->{server}) {
 				$name =~ s/::/_skel\./g;
+				$name .= "_skel";
 			} else {
 				$name =~ s/::/\./g;
 			}

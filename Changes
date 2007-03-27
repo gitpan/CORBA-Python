@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+0.34  Tue Mar 27 12:30:00 2007
+	- class.pm: fix server import
+
 0.33  Thu Mar 15 12:30:00 2007
 	- generate __ne__ when already __eq__
 
