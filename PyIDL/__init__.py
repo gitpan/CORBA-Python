@@ -22,9 +22,13 @@ def demarshal(input, name):
 def check(type, value):
     if isinstance(type, str):
         if type == 'char':
+            if not isinstance(value, str):
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
             if len(value) != 1:
                 raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
         elif type == 'wchar':
+            if not isinstance(value, basestring):
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
             if len(value) != 1:
                 raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
         elif type == 'octet':
@@ -57,9 +61,11 @@ def check(type, value):
         elif type == 'boolean':
             pass
         elif type == 'string':
-            pass
+            if not isinstance(value, str):
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
         elif type == 'wstring':
-            pass
+            if not isinstance(value, basestring):
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
         else:
             raise "Internal Error: %s" % type
     else:

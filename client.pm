@@ -100,7 +100,7 @@ sub visitRegularInterface {
 	print $FH "\n";
 	print $FH "    def __init__(self, conn):\n";
 	print $FH "        self.conn = conn\n";
-	print $FH "        if hasattr(conn, 'send') == False :\n";
+	print $FH "        if not hasattr(conn, 'send') :\n";
 	print $FH "            raise CORBA.SystemException('IDL:CORBA/INITIALIZE:1.0', 10, CORBA.CORBA_COMPLETED_NO)\n";
 	print $FH "\n";
 	$self->{repos_id} = $node->{repos_id};

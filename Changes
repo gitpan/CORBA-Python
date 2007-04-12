@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+0.35  Thu Apr 12 12:30:00 2007
+	- improve the check of string parameter
+
 0.34  Tue Mar 27 12:30:00 2007
 	- class.pm: fix server import
 

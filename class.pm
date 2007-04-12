@@ -10,7 +10,7 @@ use warnings;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.34';
+$VERSION = '0.35';
 
 package CORBA::Python::classVisitor;
 
@@ -440,9 +440,11 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 				print $FH "\n";
 				print $FH $self->{indent},"    def __init__(self, val):\n";
-				print $FH $self->{indent},"        str.__init__(val)\n";
+				print $FH $self->{indent},"        if not isinstance(val, str) :\n";
+				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				print $FH $self->{indent},"        if len(val) != ",${$node->{array_size}}[0]->{py_literal}," :\n";
 				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+				print $FH $self->{indent},"        str.__init__(val)\n";
 				print $FH "\n";
 				if ($self->{marshal}) {
 					print $FH $self->{indent},"    def marshal(self, output):\n";
@@ -712,13 +714,15 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"class ",$node->{py_name},"(str):\n";
 				print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 				print $FH "\n";
+				print $FH $self->{indent},"    def __init__(self, val):\n";
+				print $FH $self->{indent},"        if not isinstance(val, str) :\n";
+				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				if (defined $array_max[0]) {
-					print $FH $self->{indent},"    def __init__(self, val):\n";
-					print $FH $self->{indent},"        str.__init__(val)\n";
 					print $FH $self->{indent},"        if len(val) > ",$array_max[0]->{py_literal}," :\n";
 					print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
-					print $FH "\n";
 				}
+				print $FH $self->{indent},"        str.__init__(val)\n";
+				print $FH "\n";
 				if ($self->{marshal}) {
 					print $FH $self->{indent},"    def marshal(self, output):\n";
 					print $FH $self->{indent},"        CORBA.marshal(output, 'long', len(self))\n";
@@ -950,13 +954,15 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"class ",$node->{py_name},"(str):\n";
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
+			print $FH $self->{indent},"    def __init__(self, val):\n";
+			print $FH $self->{indent},"        if not isinstance(val, str) :\n";
+			print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 			if (exists $type->{max}) {
-				print $FH $self->{indent},"    def __init__(self, val):\n";
-				print $FH $self->{indent},"        str.__init__(val)\n";
 				print $FH $self->{indent},"        if len(val) > ",$type->{max}->{py_literal}," :\n";
 				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
-				print $FH "\n";
 			}
+			print $FH $self->{indent},"        str.__init__(val)\n";
+			print $FH "\n";
 			if ($self->{marshal}) {
 				print $FH $self->{indent},"    def marshal(self, output):\n";
 				print $FH $self->{indent},"        CORBA.marshal(output, 'string', self)\n";
@@ -1001,13 +1007,15 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"class ",$node->{py_name},"(unicode):\n";
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
+			print $FH $self->{indent},"    def __init__(self, val):\n";
+			print $FH $self->{indent},"        if not isinstance(val, basestring) :\n";
+			print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 			if (exists $type->{max}) {
-				print $FH $self->{indent},"    def __init__(self, val):\n";
-				print $FH $self->{indent},"        unicode.__init__(val)\n";
 				print $FH $self->{indent},"        if len(val) > ",$type->{max}->{py_literal}," :\n";
 				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
-				print $FH "\n";
 			}
+			print $FH $self->{indent},"        unicode.__init__(val)\n";
+			print $FH "\n";
 			if ($self->{marshal}) {
 				print $FH $self->{indent},"    def marshal(self, output):\n";
 				print $FH $self->{indent},"        CORBA.marshal(output, 'wstring', self)\n";
@@ -1126,8 +1134,8 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __init__(self, val):\n";
-			print $FH $self->{indent},"        int.__init__(val)\n";
 			print $FH $self->{indent},"        CORBA.check('",$value,"', val)\n";
+			print $FH $self->{indent},"        int.__init__(val)\n";
 			print $FH "\n";
 			if ($self->{marshal}) {
 				print $FH $self->{indent},"    def marshal(self, output):\n";
@@ -1170,8 +1178,8 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __init__(self, val):\n";
-			print $FH $self->{indent},"        str.__init__(val)\n";
 			print $FH $self->{indent},"        CORBA.check('char', val)\n";
+			print $FH $self->{indent},"        str.__init__(val)\n";
 			print $FH "\n";
 			if ($self->{marshal}) {
 				print $FH $self->{indent},"    def marshal(self, output):\n";
@@ -1192,7 +1200,6 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __init__(self, val):\n";
-			print $FH $self->{indent},"        self._value = unicode(val)\n";
 			print $FH $self->{indent},"        CORBA.check('wchar', self._value)\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __cmp__(self, val):\n";
@@ -1214,8 +1221,8 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __init__(self, val):\n";
-			print $FH $self->{indent},"        unicode.__init__(val)\n";
 			print $FH $self->{indent},"        CORBA.check('wchar', val)\n";
+			print $FH $self->{indent},"        unicode.__init__(val)\n";
 			print $FH "\n";
 			if ($self->{marshal}) {
 				print $FH $self->{indent},"    def marshal(self, output):\n";
@@ -1300,8 +1307,8 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __init__(self, val):\n";
-			print $FH $self->{indent},"        int.__init__(val)\n";
 			print $FH $self->{indent},"        CORBA.check('octet', val)\n";
+			print $FH $self->{indent},"        int.__init__(val)\n";
 			print $FH "\n";
 			if ($self->{marshal}) {
 				print $FH $self->{indent},"    def marshal(self, output):\n";
@@ -1426,7 +1433,7 @@ sub visitStructType {
 		print $FH $self->{indent},"    def __eq__(self, obj):\n";
 		print $FH $self->{indent},"        if obj == None :\n";
 		print $FH $self->{indent},"            return False\n";
-		print $FH $self->{indent},"        if isinstance(obj, type(self)) == False :\n";
+		print $FH $self->{indent},"        if not isinstance(obj, type(self)) :\n";
 		print $FH $self->{indent},"            return False\n";
 		foreach (@{$node->{list_member}}) {
 			my $member = $self->_get_defn($_);
@@ -1922,7 +1929,7 @@ sub visitUnionType {
 		print $FH $self->{indent},"    def __eq__(self, obj):\n";
 		print $FH $self->{indent},"        if obj == None :\n";
 		print $FH $self->{indent},"            return False\n";
-		print $FH $self->{indent},"        if isinstance(obj, ",$node->{py_name},") == True :\n";
+		print $FH $self->{indent},"        if isinstance(obj, ",$node->{py_name},") :\n";
 		print $FH $self->{indent},"            if self._d == obj._d :\n";
 		print $FH $self->{indent},"                return self._v == obj._v\n";
 		print $FH $self->{indent},"            else :\n";
@@ -2126,7 +2133,7 @@ sub visitException {
 		print $FH $self->{indent},"    def __eq__(self, obj):\n";
 		print $FH $self->{indent},"        if obj == None :\n";
 		print $FH $self->{indent},"            return False\n";
-		print $FH $self->{indent},"        if isinstance(obj, ",$node->{py_name},") == False :\n";
+		print $FH $self->{indent},"        if not isinstance(obj, ",$node->{py_name},") :\n";
 		print $FH $self->{indent},"            return False\n";
 		foreach (@{$node->{list_member}}) {
 			my $member = $self->_get_defn($_);
