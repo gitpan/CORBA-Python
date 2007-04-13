@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+0.36  Fri Apr 13 12:30:00 2007
+	- allow None for empty sequence of char or octet
+
 0.35  Thu Apr 12 12:30:00 2007
 	- improve the check of string parameter
 

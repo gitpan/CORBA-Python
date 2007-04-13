@@ -10,7 +10,7 @@ use warnings;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.35';
+$VERSION = '0.36';
 
 package CORBA::Python::classVisitor;
 
@@ -715,11 +715,12 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 				print $FH "\n";
 				print $FH $self->{indent},"    def __init__(self, val):\n";
-				print $FH $self->{indent},"        if not isinstance(val, str) :\n";
-				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+				print $FH $self->{indent},"        if val != None :\n";
+				print $FH $self->{indent},"            if not isinstance(val, str) :\n";
+				print $FH $self->{indent},"                raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				if (defined $array_max[0]) {
-					print $FH $self->{indent},"        if len(val) > ",$array_max[0]->{py_literal}," :\n";
-					print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
+					print $FH $self->{indent},"            if len(val) > ",$array_max[0]->{py_literal}," :\n";
+					print $FH $self->{indent},"                raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				}
 				print $FH $self->{indent},"        str.__init__(val)\n";
 				print $FH "\n";
