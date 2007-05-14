@@ -69,6 +69,18 @@ sub visitSpecification {
 	print $FH "extern int parse_object(PyObject *obj, char *format, void *addr);\n";
 	print $FH "\n";
 	print $FH "\n";
+	print $FH "static PyObject* _cls_PyIDL_SystemException = NULL;\n";
+	print $FH "\n";
+	print $FH "static PyObject* getclass_PyIDL_SystemException()\n";
+	print $FH "{\n";
+	print $FH "\tif (NULL == _cls_PyIDL_SystemException) {\n";
+	print $FH "\t\tPyObject* mod = PyImport_AddModule(\"PyIDL\");  // Borrowed reference\n";
+	print $FH "\t\t_cls_PyIDL_SystemException = PyObject_GetAttrString(mod, \"SystemException\"); // New reference\n";
+	print $FH "\t}\n";
+	print $FH "\tassert(_cls_PyIDL_SystemException != NULL);\n";
+	print $FH "\treturn _cls_PyIDL_SystemException;\n";
+	print $FH "}\n";
+	print $FH "\n";
 	my $empty = 1;
 	foreach (@{$node->{list_decl}}) {
 		my $defn = $self->_get_defn($_);
@@ -414,15 +426,14 @@ sub visitOperation {
 			print $FH "\t\t\tgoto err;\n";
 			print $FH "\t\t}\n";
 		}
-	}
-	unless ($type->isa("VoidType")) {
+		unless ($type->isa("VoidType")) {
 			my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
 			if ($fmt eq "O") {
 				print $FH "\t\tPYOBJ_CHECK_",$type->{c_name},"(__ret);\n";
 				print $FH "\t\tPYOBJ_AS_",$type->{c_name},"(",CORBA::Python::Cobj_as->NameAttr($self->{symbtab}, $type, 'return'),"_ret, __ret);\n";
 			}
-	}
-	foreach (@{$node->{list_param}}) {	# parameter
+		}
+		foreach (@{$node->{list_param}}) {	# parameter
 			next if ($_->{attr} eq "in");
 			my $type = $self->_get_defn($_->{type});
 			my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
@@ -430,6 +441,7 @@ sub visitOperation {
 				print $FH "\t\tPYOBJ_CHECK_",$type->{c_name},"(_arg_",$_->{c_name},");\n";
 				print $FH "\t\tPYOBJ_AS_",$_->{attr},"_",$type->{c_name},"(",CORBA::Python::Cobj_as->NameAttr($self->{symbtab}, $type, $_->{attr}), $_->{c_name},", _arg_",$_->{c_name},");\n";
 			}
+		}
 	}
 	print $FH "\t} else {\n";
 	print $FH "\t\t_exc = PyErr_Occurred(); // Borrowed reference\n";
@@ -451,6 +463,21 @@ sub visitOperation {
 	}
 	print $FH "\t\t\t\tCORBA_exception_set_system(_ev, ex_CORBA_BAD_PARAM, CORBA_COMPLETED_NO);\n";
 	print $FH "\t\t\t\tgoto err;\n";
+	print $FH "\t\t\t} else if (PyErr_GivenExceptionMatches(getclass_PyIDL_SystemException(), _exc)) {\n";
+	print $FH "\t\t\t\tPyObject * _type;\n";
+	print $FH "\t\t\t\tPyObject * _value;\n";
+	print $FH "\t\t\t\tPyObject * _traceback;\n";
+	print $FH "\t\t\t\tPyObject * _member;\n";
+	print $FH "\t\t\t\tCORBA_unsigned_long _minor;\n";
+	print $FH "\t\t\t\tCORBA_completion_status _completed;\n";
+	print $FH "\t\t\t\tPyErr_Fetch(&_type, &_value, &_traceback);\n";
+	print $FH "\t\t\t\t_member = PyObject_GetAttrString(_value, \"minor\"); // New reference\n";
+	print $FH "\t\t\t\t_minor = PyInt_AsLong(_member);\n";
+	print $FH "\t\t\t\tPy_DECREF(_member);\n";
+	print $FH "\t\t\t\t_member = PyObject_GetAttrString(_value, \"completed\"); // New reference\n";
+	print $FH "\t\t\t\t_completed = PyInt_AsLong(_member);\n";
+	print $FH "\t\t\t\tPy_DECREF(_member);\n";
+	print $FH "\t\t\t\tCORBA_exception_set_system(_ev, _minor, _completed);\n";
 	if (exists $node->{list_raise}) {
 		foreach (@{$node->{list_raise}}) {
 			my $defn = $self->_get_defn($_);

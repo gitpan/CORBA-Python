@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+0.37  Mon May 14 08:30:00 2007
+	- cpyemb.pm: handles SystemException
+
 0.36  Fri Apr 13 12:30:00 2007
 	- allow None for empty sequence of char or octet
 
