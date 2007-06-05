@@ -10,7 +10,7 @@ use warnings;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.37';
+$VERSION = '0.38';
 
 package CORBA::Python::classVisitor;
 
@@ -46,6 +46,7 @@ sub new {
 	$self->{out} = undef;
 	$self->{import} = "import PyIDL as CORBA\n"
 					. "\n";
+	$self->{import_substitution} = {};
 	return $self;
 }
 
@@ -110,8 +111,10 @@ sub open_stream {
 				$name =~ s/::/\./g;
 			}
 			if ($self->{base_package}) {
-				$name = $self->{base_package} . "." . $name;
-				$name =~ s/\//\./g;
+				my $full_import_name = $self->{base_package} . "." . $name;
+				$full_import_name =~ s/\//\./g;
+				$self->{import_substitution}->{$name} = $full_import_name;
+				$name = $full_import_name;
 			}
 		}
 		print $FH "import ",$name,"\n";
@@ -163,6 +166,13 @@ sub _get_scoped_name {
 				$name =~ s/::/_skel\./;
 			}
 			$name =~ s/::/\./g;
+			if ($self->{base_package}) {
+				my $import_name = $name;
+				$import_name =~ s/\.[0-9A-Z_a-z]+$//;
+				if (exists $self->{import_substitution}->{$import_name}) {
+					$name =~ s/$import_name/$self->{import_substitution}->{$import_name}/;
+				}
+			}
 		} else {
 			my $name2 = $node->{py_name};
 			$name =~ s/::[0-9A-Z_a-z]+$//;

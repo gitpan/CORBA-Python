@@ -1,5 +1,10 @@
 Revision history for Perl extension CORBA::Python.
 
+0.38  Tue Jun 05 12:30:00 2007
+	- class.pm : fully qualified import (option -J)
+	- server.pm : fix corba_id call
+	- PyIDL/rpc_giop.py : fix socket fragmentation
+
 0.37  Mon May 14 08:30:00 2007
 	- cpyemb.pm: handles SystemException
 

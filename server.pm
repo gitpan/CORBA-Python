@@ -280,7 +280,7 @@ sub visitOperation {
 			my $defn = $self->_get_defn($_);
 			print $FH "        except ",$self->_get_scoped_name($defn, $self->{itf}),", e:\n";
 			print $FH "            try :\n";
-			print $FH "                CORBA.marshal(reply_body, 'string', e.corba_id)\n";
+			print $FH "                CORBA.marshal(reply_body, 'string', e.corba_id())\n";
 			if (exists $defn->{list_expr}) {
 				print $FH "                e.marshal(reply_body)\n";
 			}
