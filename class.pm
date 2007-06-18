@@ -10,7 +10,7 @@ use warnings;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.38';
+$VERSION = '0.39';
 
 package CORBA::Python::classVisitor;
 

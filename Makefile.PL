@@ -23,12 +23,13 @@ WriteMakefile(
                         'pyemb.pm'      => '$(INST_LIBDIR)/Python/pyemb.pm',
     },
     'EXE_FILES'     => [
-                        'idl2py.pl', 
-                        'idl2pycli.pl', 
-                        'idl2pysrv.pl', 
-                        'idl2pyemb.pl', 
+                        'idl2py.pl',
+                        'idl2pycli.pl',
+                        'idl2pysrv.pl',
+                        'idl2pyemb.pl',
                         'idl2pyext.pl',
     ],
+    'C'             => [],
     'AUTHOR'        => "Francois PERRAD (francois.perrad\@gadz.org)",
     'dist'          => {
                         'COMPRESS'      => 'gzip',

@@ -112,6 +112,7 @@ class Servant(object):
 
     def Servant(self, request):
         if len(request) < _GIOP_HEADER_LENGTH:
+            _LOGGER.debug("header incomplete")
             return None, request
 
         def checkHeaderField(name, got, expected):
@@ -136,8 +137,13 @@ class Servant(object):
         message_type = CORBA.demarshal(input_buffer, 'octet')
         message_size = CORBA.demarshal(input_buffer, 'unsigned_long')
 
+        message_data = input_buffer.read(message_size)
+        if len(message_data) < message_size:
+            _LOGGER.debug("message incomplete")
+            return None, request
+
         # From now on consume the data..
-        message = CDR.InputBuffer(input_buffer.read(message_size))
+        message = CDR.InputBuffer(message_data)
         message.endian = endian
         remaining_data = input_buffer.read()
 
