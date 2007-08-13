@@ -4,6 +4,7 @@ import struct
 import StringIO
 
 class OutputBuffer(object):
+    """ Marshaling buffer """
 
     def __init__(self, buf=None):
         if buf is None:
@@ -23,8 +24,8 @@ class OutputBuffer(object):
     def close(self):
         self._buf.close()
 
-    def write(self, str):
-        self._buf.write(str)
+    def write(self, str_):
+        self._buf.write(str_)
 
     def _align(self, size):
         while (self._pos % size) != 0:
@@ -32,9 +33,9 @@ class OutputBuffer(object):
             self._pos += 1
 
     def _pack(self, fmt, value):
-        str = struct.pack(fmt, value)
-        self._buf.write(str)
-        self._pos += len(str)
+        str_ = struct.pack(fmt, value)
+        self._buf.write(str_)
+        self._pos += len(str_)
 
     def char__marshal(self, value):
         self._pack('c', value)
@@ -98,6 +99,7 @@ class OutputBuffer(object):
 
 
 class InputBuffer(object):
+    """ Demarshaling buffer """
 
     def __init__(self, input=None, endian=None):
         if input == None:
@@ -136,7 +138,8 @@ class InputBuffer(object):
         chunk = self._buf.read(size)
         if len(chunk) < size:
             print "Not enough data!"
-            raise CORBA.SystemException('IDL:CORBA/INTERNAL:1.0', 8, CORBA.CORBA_COMPLETED_MAYBE)
+            raise CORBA.SystemException('IDL:CORBA/INTERNAL:1.0', 8,
+                                        CORBA.CORBA_COMPLETED_MAYBE)
         self._pos += size
         return struct.unpack(fmt, chunk)[0]
 
@@ -190,8 +193,8 @@ class InputBuffer(object):
     def string__demarshal(self):
         self._align(4)
         length = self._unpack('L')
-        s = self._unpack(str(length) + 's')
-        return s[:len(s)-1]
+        str_ = self._unpack(str(length) + 's')
+        return str_[:len(str_)-1]
 
     def wstring__demarshal(self):
         raise NotImplementedError

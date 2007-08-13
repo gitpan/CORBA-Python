@@ -16,7 +16,6 @@ use CORBA::Python::import;
 use CORBA::Python::literal;
 use CORBA::Python::class;
 use CORBA::Python::server;
-use CORBA::Python::pyemb;
 use CORBA::Python::cpyemb;
 
 my $parser = new Parser;
@@ -90,7 +89,7 @@ if (        exists $parser->YYData->{root}
 	$parser->YYData->{root}->visit(new CORBA::Python::importVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::Python::literalVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::Python::cEmbeddedVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::Python::cPyEmbeddedVisitor($parser));
+	$parser->YYData->{root}->visit(new CORBA::Python::PyEmbeddedVisitor($parser));
 }
 
 __END__

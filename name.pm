@@ -19,9 +19,9 @@ sub new {
 	bless($self, $class);
 	my ($parser) = @_;
 	$self->{symbtab} = $parser->YYData->{symbtab};
-	$self->{python_keywords} = {		# Python 2.4
+	$self->{python_keywords} = {		# Python 2.5
 		'and'				=> 1,
-		'as'				=> 1,	# future version
+		'as'				=> 1,
 		'assert'			=> 1,
 		'break'				=> 1,
 		'class'				=> 1,
@@ -49,8 +49,8 @@ sub new {
 		'return'			=> 1,
 		'try'				=> 1,
 		'while'				=> 1,
+		'with'				=> 1,
 		'yield'				=> 1,
-		'None'				=> 1,	# future version
 	};
 	return $self;
 }
@@ -70,7 +70,7 @@ sub _get_name {
 	my ($node) = @_;
 	my $name = $node->{idf};
 	if (exists $self->{python_keywords}->{$name}) {
-		return "_" . $name;
+		return '_' . $name;
 	} else {
 		return $name;
 	}
@@ -291,26 +291,26 @@ sub visitSequenceType {
 sub visitStringType {
 	my $self = shift;
 	my ($node) = @_;
-	$node->{py_name} = "string";
+	$node->{py_name} = 'string';
 }
 
 sub visitWideStringType {
 	my $self = shift;
 	my ($node) = @_;
-	$node->{py_name} = "wstring";
+	$node->{py_name} = 'wstring';
 }
 
 sub visitFixedPtType {
 	my $self = shift;
 	my ($node) = @_;
-	my $name = "fixed";
+	my $name = 'fixed';
 	$node->{py_name} = $name;
 }
 
 sub visitFixedPtConstType {
 	my $self = shift;
 	my ($node) = @_;
-	my $name = "fixed";
+	my $name = 'fixed';
 	$node->{py_name} = $name;
 }
 
@@ -352,7 +352,7 @@ sub visitParameter {
 sub visitVoidType {
 	my $self = shift;
 	my ($node) = @_;
-	$node->{py_name} = "";
+	$node->{py_name} = q{};
 }
 
 #

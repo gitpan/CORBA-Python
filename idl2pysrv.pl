@@ -76,7 +76,7 @@ if (        exists $parser->YYData->{root}
 	}
 	$parser->YYData->{root}->visit(new CORBA::Python::nameVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::Python::importVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::Python::literalVisitor($parser, "server"));
+	$parser->YYData->{root}->visit(new CORBA::Python::literalVisitor($parser, 'server'));
 	$parser->YYData->{root}->visit(new CORBA::Python::serverVisitor($parser));
 }
 
@@ -143,7 +143,7 @@ B<idl2pysrv> parses the given input file (IDL) and generates :
 =over 4
 
 =item *
-a set of Python sources : an optional _I<spec>_skel.py 
+a set of Python sources : an optional _I<spec>_skel.py
 and I<pkg>_skel/__init__.py for each package
 
 =item *
@@ -171,11 +171,11 @@ After standard Perl installation, you must install the Python package PyIDL :
 
 RPC-GIOP is an another RPC (Remote Procedure Call) mecanism.
 
-RPC-GIOP reuses a subset of CORBA GIOP messages, but don't deal with 
+RPC-GIOP reuses a subset of CORBA GIOP messages, but don't deal with
 any CORBA ORB (Object Request Broker). RPC-GIOP reuses the CORBA CDR
 (Common Data Representation) transfer syntax.
 
-An interface (a set of operations) is defined with CORBA IDL 
+An interface (a set of operations) is defined with CORBA IDL
 (Interface Definition Language).
 And this package supplies an client stub generator F<idl2pycli.pl> and
 an server skeleton generator F<idl2pysrv.pl>.
@@ -185,15 +185,15 @@ RPC-GIOP has a lot of common properties with CORBA GIOP :
 =over 8
 
 =item *
-needs a reliable transport layer (typically TCP/IP) 
+needs a reliable transport layer (typically TCP/IP)
 
 =item *
 uses a binary format (CDR)
 
 =item *
-is interoperable (byte-order)  
+is interoperable (byte-order)
 
-=back 
+=back
 
 =head2 EXAMPLE 1
 
@@ -220,7 +220,7 @@ Third, create your implementation F<MyCalc.py> which inherits of F<_Calc_skel.py
             ...
 
 Fourth, create a server F<server.py> that registers your implementation
-(a server could register several interfaces). 
+(a server could register several interfaces).
 
     servant = RPC_GIOP.Servant()
     myCalc = MyCalc()

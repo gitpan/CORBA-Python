@@ -10,7 +10,7 @@ use warnings;
 package CORBA::Python::class;
 
 use vars qw($VERSION);
-$VERSION = '0.39';
+$VERSION = '0.40';
 
 package CORBA::Python::classVisitor;
 
@@ -34,7 +34,7 @@ sub new {
 	if (exists $parser->YYData->{opt_J}) {
 		$self->{base_package} = $parser->YYData->{opt_J};
 	} else {
-		$self->{base_package} = "";
+		$self->{base_package} = q{};
 	}
 	$self->{done_hash} = {};
 	$self->{marshal} = 1;
@@ -42,7 +42,7 @@ sub new {
 	$self->{compare} = 1;
 	$self->{id} = 1;
 	$self->{old_object} = exists $parser->YYData->{opt_O};
-	$self->{indent} = "";
+	$self->{indent} = q{};
 	$self->{out} = undef;
 	$self->{import} = "import PyIDL as CORBA\n"
 					. "\n";
@@ -52,9 +52,9 @@ sub new {
 
 sub open_stream {
 	my $self = shift;
-	my ($filename, $node) = @_;
+	my ($filename, $node, $doc_string) = @_;
 	my $dirname = dirname($filename);
-	if ($dirname ne ".") {
+	if ($dirname ne '.') {
 		unless (-d $dirname) {
 			mkpath($dirname)
 					or die "can't create $dirname ($!).\n";
@@ -71,6 +71,10 @@ sub open_stream {
 	print $FH "#   This file was generated (by ",basename($0),"). DO NOT modify it.\n";
 	print $FH "# From file : ",$self->{srcname},", ",$self->{srcname_size}," octets, ",POSIX::ctime($self->{srcname_mtime});
 	print $FH "\n";
+	if (defined $doc_string) {
+		print $FH $doc_string,"\n";
+		print $FH "\n";
+	}
 	print $FH $self->{import};
 	foreach my $name (sort keys %{$node->{py_import}}) {
 		if ($name eq '::CORBA') {
@@ -85,33 +89,33 @@ sub open_stream {
 			print $FH "import PyIDL.giop as GIOP\n";
 			next;
 		}
-		if ( $name eq '::' or $name eq '' ) {
+		if ( $name eq '::' or $name eq q{} ) {
 			if ($self->{base_package}) {
 				if (exists $self->{server}) {
-					$name = $self->{base_package} . "_skel";
+					$name = $self->{base_package} . '_skel';
 				} else {
 					$name = $self->{base_package};
 				}
 				$name =~ s/\//\./g;
 			} else {
-				my $basename = basename($self->{srcname}, ".idl");
+				my $basename = basename($self->{srcname}, '.idl');
 				$basename =~ s/\./_/g;
 				if (exists $self->{server}) {
-					$name = "_" . $basename . "_skel";
+					$name = '_' . $basename . '_skel';
 				} else {
-					$name = "_" . $basename;
+					$name = '_' . $basename;
 				}
 			}
 		} else {
 			$name =~ s/^:://;
 			if (exists $self->{server}) {
 				$name =~ s/::/_skel\./g;
-				$name .= "_skel";
+				$name .= '_skel';
 			} else {
 				$name =~ s/::/\./g;
 			}
 			if ($self->{base_package}) {
-				my $full_import_name = $self->{base_package} . "." . $name;
+				my $full_import_name = $self->{base_package} . '.' . $name;
 				$full_import_name =~ s/\//\./g;
 				$self->{import_substitution}->{$name} = $full_import_name;
 				$name = $full_import_name;
@@ -142,12 +146,12 @@ sub _get_scoped_name {
 		$name = $node->{py_name};
 	} elsif ($name =~ /^::[0-9A-Z_a-z]+$/) {
 		if ($scope_full) {
-			my $basename = basename($self->{srcname}, ".idl");
+			my $basename = basename($self->{srcname}, '.idl');
 			$basename =~ s/\./_/g;
 			if (exists $self->{server}) {
-				$name = "_" . $basename . "_skel." . $node->{py_name};
+				$name = '_' . $basename . '_skel.' . $node->{py_name};
 			} else {
-				$name = "_" . $basename . "." . $node->{py_name};
+				$name = '_' . $basename . '.' . $node->{py_name};
 			}
 		} else {
 			$name = $node->{py_name};
@@ -179,9 +183,9 @@ sub _get_scoped_name {
 			while ($name) {
 				my $defn = $self->{symbtab}->Lookup($name);
 				if ($defn->isa('Interface') and exists $self->{server}) {
-					$name2 = $defn->{py_name} . "_skel." . $name2;
+					$name2 = $defn->{py_name} . '_skel.' . $name2;
 				} else {
-					$name2 = $defn->{py_name} . "." . $name2;
+					$name2 = $defn->{py_name} . '.' . $name2;
 				}
 				$name =~ s/::[0-9A-Z_a-z]+$//;
 			}
@@ -193,7 +197,7 @@ sub _get_scoped_name {
 
 sub _setup_py {
 	my $self = shift;
-	my $filename = (exists $self->{server}) ? "setup_skel.py" : "setup.py";
+	my $filename = (exists $self->{server}) ? 'setup_skel.py' : 'setup.py';
 	my $FH = new IO::File "> $filename"
 			or die "can't open $filename ($!).\n";
 
@@ -222,7 +226,7 @@ sub empty_modules {
 				or die "can't create $dirname ($!).\n";
 	}
 	while ($dirname ne '.') {
-		my $filename = $dirname . "/__init__.py";
+		my $filename = $dirname . '/__init__.py';
 		unless (-e $filename) {
 			open my $FH, '>', $filename
 					or die "can't open $filename ($!).\n";
@@ -247,19 +251,19 @@ sub visitSpecification {
 	if ($self->{base_package}) {
 		$setup_name = $self->{base_package};
 		if (exists $self->{server}) {
-			$setup_name .= "_skel";
+			$setup_name .= '_skel';
 		}
-		$filename = $setup_name . "/__init__.py";
+		$filename = $setup_name . '/__init__.py';
 		$self->{setup_name} = $setup_name;
 		push @{$self->{setup_packages}}, $setup_name;
 	} else {
-		my $basename = basename($self->{srcname}, ".idl");
+		my $basename = basename($self->{srcname}, '.idl');
 		$basename =~ s/\./_/g;
-		$setup_name = "_" . $basename;
+		$setup_name = '_' . $basename;
 		if (exists $self->{server}) {
-			$setup_name .= "_skel";
+			$setup_name .= '_skel';
 		}
-		$filename = $setup_name . ".py";
+		$filename = $setup_name . '.py';
 		$empty = 1;
 		foreach (@{$node->{list_decl}}) {
 			my $defn = $self->_get_defn($_);
@@ -302,20 +306,19 @@ sub visitModules {
 	$setup_name =~ s/^:://;
 	if (exists $self->{server}) {
 		$setup_name =~ s/::/_skel\//g;
-		$setup_name .= "_skel";
+		$setup_name .= '_skel';
 	} else {
 		$setup_name =~ s/::/\//g;
 	}
 	if ($self->{base_package}) {
-		$setup_name = $self->{base_package} . "/" . $setup_name;
+		$setup_name = $self->{base_package} . '/' . $setup_name;
 	}
 	$self->{setup_name} = $setup_name unless ($self->{setup_name});
 	push @{$self->{setup_packages}}, $setup_name;
-	my $filename = $setup_name . "/__init__.py";
-	$self->open_stream($filename, $node);
+	my $filename = $setup_name . '/__init__.py';
+	my $doc_string = "\"\"\" Module " . $defn->{repos_id} . " \"\"\"";
+	$self->open_stream($filename, $node, $doc_string);
 	my $FH = $self->{out};
-	print $FH "\"\"\" Module ",$defn->{repos_id}," \"\"\"\n";
-	print $FH "\n";
 	foreach (@{$node->{list_decl}}) {
 		$_->visit($self);
 	}
@@ -359,18 +362,139 @@ sub visitBaseInterface {
 		}
 		$defn->visit($self);
 	}
+	print $FH "    def __init__(self):\n";
+	print $FH "        pass\n";
+	print $FH "\n";
 	if ($self->{id}) {
 		print $FH "    def _get_id(cls):\n";
 		print $FH "        return '",$node->{repos_id},"'\n";
-		print $FH "\n";
 		print $FH "    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
-	$self->{indent} = "";
+	$self->{indent} = q{};
 }
 
 sub visitForwardBaseInterface {
 	# empty
+}
+
+sub visitRegularInterface {
+	my $self = shift;
+	my($node) = @_;
+	my $FH = $self->{out};
+	$self->{indent} = "    ";
+	print $FH "\n";
+	if ($self->{old_object}) {
+		print $FH "class ",$node->{py_name};
+		if (exists $node->{inheritance} and exists $node->{inheritance}->{list_interface}) {
+			print $FH "(";
+			my $first = 1;
+			foreach (@{$node->{inheritance}->{list_interface}}) {
+				print $FH ", " unless ($first);
+				my $base = $self->_get_defn($_);
+				print $FH $self->_get_scoped_name($base, $node);
+				$first = 0;
+			}
+			print $FH ")";
+		}
+		print $FH ":\n";
+	} else {
+		print $FH "class ",$node->{py_name},"(";
+		if (exists $node->{inheritance} and exists $node->{inheritance}->{list_interface}) {
+			my $first = 1;
+			foreach (@{$node->{inheritance}->{list_interface}}) {
+				print $FH ", " unless ($first);
+				my $base = $self->_get_defn($_);
+				print $FH $self->_get_scoped_name($base, $node);
+				$first = 0;
+			}
+		} else {
+			print $FH "object";
+		}
+		print $FH "):\n";
+	}
+	print $FH "    \"\"\" Interface: ",$node->{repos_id}," \"\"\"\n";
+	print $FH "\n";
+	print $FH "    def __init__(self):\n";
+	print $FH "        pass\n";
+	print $FH "\n";
+	$self->{repos_id} = $node->{repos_id};
+	foreach (@{$node->{list_decl}}) {
+		my $defn = $self->_get_defn($_);
+		if (	   $defn->isa('Operation')
+				or $defn->isa('Attributes') ) {
+			next;
+		}
+		$defn->visit($self);
+	}
+	if ($self->{id}) {
+		print $FH "    def _get_id(cls):\n";
+		print $FH "        return '",$node->{repos_id},"'\n";
+		print $FH "    corba_id = classmethod(_get_id)\n";
+		print $FH "\n";
+	}
+	foreach (sort keys %{$node->{hash_attribute_operation}}) {
+		my $defn = $self->_get_defn(${$node->{hash_attribute_operation}}{$_});
+		$defn->visit($self);
+	}
+	print $FH "\n";
+	$self->{indent} = q{};
+}
+
+sub visitAbstractInterface {
+	my $self = shift;
+	my($node) = @_;
+	my $FH = $self->{out};
+	$self->{indent} = "    ";
+	print $FH "\n";
+	if ($self->{old_object}) {
+		print $FH "class ",$node->{py_name};
+		if (exists $node->{inheritance} and exists $node->{inheritance}->{list_interface}) {
+			print $FH "(";
+			my $first = 1;
+			foreach (@{$node->{inheritance}->{list_interface}}) {
+				print $FH ", " unless ($first);
+				my $base = $self->_get_defn($_);
+				print $FH $self->_get_scoped_name($base, $node);
+				$first = 0;
+			}
+			print $FH ")";
+		}
+		print $FH ":\n";
+	} else {
+		print $FH "class ",$node->{py_name},"(";
+		if (exists $node->{inheritance} and exists $node->{inheritance}->{list_interface}) {
+			my $first = 1;
+			foreach (@{$node->{inheritance}->{list_interface}}) {
+				print $FH ", " unless ($first);
+				my $base = $self->_get_defn($_);
+				print $FH $self->_get_scoped_name($base, $node);
+				$first = 0;
+			}
+		} else {
+			print $FH "object";
+		}
+		print $FH "):\n";
+	}
+	print $FH "    \"\"\" Abstract Interface: ",$node->{repos_id}," \"\"\"\n";
+	print $FH "\n";
+	print $FH "    def __init__(self):\n";
+	print $FH "        pass\n";
+	print $FH "\n";
+	$self->{repos_id} = $node->{repos_id};
+	foreach (@{$node->{list_decl}}) {
+		my $defn = $self->_get_defn($_);
+		if (	   $defn->isa('Operation')
+				or $defn->isa('Attributes') ) {
+			next;
+		}
+		$defn->visit($self);
+	}
+	foreach (sort keys %{$node->{hash_attribute_operation}}) {
+		my $defn = $self->_get_defn(${$node->{hash_attribute_operation}}{$_});
+		$defn->visit($self);
+	}
+	$self->{indent} = q{};
 }
 
 #
@@ -428,7 +552,7 @@ sub visitTypeDeclarator {
 				print $FH "\n";
 				print $FH $self->{indent},"    def __init__(self, val):\n";
 				print $FH $self->{indent},"        self._value = str(val)\n";
-				print $FH $self->{indent},"        if len(self._value) != ",${$node->{array_size}}[0]->{py_literal}," :\n";
+				print $FH $self->{indent},"        if len(self._value) != ",${$node->{array_size}}[0]->{py_literal},":\n";
 				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				print $FH "\n";
 				print $FH $self->{indent},"    def __cmp__(self, val):\n";
@@ -450,28 +574,28 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 				print $FH "\n";
 				print $FH $self->{indent},"    def __init__(self, val):\n";
-				print $FH $self->{indent},"        if not isinstance(val, str) :\n";
+				print $FH $self->{indent},"        if not isinstance(val, str):\n";
 				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
-				print $FH $self->{indent},"        if len(val) != ",${$node->{array_size}}[0]->{py_literal}," :\n";
+				print $FH $self->{indent},"        if len(val) != ",${$node->{array_size}}[0]->{py_literal},":\n";
 				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				print $FH $self->{indent},"        str.__init__(val)\n";
 				print $FH "\n";
 				if ($self->{marshal}) {
 					print $FH $self->{indent},"    def marshal(self, output):\n";
-					print $FH $self->{indent},"        for e in self :\n";
+					print $FH $self->{indent},"        for elt in self:\n";
 					if ($type->isa('OctetType')) {
-						print $FH $self->{indent},"            CORBA.marshal(output, 'octet', ord(e))\n";
+						print $FH $self->{indent},"            CORBA.marshal(output, 'octet', ord(elt))\n";
 					} else {
-						print $FH $self->{indent},"            CORBA.marshal(output, 'char', e)\n";
+						print $FH $self->{indent},"            CORBA.marshal(output, 'char', elt)\n";
 					}
 					print $FH "\n";
 				}
 			}
 			if ($self->{marshal}) {
-				print $FH $self->{indent},"    def demarshal(cls, input):\n";
+				print $FH $self->{indent},"    def demarshal(cls, input_):\n";
 				print $FH $self->{indent},"        lst = []\n";
-				print $FH $self->{indent},"        for i in xrange(",${$node->{array_size}}[0]->{py_literal},") :\n";
-				print $FH $self->{indent},"            lst.append(CORBA.demarshal(input, '",$type->{value},"'))\n";
+				print $FH $self->{indent},"        for _ in xrange(",${$node->{array_size}}[0]->{py_literal},"):\n";
+				print $FH $self->{indent},"            lst.append(CORBA.demarshal(input_, '",$type->{value},"'))\n";
 				if ($type->isa('OctetType')) {
 					print $FH $self->{indent},"        val = ''.join(map(chr, lst))\n";
 				} else {
@@ -501,18 +625,18 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"        self._value = list(*params)\n";
 				print $FH $self->{indent},@tab,"_e",$n," = self._value\n";
 				foreach (@{$node->{array_size}}) {
-					print $FH $self->{indent},@tab,"if len(_e",$n,") != ",$_->{py_literal}," :\n";
+					print $FH $self->{indent},@tab,"if len(_e",$n,") != ",$_->{py_literal},":\n";
 					print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
-					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 					$n ++;
 					push @tab, "    ";
 				}
 				foreach (@array_max) {
 					if (defined $_) {
-						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal}," :\n";
+						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal},":\n";
 						print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
-					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 					$n ++;
 					push @tab, "    ";
 				}
@@ -553,13 +677,13 @@ sub visitTypeDeclarator {
 					print $FH $self->{indent},"    def marshal(self, output):\n";
 					print $FH $self->{indent},@tab,"_e",$n," = self._value\n";
 					foreach (@{$node->{array_size}}) {
-						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 						$n ++;
 						push @tab, "    ";
 					}
 					foreach (@array_max) {
 						print $FH $self->{indent},@tab,"CORBA.marshal(output, 'long', len(_e",$n,"))\n";
-						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 						$n ++;
 						push @tab, "    ";
 					}
@@ -584,18 +708,18 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"        list.__init__(self, *params)\n";
 				print $FH $self->{indent},@tab,"_e",$n," = list(*params)\n";
 				foreach (@{$node->{array_size}}) {
-					print $FH $self->{indent},@tab,"if len(_e",$n,") != ",$_->{py_literal}," :\n";
+					print $FH $self->{indent},@tab,"if len(_e",$n,") != ",$_->{py_literal},":\n";
 					print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
-					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 					$n ++;
 					push @tab, "    ";
 				}
 				foreach (@array_max) {
 					if (defined $_) {
-						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal}," :\n";
+						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal},":\n";
 						print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
-					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 					$n ++;
 					push @tab, "    ";
 				}
@@ -615,13 +739,13 @@ sub visitTypeDeclarator {
 					print $FH $self->{indent},"    def marshal(self, output):\n";
 					print $FH $self->{indent},@tab,"_e",$n," = self\n";
 					foreach (@{$node->{array_size}}) {
-						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 						$n ++;
 						push @tab, "    ";
 					}
 					foreach (@array_max) {
 						print $FH $self->{indent},@tab,"CORBA.marshal(output, 'long', len(_e",$n,"))\n";
-						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 						$n ++;
 						push @tab, "    ";
 					}
@@ -640,31 +764,31 @@ sub visitTypeDeclarator {
 			if ($self->{marshal}) {
 				my $n = 0;
 				my @tab = ("        ");
-				print $FH $self->{indent},"    def demarshal(cls, input):\n";
+				print $FH $self->{indent},"    def demarshal(cls, input_):\n";
 				foreach (@{$node->{array_size}}) {
 					print $FH $self->{indent},@tab,"_lst",$n," = []\n";
-					print $FH $self->{indent},@tab,"for _i",$n," in xrange(",$_->{py_literal},") :\n";
+					print $FH $self->{indent},@tab,"for _i",$n," in xrange(",$_->{py_literal},"):\n";
 					$n ++;
 					push @tab, "    ";
 				}
 				foreach (@array_max) {
-					print $FH $self->{indent},@tab,"_len",$n," = CORBA.demarshal(input, 'long')\n";
+					print $FH $self->{indent},@tab,"_len",$n," = CORBA.demarshal(input_, 'long')\n";
 					if (defined $_) {
-						print $FH $self->{indent},@tab,"if _len",$n," > ",$_->{py_literal}," :\n";
+						print $FH $self->{indent},@tab,"if _len",$n," > ",$_->{py_literal},":\n";
 						print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
 					print $FH $self->{indent},@tab,"_lst",$n," = []\n";
-					print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,") :\n";
+					print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,"):\n";
 					$n ++;
 					push @tab, "    ";
 				}
 				$n --;
 				if (exists $type->{full}) {
-					print $FH $self->{indent},@tab,"_lst",$n,".append(",$self->_get_scoped_name($type, $node),".demarshal(input))\n";
+					print $FH $self->{indent},@tab,"_lst",$n,".append(",$self->_get_scoped_name($type, $node),".demarshal(input_))\n";
 				} else {
 					my $type_name = $type->{value};
 					$type_name =~ s/ /_/g;
-					print $FH $self->{indent},@tab,"_lst",$n,".append(CORBA.demarshal(input, '",$type_name,"'))\n";
+					print $FH $self->{indent},@tab,"_lst",$n,".append(CORBA.demarshal(input_, '",$type_name,"'))\n";
 				}
 				pop @tab;
 				if ($type->isa('CharType')) {
@@ -702,7 +826,7 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    def __init__(self, val):\n";
 				print $FH $self->{indent},"        self._value = str(val)\n";
 				if (defined $array_max[0]) {
-					print $FH $self->{indent},"        if len(self._value) > ",$array_max[0]->{py_literal}," :\n";
+					print $FH $self->{indent},"        if len(self._value) > ",$array_max[0]->{py_literal},":\n";
 					print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				}
 				print $FH "\n";
@@ -725,11 +849,11 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 				print $FH "\n";
 				print $FH $self->{indent},"    def __init__(self, val):\n";
-				print $FH $self->{indent},"        if val != None :\n";
-				print $FH $self->{indent},"            if not isinstance(val, str) :\n";
+				print $FH $self->{indent},"        if val != None:\n";
+				print $FH $self->{indent},"            if not isinstance(val, str):\n";
 				print $FH $self->{indent},"                raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				if (defined $array_max[0]) {
-					print $FH $self->{indent},"            if len(val) > ",$array_max[0]->{py_literal}," :\n";
+					print $FH $self->{indent},"            if len(val) > ",$array_max[0]->{py_literal},":\n";
 					print $FH $self->{indent},"                raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 				}
 				print $FH $self->{indent},"        str.__init__(val)\n";
@@ -737,21 +861,21 @@ sub visitTypeDeclarator {
 				if ($self->{marshal}) {
 					print $FH $self->{indent},"    def marshal(self, output):\n";
 					print $FH $self->{indent},"        CORBA.marshal(output, 'long', len(self))\n";
-					print $FH $self->{indent},"        for e in self :\n";
+					print $FH $self->{indent},"        for elt in self:\n";
 					if ($type->isa('OctetType')) {
-						print $FH $self->{indent},"            CORBA.marshal(output, 'octet', ord(e))\n";
+						print $FH $self->{indent},"            CORBA.marshal(output, 'octet', ord(elt))\n";
 					} else {
-						print $FH $self->{indent},"            CORBA.marshal(output, 'char', e)\n";
+						print $FH $self->{indent},"            CORBA.marshal(output, 'char', elt)\n";
 					}
 					print $FH "\n";
 				}
 			}
 			if ($self->{marshal}) {
-				print $FH $self->{indent},"    def demarshal(cls, input):\n";
-				print $FH $self->{indent},"        nb = CORBA.demarshal(input, 'long')\n";
+				print $FH $self->{indent},"    def demarshal(cls, input_):\n";
+				print $FH $self->{indent},"        length = CORBA.demarshal(input_, 'long')\n";
 				print $FH $self->{indent},"        lst = []\n";
-				print $FH $self->{indent},"        for i in xrange(nb) :\n";
-				print $FH $self->{indent},"            lst.append(CORBA.demarshal(input, '",$type->{value},"'))\n";
+				print $FH $self->{indent},"        for _ in xrange(length):\n";
+				print $FH $self->{indent},"            lst.append(CORBA.demarshal(input_, '",$type->{value},"'))\n";
 				if ($type->isa('OctetType')) {
 					print $FH $self->{indent},"        val = ''.join(map(chr, lst))\n";
 				} else {
@@ -773,10 +897,10 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},@tab,"_e",$n," = self._value\n";
 				foreach (@array_max) {
 					if (defined $_) {
-						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal}," :\n";
+						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal},":\n";
 							print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
-					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 					$n ++;
 					push @tab, "    ";
 				}
@@ -818,7 +942,7 @@ sub visitTypeDeclarator {
 					print $FH $self->{indent},@tab,"_e",$n," = self._value\n";
 					foreach (@array_max) {
 						print $FH $self->{indent},@tab,"CORBA.marshal(output, 'long', len(_e",$n,"))\n";
-						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 						$n ++;
 						push @tab, "    ";
 					}
@@ -844,10 +968,10 @@ sub visitTypeDeclarator {
 				print $FH $self->{indent},@tab,"_e",$n," = list(*params)\n";
 				foreach (@array_max) {
 					if (defined $_) {
-						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal}," :\n";
+						print $FH $self->{indent},@tab,"if len(_e",$n,") > ",$_->{py_literal},":\n";
 							print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
-					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+					print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 					$n ++;
 					push @tab, "    ";
 				}
@@ -868,7 +992,7 @@ sub visitTypeDeclarator {
 					print $FH $self->{indent},@tab,"_e",$n," = self\n";
 					foreach (@array_max) {
 						print $FH $self->{indent},@tab,"CORBA.marshal(output, 'long', len(_e",$n,"))\n";
-						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+						print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 						$n ++;
 						push @tab, "    ";
 					}
@@ -887,25 +1011,25 @@ sub visitTypeDeclarator {
 			if ($self->{marshal}) {
 				my $n = 0;
 				my @tab = ("        ");
-				print $FH $self->{indent},"    def demarshal(cls, input):\n";
+				print $FH $self->{indent},"    def demarshal(cls, input_):\n";
 				foreach (@array_max) {
-					print $FH $self->{indent},@tab,"_len",$n," = CORBA.demarshal(input, 'long')\n";
+					print $FH $self->{indent},@tab,"_len",$n," = CORBA.demarshal(input_, 'long')\n";
 					if (defined $_) {
-						print $FH $self->{indent},@tab,"if _len",$n," > ",$_->{py_literal}," :\n";
+						print $FH $self->{indent},@tab,"if _len",$n," > ",$_->{py_literal},":\n";
 						print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 					}
 					print $FH $self->{indent},@tab,"_lst",$n," = []\n";
-					print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,") :\n";
+					print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,"):\n";
 					$n ++;
 					push @tab, "    ";
 				}
 				$n --;
 				if (exists $type->{full}) {
-					print $FH $self->{indent},@tab,"_lst",$n,".append(",$self->_get_scoped_name($type, $node),".demarshal(input))\n";
+					print $FH $self->{indent},@tab,"_lst",$n,".append(",$self->_get_scoped_name($type, $node),".demarshal(input_))\n";
 				} else {
 					my $type_name = $type->{value};
 					$type_name =~ s/ /_/g;
-					print $FH $self->{indent},@tab,"_lst",$n,".append(CORBA.demarshal(input, '",$type_name,"'))\n";
+					print $FH $self->{indent},@tab,"_lst",$n,".append(CORBA.demarshal(input_, '",$type_name,"'))\n";
 				}
 				pop @tab;
 				if ($type->isa('CharType')) {
@@ -943,7 +1067,7 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"    def __init__(self, val):\n";
 			print $FH $self->{indent},"        self._value = str(val)\n";
 			if (exists $type->{max}) {
-				print $FH $self->{indent},"        if len(self._value) > ",$type->{max}->{py_literal}," :\n";
+				print $FH $self->{indent},"        if len(self._value) > ",$type->{max}->{py_literal},":\n";
 				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 			}
 			print $FH "\n";
@@ -966,10 +1090,10 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __init__(self, val):\n";
-			print $FH $self->{indent},"        if not isinstance(val, str) :\n";
+			print $FH $self->{indent},"        if not isinstance(val, str):\n";
 			print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 			if (exists $type->{max}) {
-				print $FH $self->{indent},"        if len(val) > ",$type->{max}->{py_literal}," :\n";
+				print $FH $self->{indent},"        if len(val) > ",$type->{max}->{py_literal},":\n";
 				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 			}
 			print $FH $self->{indent},"        str.__init__(val)\n";
@@ -981,8 +1105,8 @@ sub visitTypeDeclarator {
 			}
 		}
 		if ($self->{marshal}) {
-			print $FH $self->{indent},"    def demarshal(cls, input):\n";
-			print $FH $self->{indent},"        val = CORBA.demarshal(input, 'string')\n";
+			print $FH $self->{indent},"    def demarshal(cls, input_):\n";
+			print $FH $self->{indent},"        val = CORBA.demarshal(input_, 'string')\n";
 			print $FH $self->{indent},"        return cls(val)\n";
 			print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
 			print $FH "\n";
@@ -996,7 +1120,7 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"    def __init__(self, val):\n";
 			print $FH $self->{indent},"        self._value = str(val)\n";
 			if (exists $type->{max}) {
-				print $FH $self->{indent},"        if len(self._value) > ",$type->{max}->{py_literal}," :\n";
+				print $FH $self->{indent},"        if len(self._value) > ",$type->{max}->{py_literal},":\n";
 				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 			}
 			print $FH "\n";
@@ -1019,10 +1143,10 @@ sub visitTypeDeclarator {
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __init__(self, val):\n";
-			print $FH $self->{indent},"        if not isinstance(val, basestring) :\n";
+			print $FH $self->{indent},"        if not isinstance(val, basestring):\n";
 			print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 			if (exists $type->{max}) {
-				print $FH $self->{indent},"        if len(val) > ",$type->{max}->{py_literal}," :\n";
+				print $FH $self->{indent},"        if len(val) > ",$type->{max}->{py_literal},":\n";
 				print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 			}
 			print $FH $self->{indent},"        unicode.__init__(val)\n";
@@ -1036,8 +1160,8 @@ sub visitTypeDeclarator {
 		print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 		print $FH "\n";
 		if ($self->{marshal}) {
-			print $FH $self->{indent},"    def demarshal(cls, input):\n";
-			print $FH $self->{indent},"        val = CORBA.demarshal(input, 'wstring')\n";
+			print $FH $self->{indent},"    def demarshal(cls, input_):\n";
+			print $FH $self->{indent},"        val = CORBA.demarshal(input_, 'wstring')\n";
 			print $FH $self->{indent},"        return cls(val)\n";
 			print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
 			print $FH "\n";
@@ -1047,11 +1171,11 @@ sub visitTypeDeclarator {
 		print $FH $self->{indent},"class ",$node->{py_name},"(",$self->_get_scoped_name($type, $node, 1),"):\n";
 		print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 		print $FH "\n";
-		print $FH $self->{indent},"    def __init__(self, *args, **kw):\n";
+		print $FH $self->{indent},"    def __init__(self, *args, **kwargs):\n";
 		print $FH $self->{indent},"        if len(args) == 1 and isinstance(args[0], ",$self->_get_scoped_name($type, $node),"):\n";
 		print $FH $self->{indent},"            self.__dict__ = dict(args[0].__dict__)\n";
 		print $FH $self->{indent},"        else:\n";
-		print $FH $self->{indent},"            super(",$self->_get_scoped_name($node, $node),", self).__init__(*args, **kw)\n";
+		print $FH $self->{indent},"            super(",$self->_get_scoped_name($node, $node),", self).__init__(*args, **kwargs)\n";
 		print $FH "\n";
 	} elsif (  $type->isa('TypeDeclarator')
 			or $type->isa('BaseInterface') ) {
@@ -1097,8 +1221,8 @@ sub visitTypeDeclarator {
 		if ($self->{marshal}) {
 			my $value = $type->{value};
 			$value =~ s/ /_/g;
-			print $FH $self->{indent},"    def demarshal(cls, input):\n";
-			print $FH $self->{indent},"        val = CORBA.demarshal(input, '",$value,"')\n";
+			print $FH $self->{indent},"    def demarshal(cls, input_):\n";
+			print $FH $self->{indent},"        val = CORBA.demarshal(input_, '",$value,"')\n";
 			print $FH $self->{indent},"        return cls(val)\n";
 			print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
 			print $FH "\n";
@@ -1106,18 +1230,20 @@ sub visitTypeDeclarator {
 	} elsif ($type->isa('IntegerType')) {
 		my $value = $type->{value};
 		$value =~ s/ /_/g;
+		my $py_type;
+		if (       $value eq 'short'
+				or $value eq 'unsigned_short'
+				or $value eq 'long' ) {
+			$py_type = 'int';
+		} else {
+			$py_type = 'long';
+		}
 		if ($self->{old_object}) {
 			print $FH $self->{indent},"class ",$node->{py_name},":\n";
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __init__(self, val):\n";
-			if (       $value eq 'short'
-					or $value eq 'unsigned_short'
-					or $value eq 'long' ) {
-				print $FH $self->{indent},"        self._value = int(val)\n";
-			} else {
-				print $FH $self->{indent},"        self._value = long(val)\n";
-			}
+			print $FH $self->{indent},"        self._value = ",$py_type,"(val)\n";
 			print $FH $self->{indent},"        CORBA.check('",$value,"', self._value)\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __cmp__(self, val):\n";
@@ -1135,18 +1261,12 @@ sub visitTypeDeclarator {
 				print $FH "\n";
 			}
 		} else {
-			if (       $value eq 'short'
-					or $value eq 'unsigned_short'
-					or $value eq 'long' ) {
-				print $FH $self->{indent},"class ",$node->{py_name},"(int):\n";
-			} else {
-				print $FH $self->{indent},"class ",$node->{py_name},"(long):\n";
-			}
+			print $FH $self->{indent},"class ",$node->{py_name},"(",$py_type,"):\n";
 			print $FH $self->{indent},"    \"\"\" Typedef ",$node->{repos_id}," \"\"\"\n";
 			print $FH "\n";
 			print $FH $self->{indent},"    def __init__(self, val):\n";
 			print $FH $self->{indent},"        CORBA.check('",$value,"', val)\n";
-			print $FH $self->{indent},"        int.__init__(val)\n";
+			print $FH $self->{indent},"        ",$py_type,".__init__(val)\n";
 			print $FH "\n";
 			if ($self->{marshal}) {
 				print $FH $self->{indent},"    def marshal(self, output):\n";
@@ -1155,8 +1275,8 @@ sub visitTypeDeclarator {
 			}
 		}
 		if ($self->{marshal}) {
-			print $FH $self->{indent},"    def demarshal(cls, input):\n";
-			print $FH $self->{indent},"        val = CORBA.demarshal(input, '",$value,"')\n";
+			print $FH $self->{indent},"    def demarshal(cls, input_):\n";
+			print $FH $self->{indent},"        val = CORBA.demarshal(input_, '",$value,"')\n";
 			print $FH $self->{indent},"        return cls(val)\n";
 			print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
 			print $FH "\n";
@@ -1199,8 +1319,8 @@ sub visitTypeDeclarator {
 			}
 		}
 		if ($self->{marshal}) {
-			print $FH $self->{indent},"    def demarshal(cls, input):\n";
-			print $FH $self->{indent},"        val = CORBA.demarshal(input, 'char')\n";
+			print $FH $self->{indent},"    def demarshal(cls, input_):\n";
+			print $FH $self->{indent},"        val = CORBA.demarshal(input_, 'char')\n";
 			print $FH $self->{indent},"        return cls(val)\n";
 			print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
 			print $FH "\n";
@@ -1242,8 +1362,8 @@ sub visitTypeDeclarator {
 			}
 		}
 		if ($self->{marshal}) {
-			print $FH $self->{indent},"    def demarshal(cls, input):\n";
-			print $FH $self->{indent},"        val = CORBA.demarshal(input, 'wchar')\n";
+			print $FH $self->{indent},"    def demarshal(cls, input_):\n";
+			print $FH $self->{indent},"        val = CORBA.demarshal(input_, 'wchar')\n";
 			print $FH $self->{indent},"        return cls(val)\n";
 			print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
 			print $FH "\n";
@@ -1284,8 +1404,8 @@ sub visitTypeDeclarator {
 			}
 		}
 		if ($self->{marshal}) {
-			print $FH $self->{indent},"    def demarshal(cls, input):\n";
-			print $FH $self->{indent},"        val = CORBA.demarshal(input, 'boolean')\n";
+			print $FH $self->{indent},"    def demarshal(cls, input_):\n";
+			print $FH $self->{indent},"        val = CORBA.demarshal(input_, 'boolean')\n";
 			print $FH $self->{indent},"        return cls(val)\n";
 			print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
 			print $FH "\n";
@@ -1328,8 +1448,8 @@ sub visitTypeDeclarator {
 			}
 		}
 		if ($self->{marshal}) {
-			print $FH $self->{indent},"    def demarshal(cls, input):\n";
-			print $FH $self->{indent},"        val = CORBA.demarshal(input, 'octet')\n";
+			print $FH $self->{indent},"    def demarshal(cls, input_):\n";
+			print $FH $self->{indent},"        val = CORBA.demarshal(input_, 'octet')\n";
 			print $FH $self->{indent},"        return cls(val)\n";
 			print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
 			print $FH "\n";
@@ -1341,14 +1461,12 @@ sub visitTypeDeclarator {
 	if ($self->{id}) {
 		print $FH $self->{indent},"    def _get_id(cls):\n";
 		print $FH $self->{indent},"        return '",$node->{repos_id},"'\n";
-		print $FH "\n";
 		print $FH $self->{indent},"    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	if (exists $node->{serial_uid}) {
 		print $FH $self->{indent},"    def _get_uid(cls):\n";
 		print $FH $self->{indent},"        return 0x",$node->{serial_uid},"L\n";
-		print $FH "\n";
 		print $FH $self->{indent},"    serial_uid = classmethod(_get_uid)\n";
 		print $FH "\n";
 	}
@@ -1420,7 +1538,7 @@ sub visitStructType {
 			$self->_member_marshal($member, "self." . $member->{py_name});
 		}
 		print $FH "\n";
-		print $FH $self->{indent},"    def demarshal(cls, input):\n";
+		print $FH $self->{indent},"    def demarshal(cls, input_):\n";
 		foreach (@{$node->{list_member}}) {
 			my $member = $self->_get_defn($_);
 			$self->_member_demarshal($member, $node);
@@ -1442,13 +1560,13 @@ sub visitStructType {
 	}
 	if ($self->{compare}) {
 		print $FH $self->{indent},"    def __eq__(self, obj):\n";
-		print $FH $self->{indent},"        if obj == None :\n";
+		print $FH $self->{indent},"        if obj == None:\n";
 		print $FH $self->{indent},"            return False\n";
-		print $FH $self->{indent},"        if not isinstance(obj, type(self)) :\n";
+		print $FH $self->{indent},"        if not isinstance(obj, type(self)):\n";
 		print $FH $self->{indent},"            return False\n";
 		foreach (@{$node->{list_member}}) {
 			my $member = $self->_get_defn($_);
-			print $FH $self->{indent},"        if self.",$member->{py_name}," != obj.",$member->{py_name}," :\n";
+			print $FH $self->{indent},"        if self.",$member->{py_name}," != obj.",$member->{py_name},":\n";
 			print $FH $self->{indent},"            return False\n";
 		}
 		print $FH $self->{indent},"        return True\n";
@@ -1476,14 +1594,12 @@ sub visitStructType {
 	if ($self->{id}) {
 		print $FH $self->{indent},"    def _get_id(cls):\n";
 		print $FH $self->{indent},"        return '",$node->{repos_id},"'\n";
-		print $FH "\n";
 		print $FH $self->{indent},"    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	if (exists $node->{serial_uid}) {
 		print $FH $self->{indent},"    def _get_uid(cls):\n";
 		print $FH $self->{indent},"        return 0x",$node->{serial_uid},"L\n";
-		print $FH "\n";
 		print $FH $self->{indent},"    serial_uid = classmethod(_get_uid)\n";
 		print $FH "\n";
 	}
@@ -1498,13 +1614,13 @@ sub _member_check {
 	my @tab = ($tab);
 	my $n = 0;
 	my $m = 0;
-	my $idx = '';
+	my $idx = q{};
 	if (exists $member->{array_size}) {
 		print $FH $self->{indent},@tab,"_e",$n," = ",$label,"\n";
 		foreach (@{$member->{array_size}}) {
-			print $FH $self->{indent},@tab,"if len(_e",$n,") != ",$_->{py_literal}," :\n";
+			print $FH $self->{indent},@tab,"if len(_e",$n,") != ",$_->{py_literal},":\n";
 			print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
-			print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+			print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 			$n ++;
 			push @tab, "    ";
 			if ($n == scalar(@{$member->{array_size}})) {
@@ -1529,7 +1645,7 @@ sub _member_check {
 		print $FH $self->{indent},@tab,"_e",$n," = ",$label,"\n" unless ($n);
 		foreach (@array_max) {
 			print $FH $self->{indent},@tab,"CORBA.check('long', len(_e",$n,"))\n";
-			print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+			print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 			$n ++;
 			push @tab, "    ";
 			if ($n == $m + scalar(@array_max)) {
@@ -1558,7 +1674,7 @@ sub _member_check {
 		}
 		if ( ($type->isa('StringType') or $type->isa('WideStringType'))
 				and exists $type->{max} ) {
-			print $FH $self->{indent},@tab,"if len(",$label,") > ",$type->{max}->{py_literal}," :\n";
+			print $FH $self->{indent},@tab,"if len(",$label,") > ",$type->{max}->{py_literal},":\n";
 			print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 	}
@@ -1573,11 +1689,11 @@ sub _member_marshal {
 	my @tab = ("            ");
 	my $n = 0;
 	my $m = 0;
-	my $idx = '';
+	my $idx = q{};
 	if (exists $member->{array_size}) {
 		print $FH $self->{indent},@tab,"_e",$n," = ",$label,"\n";
 		foreach (@{$member->{array_size}}) {
-			print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+			print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 			$n ++;
 			push @tab, "    ";
 			if ($n == scalar(@{$member->{array_size}})) {
@@ -1602,7 +1718,7 @@ sub _member_marshal {
 		print $FH $self->{indent},@tab,"_e",$n," = ",$label,"\n" unless ($n);
 		foreach (@array_max) {
 			print $FH $self->{indent},@tab,"CORBA.marshal(output, 'long', len(_e",$n,"))\n";
-			print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n," :\n";
+			print $FH $self->{indent},@tab,"for _e",$n + 1," in _e",$n,":\n";
 			$n ++;
 			push @tab, "    ";
 			if ($n == $m + scalar(@array_max)) {
@@ -1643,7 +1759,7 @@ sub _member_demarshal {
 	if (exists $member->{array_size}) {
 		foreach (@{$member->{array_size}}) {
 			print $FH $self->{indent},@tab,"_lst",$n," = []\n";
-			print $FH $self->{indent},@tab,"for _i",$n," in xrange(",$_->{py_literal},") :\n";
+			print $FH $self->{indent},@tab,"for _i",$n," in xrange(",$_->{py_literal},"):\n";
 			$n ++;
 			push @tab, "    ";
 		}
@@ -1659,24 +1775,24 @@ sub _member_demarshal {
 	}
 	my $name = $member->{py_name};
 	foreach (@array_max) {
-		print $FH $self->{indent},@tab,"_len",$n," = CORBA.demarshal(input, 'long')\n";
+		print $FH $self->{indent},@tab,"_len",$n," = CORBA.demarshal(input_, 'long')\n";
 		if (defined $_) {
-			print $FH $self->{indent},@tab,"if _len",$n," > ",$_->{py_literal}," :\n";
+			print $FH $self->{indent},@tab,"if _len",$n," > ",$_->{py_literal},":\n";
 			print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 		print $FH $self->{indent},@tab,"_lst",$n," = []\n";
-		print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,") :\n";
+		print $FH $self->{indent},@tab,"for _i",$n," in xrange(_len",$n,"):\n";
 		$n ++;
 		push @tab, "    ";
 	}
 	if ($n) {
 		$n --;
 		if (exists $type->{full}) {
-			print $FH $self->{indent},@tab,"_lst",$n,".append(",$self->_get_scoped_name($type, $node),".demarshal(input))\n";
+			print $FH $self->{indent},@tab,"_lst",$n,".append(",$self->_get_scoped_name($type, $node),".demarshal(input_))\n";
 		} else {
 			my $type_name = $type->{value};
 			$type_name =~ s/ /_/g;
-			print $FH $self->{indent},@tab,"_lst",$n,".append(CORBA.demarshal(input, '",$type_name,"'))\n";
+			print $FH $self->{indent},@tab,"_lst",$n,".append(CORBA.demarshal(input_, '",$type_name,"'))\n";
 		}
 		pop @tab;
 		if ($type->isa('CharType')) {
@@ -1693,15 +1809,15 @@ sub _member_demarshal {
 		print $FH $self->{indent},@tab,$name," = _lst0\n";
 	} else {
 		if (exists $type->{full}) {
-			print $FH $self->{indent},@tab,$name," = ",$self->_get_scoped_name($type, $node),".demarshal(input)\n";
+			print $FH $self->{indent},@tab,$name," = ",$self->_get_scoped_name($type, $node),".demarshal(input_)\n";
 		} else {
 			my $type_name = $type->{value};
 			$type_name =~ s/ /_/g;
-			print $FH $self->{indent},@tab,$name," = CORBA.demarshal(input, '",$type_name,"')\n";
+			print $FH $self->{indent},@tab,$name," = CORBA.demarshal(input_, '",$type_name,"')\n";
 		}
 		if ( ($type->isa('StringType') or $type->isa('WideStringType'))
 				and exists $type->{max} ) {
-			print $FH $self->{indent},@tab,"if len(",$name,") > ",$type->{max}->{py_literal}," :\n";
+			print $FH $self->{indent},@tab,"if len(",$name,") > ",$type->{max}->{py_literal},":\n";
 			print $FH $self->{indent},@tab,"    raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 	}
@@ -1710,7 +1826,7 @@ sub _member_demarshal {
 sub _member_stringify {
 	my $self = shift;
 	my ($member) = @_;
-	my $array = '';
+	my $array = q{};
 	if (exists $member->{array_size}) {
 		foreach (@{$member->{array_size}}) {
 			$array .= "[" . $_->{py_literal} . "]";
@@ -1768,7 +1884,7 @@ sub visitUnionType {
 	}
 	$self->{indent} = $indent;
 	print $FH $self->{indent},"    def __init__(self, *args, **kwargs):\n";
-	print $FH $self->{indent},"        if len(args) == 2 :\n";
+	print $FH $self->{indent},"        if len(args) == 2:\n";
 	print $FH $self->{indent},"            _d, _v = args\n";
 	if (exists $type->{full}) {
 		print $FH $self->{indent},"            CORBA.check(",$self->_get_scoped_name($type, $node),", _d)\n";
@@ -1781,7 +1897,7 @@ sub visitUnionType {
 	foreach my $case (@{$node->{list_expr}}) {	# case
 		foreach (@{$case->{list_label}}) {	# default or expression
 			unless ($_->isa('Default')) {
-				print $FH $self->{indent},"            ",$elif," _d == ",$_->{py_literal}," :\n";
+				print $FH $self->{indent},"            ",$elif," _d == ",$_->{py_literal},":\n";
 				my $member = $self->_get_defn($case->{element}->{value});
 				$self->_member_check($member, "_v", "                ", $node);
 				$elif = "elif";
@@ -1789,14 +1905,14 @@ sub visitUnionType {
 		}
 	}
 	if ($elif eq "if") {
-		print $FH $self->{indent},"            if False : pass\n";
+		print $FH $self->{indent},"            if False: pass\n";
 	}
 	if (defined $default) {
-		print $FH $self->{indent},"            else :\t# default\n";
+		print $FH $self->{indent},"            else:   # default\n";
 		my $member = $self->_get_defn($default->{element}->{value});
 		$self->_member_check($member, "_v", "                ", $node);
 	} else {
-		print $FH $self->{indent},"            else :\n";
+		print $FH $self->{indent},"            else:\n";
 		print $FH $self->{indent},"                raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 	}
 	print $FH $self->{indent},"            self.__d = _d\n";
@@ -1807,13 +1923,13 @@ sub visitUnionType {
 				unless ($_->isa('Default')) {
 					my $elt = $self->_get_defn($case->{element});
 					my $label = ${$elt->{list_expr}}[0];
-					print $FH $self->{indent},"        elif '",$label,"' in kwargs :\n";
+					print $FH $self->{indent},"        elif '",$label,"' in kwargs:\n";
 					print $FH $self->{indent},"            self._set",$label,"(kwargs['",$label,"'])\n";
 				}
 			}
 		}
 	}
-	print $FH $self->{indent},"        else :\n";
+	print $FH $self->{indent},"        else:\n";
 	print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 	print $FH "\n";
 	print $FH $self->{indent},"    def _get_d(self):\n";
@@ -1826,7 +1942,7 @@ sub visitUnionType {
 	foreach my $case (@{$node->{list_expr}}) {	# case
 		foreach (@{$case->{list_label}}) {	# default or expression
 			unless ($_->isa('Default')) {
-				print $FH $self->{indent},"        ",$elif," self.__d == ",$_->{py_literal}," :\n";
+				print $FH $self->{indent},"        ",$elif," self.__d == ",$_->{py_literal},":\n";
 				my $member = $self->_get_defn($case->{element}->{value});
 				print $FH $self->{indent},"            return self.__v\n";
 				$elif = "elif";
@@ -1834,14 +1950,14 @@ sub visitUnionType {
 		}
 	}
 	if ($elif eq "if") {
-		print $FH $self->{indent},"        if False : pass\n";
+		print $FH $self->{indent},"        if False: pass\n";
 	}
 	if (defined $default) {
-		print $FH $self->{indent},"        else :\t# default\n";
+		print $FH $self->{indent},"        else:   # default\n";
 		my $member = $self->_get_defn($default->{element}->{value});
 		print $FH $self->{indent},"            return self.__v\n";
 	} else {
-		print $FH $self->{indent},"        else :\n";
+		print $FH $self->{indent},"        else:\n";
 		print $FH $self->{indent},"            return None\n";
 	}
 	print $FH "\n";
@@ -1859,7 +1975,7 @@ sub visitUnionType {
 					print $FH $self->{indent},"        self.__v = ",$label,"\n";
 					print $FH "\n";
 					print $FH $self->{indent},"    def _get",$label,"(self):\n";
-					print $FH $self->{indent},"        if self.__d == ",$_->{py_literal}," :\n";
+					print $FH $self->{indent},"        if self.__d == ",$_->{py_literal},":\n";
 					print $FH $self->{indent},"            return self.__v\n";
 					print $FH $self->{indent},"        return None\n";
 					print $FH "\n";
@@ -1882,7 +1998,7 @@ sub visitUnionType {
 		foreach my $case (@{$node->{list_expr}}) {	# case
 			foreach (@{$case->{list_label}}) {	# default or expression
 				unless ($_->isa('Default')) {
-					print $FH $self->{indent},"        ",$elif," self._d == ",$_->{py_literal}," :\n";
+					print $FH $self->{indent},"        ",$elif," self._d == ",$_->{py_literal},":\n";
 					my $member = $self->_get_defn($case->{element}->{value});
 					$self->_member_marshal($member, "self.__v");
 					$elif = "elif";
@@ -1890,30 +2006,30 @@ sub visitUnionType {
 			}
 		}
 		if ($elif eq "if") {
-			print $FH $self->{indent},"        if False : pass\n";
+			print $FH $self->{indent},"        if False: pass\n";
 		}
 		if (defined $default) {
-			print $FH $self->{indent},"        else :\t# default\n";
+			print $FH $self->{indent},"        else:   # default\n";
 			my $member = $self->_get_defn($default->{element}->{value});
 			$self->_member_marshal($member, "self.__v");
 		} else {
-			print $FH $self->{indent},"        else :\n";
+			print $FH $self->{indent},"        else:\n";
 			print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 		print $FH "\n";
-		print $FH $self->{indent},"    def demarshal(cls, input):\n";
+		print $FH $self->{indent},"    def demarshal(cls, input_):\n";
 		if (exists $type->{full}) {
-			print $FH $self->{indent},"        _d = ",$self->_get_scoped_name($type, $node),".demarshal(input)\n";
+			print $FH $self->{indent},"        _d = ",$self->_get_scoped_name($type, $node),".demarshal(input_)\n";
 		} else {
 			my $type_name = $type->{value};
 			$type_name =~ s/ /_/g;
-			print $FH $self->{indent},"        _d = CORBA.demarshal(input, '",$type_name,"')\n";
+			print $FH $self->{indent},"        _d = CORBA.demarshal(input_, '",$type_name,"')\n";
 		}
 		$elif = "if";
 		foreach my $case (@{$node->{list_expr}}) {	# case
 			foreach (@{$case->{list_label}}) {	# default or expression
 				unless ($_->isa('Default')) {
-					print $FH $self->{indent},"        ",$elif," _d == ",$_->{py_literal}," :\n";
+					print $FH $self->{indent},"        ",$elif," _d == ",$_->{py_literal},":\n";
 					my $member = $self->_get_defn($case->{element}->{value});
 					$self->_member_demarshal($member, $node);
 					print $FH $self->{indent},"            return cls(_d, ",$member->{py_name},")\n";
@@ -1922,15 +2038,15 @@ sub visitUnionType {
 			}
 		}
 		if ($elif eq "if") {
-			print $FH $self->{indent},"        if False : pass\n";
+			print $FH $self->{indent},"        if False: pass\n";
 		}
 		if (defined $default) {
-			print $FH $self->{indent},"        else :\t# default\n";
+			print $FH $self->{indent},"        else:   # default\n";
 			my $member = $self->_get_defn($default->{element}->{value});
 			$self->_member_demarshal($member, $node);
 			print $FH $self->{indent},"            return cls(_d, ",$member->{py_name},")\n";
 		} else {
-			print $FH $self->{indent},"        else :\n";
+			print $FH $self->{indent},"        else:\n";
 			print $FH $self->{indent},"            raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
 		print $FH $self->{indent},"    demarshal = classmethod(demarshal)\n";
@@ -1938,14 +2054,14 @@ sub visitUnionType {
 	}
 	if ($self->{compare}) {
 		print $FH $self->{indent},"    def __eq__(self, obj):\n";
-		print $FH $self->{indent},"        if obj == None :\n";
+		print $FH $self->{indent},"        if obj == None:\n";
 		print $FH $self->{indent},"            return False\n";
-		print $FH $self->{indent},"        if isinstance(obj, ",$node->{py_name},") :\n";
-		print $FH $self->{indent},"            if self._d == obj._d :\n";
+		print $FH $self->{indent},"        if isinstance(obj, type(self)):\n";
+		print $FH $self->{indent},"            if self._d == obj._d:\n";
 		print $FH $self->{indent},"                return self._v == obj._v\n";
-		print $FH $self->{indent},"            else :\n";
+		print $FH $self->{indent},"            else:\n";
 		print $FH $self->{indent},"                return False\n";
-		print $FH $self->{indent},"        else :\n";
+		print $FH $self->{indent},"        else:\n";
 		print $FH $self->{indent},"            return False\n";
 		print $FH "\n";
 		print $FH $self->{indent},"    def __ne__(self, obj):\n";
@@ -1969,14 +2085,12 @@ sub visitUnionType {
 	if ($self->{id}) {
 		print $FH $self->{indent},"    def _get_id(cls):\n";
 		print $FH $self->{indent},"        return '",$node->{repos_id},"'\n";
-		print $FH "\n";
 		print $FH $self->{indent},"    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	if (exists $node->{serial_uid}) {
 		print $FH $self->{indent},"    def _get_uid(cls):\n";
 		print $FH $self->{indent},"        return 0x",$node->{serial_uid},"L\n";
-		print $FH "\n";
 		print $FH $self->{indent},"    serial_uid = classmethod(_get_uid)\n";
 		print $FH "\n";
 	}
@@ -2012,14 +2126,12 @@ sub visitEnumType {
 	if ($self->{id}) {
 		print $FH $self->{indent},"    def _get_id(cls):\n";
 		print $FH $self->{indent},"        return '",$node->{repos_id},"'\n";
-		print $FH "\n";
 		print $FH $self->{indent},"    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	if (exists $node->{serial_uid}) {
 		print $FH $self->{indent},"    def _get_uid(cls):\n";
 		print $FH $self->{indent},"        return 0x",$node->{serial_uid},"L\n";
-		print $FH "\n";
 		print $FH $self->{indent},"    serial_uid = classmethod(_get_uid)\n";
 		print $FH "\n";
 	}
@@ -2081,13 +2193,10 @@ sub visitException {
 		}
 	}
 	print $FH "):\n";
-	if (exists $node->{list_expr}) {
-		foreach (@{$node->{list_member}}) {
-			my $member = $self->_get_defn($_);			# member
-			print $FH $self->{indent},"        self._set",$member->{py_name},"(",$member->{py_name},")\n";
-		}
-	} else {
-		print $FH $self->{indent},"        pass\n";
+	print $FH $self->{indent},"        CORBA.UserException.__init__(self)\n";
+	foreach (@{$node->{list_member}}) {
+		my $member = $self->_get_defn($_);			# member
+		print $FH $self->{indent},"        self._set",$member->{py_name},"(",$member->{py_name},")\n";
 	}
 	print $FH "\n";
 
@@ -2116,7 +2225,7 @@ sub visitException {
 			print $FH $self->{indent},"        pass\n";
 		}
 		print $FH "\n";
-		print $FH $self->{indent},"    def demarshal(cls, input):\n";
+		print $FH $self->{indent},"    def demarshal(cls, input_):\n";
 		if (exists $node->{list_expr}) {
 			foreach (@{$node->{list_member}}) {
 				my $member = $self->_get_defn($_);
@@ -2142,13 +2251,13 @@ sub visitException {
 	}
 	if ($self->{compare}) {
 		print $FH $self->{indent},"    def __eq__(self, obj):\n";
-		print $FH $self->{indent},"        if obj == None :\n";
+		print $FH $self->{indent},"        if obj == None:\n";
 		print $FH $self->{indent},"            return False\n";
-		print $FH $self->{indent},"        if not isinstance(obj, ",$node->{py_name},") :\n";
+		print $FH $self->{indent},"        if not isinstance(obj, type(self)):\n";
 		print $FH $self->{indent},"            return False\n";
 		foreach (@{$node->{list_member}}) {
 			my $member = $self->_get_defn($_);
-			print $FH $self->{indent},"        if self.",$member->{py_name}," != obj.",$member->{py_name}," :\n";
+			print $FH $self->{indent},"        if self.",$member->{py_name}," != obj.",$member->{py_name},":\n";
 			print $FH $self->{indent},"            return False\n";
 		}
 		print $FH $self->{indent},"        return True\n";
@@ -2176,14 +2285,12 @@ sub visitException {
 	if ($self->{id}) {
 		print $FH $self->{indent},"    def _get_id(cls):\n";
 		print $FH $self->{indent},"        return '",$node->{repos_id},"'\n";
-		print $FH "\n";
 		print $FH $self->{indent},"    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	if (exists $node->{serial_uid}) {
 		print $FH $self->{indent},"    def _get_uid(cls):\n";
 		print $FH $self->{indent},"        return 0x",$node->{serial_uid},"L\n";
-		print $FH "\n";
 		print $FH $self->{indent},"    serial_uid = classmethod(_get_uid)\n";
 		print $FH "\n";
 	}
@@ -2197,10 +2304,28 @@ sub visitOperation {
 	my $self = shift;
 	my ($node) = @_;
 	my $FH = $self->{out};
-	print $FH "    def ",$node->{py_name},"(self";
-	print $FH "):\n";
-	print $FH "        \"\"\" Operation ",$node->{repos_id}," \"\"\"\n" if ($node->{py_name} !~ /^_/);
-	print $FH "        pass\n";
+	print $FH "#   def ",$node->{py_name},"(self";
+	foreach (@{$node->{list_param}}) {		# paramater
+		if ( $_->{attr} eq 'in' or $_->{attr} eq 'inout') {
+			print $FH ", ",$_->{py_name};
+		}
+	}
+	print $FH "): ";
+	my @out = ();
+	my $type = $self->_get_defn($node->{type});
+	unless ($type->isa('VoidType')) {
+		push @out, "_ret";
+	}
+	foreach (@{$node->{list_param}}) {		# paramater
+		if ( $_->{attr} eq 'inout' or $_->{attr} eq 'out') {
+			push @out, $_->{py_name};
+		}
+	}
+	if (scalar(@out)) {
+		print $FH "return ", join(", ",@out);
+	} else {
+		print $FH "pass";
+	}
 	print $FH "\n";
 }
 
@@ -2241,6 +2366,42 @@ sub visitTypePrefix {
 
 sub visitCodeFragment {
 	# empty
+}
+
+##############################################################################
+
+package CORBA::Python::PyEmbeddedVisitor;
+
+use base qw(CORBA::Python::classVisitor);
+
+sub new {
+	my $proto = shift;
+	my $class = ref($proto) || $proto;
+	my $self = {};
+	bless($self, $class);
+	my ($parser) = @_;
+	$self->{srcname} = $parser->YYData->{srcname};
+	$self->{srcname_size} = $parser->YYData->{srcname_size};
+	$self->{srcname_mtime} = $parser->YYData->{srcname_mtime};
+	$self->{symbtab} = $parser->YYData->{symbtab};
+	$self->{client} = 1;
+	if (exists $parser->YYData->{opt_J}) {
+		$self->{base_package} = $parser->YYData->{opt_J};
+	} else {
+		$self->{base_package} = q{};
+	}
+	$self->{done_hash} = {};
+	$self->{marshal} = 0;
+	$self->{stringify} = 1;
+	$self->{compare} = 1;
+	$self->{id} = 1;
+	$self->{old_object} = exists $parser->YYData->{opt_O};
+	$self->{indent} = q{};
+	$self->{out} = undef;
+	$self->{import} = "import PyIDL as CORBA\n"
+					. "\n";
+	$self->{scope} = undef;
+	return $self;
 }
 
 1;

@@ -26,7 +26,7 @@ sub new {
 	if (exists $parser->YYData->{opt_J}) {
 		$self->{base_package} = $parser->YYData->{opt_J};
 	} else {
-		$self->{base_package} = "";
+		$self->{base_package} = q{};
 	}
 	$self->{done_hash} = {};
 	$self->{out} = undef;
@@ -58,7 +58,7 @@ sub _import_module {
 	my $full = $mod->{full};
 	my $modulename;
 	my $c_mod;
-	my $classname = "";
+	my $classname = q{};
 	while (!$mod->isa('Modules')) {
 		$full =~ s/(::[0-9A-Z_a-z]+)$//;
 		$classname = $1 . $classname;
@@ -89,12 +89,12 @@ sub _import_module {
 sub visitSpecification {
 	my $self = shift;
 	my ($node) = @_;
-	my $basename = basename($self->{srcname}, ".idl");
-	my $py_name = "_" . $basename;
+	my $basename = basename($self->{srcname}, '.idl');
+	my $py_name = '_' . $basename;
 	$py_name =~ s/\./_/g;
 	$self->{root_module} = $py_name;
-	$self->{init} = "";
-	$self->{methods} = "";
+	$self->{init} = q{};
+	$self->{methods} = q{};
 	$self->{imp_mod} = {};
 	my $empty = 1;
 	foreach (@{$node->{list_decl}}) {
@@ -105,7 +105,7 @@ sub visitSpecification {
 		}
 	}
 	unless ($empty) {
-		my $filename = "c" . $py_name . "module.c";
+		my $filename = 'c' . $py_name . 'module.c';
 		$self->open_stream($filename);
 		my $FH = $self->{out};
 		print $FH "/* This file was generated (by ",basename($0),"). DO NOT modify it */\n";
@@ -149,20 +149,20 @@ sub visitSpecification {
 sub visitModules {
 	my $self = shift;
 	my ($node) = @_;
-	my $basename = basename($self->{srcname}, ".idl");
+	my $basename = basename($self->{srcname}, '.idl');
 	my @name = split /::/, $node->{full};
 	shift @name;
-	my $py_name = join "_", @name;
-	$name[-1] = "c" . $name[-1];
-	my $filename = join "/", @name;
-	$filename .= "module.c";
+	my $py_name = join '_', @name;
+	$name[-1] = 'c' . $name[-1];
+	my $filename = join '/', @name;
+	$filename .= 'module.c';
 	my $save_out = $self->{out};
 	my $save_init = $self->{init};
 	my $save_methods = $self->{methods};
 	my $save_imp_mod = $self->{imp_mod};
 	$self->open_stream($filename);
-	$self->{init} = "";
-	$self->{methods} = "";
+	$self->{init} = q{};
+	$self->{methods} = q{};
 	$self->{imp_mod} = {};
 	my $FH = $self->{out};
 	print $FH "/* This file was generated (by ",basename($0),"). DO NOT modify it */\n";
@@ -174,7 +174,7 @@ sub visitModules {
 	print $FH "\n";
 	print $FH "#include \"hpy_",$basename,".h\"\n";
 	print $FH "\n";
-	$self->{methods} = "";
+	$self->{methods} = q{};
 	foreach (@{$node->{list_decl}}) {
 		$self->_get_defn($_)->visit($self);
 	}
@@ -234,7 +234,7 @@ sub visitRegularInterface {
 	print $FH "\n";
 	$self->{itf} = $node;
 	my $save_methods = $self->{methods};
-	$self->{methods} = "";
+	$self->{methods} = q{};
 	$self->{init} .= "\t" . $node->{c_name} . "Type.tp_new = PyType_GenericNew;\n";
 	$self->{init} .= "\tif (PyType_Ready(&" . $node->{c_name} . "Type) < 0)\n";
 	$self->{init} .= "\t\treturn;\n";
@@ -376,7 +376,7 @@ sub visitOperation {
 	my $self = shift;
 	my ($node) = @_;
 	my $FH = $self->{out};
-	my $name = $self->{itf}->{c_name} . "_" . $node->{c_name};
+	my $name = $self->{itf}->{c_name} . '_' . $node->{c_name};
 	print $FH "PyDoc_STRVAR(",$name,"__doc__,";
 	if (exists $node->{doc}) {
 		print $FH "\n";
@@ -387,7 +387,7 @@ sub visitOperation {
 	print $FH "\n";
 	my $label_err = undef;
 	my $type = $self->_get_defn($node->{type});
-	unless ($type->isa("VoidType")) {				# return
+	unless ($type->isa('VoidType')) {				# return
 		$label_err = $type->{length};
 	}
 	foreach (@{$node->{list_in}}) {					# parameter
@@ -410,7 +410,7 @@ sub visitOperation {
 	if (exists $node->{list_context}) {
 		print $FH "\tCORBA_Context _ctx;\n";
 	}
-	unless ($type->isa("VoidType")) {
+	unless ($type->isa('VoidType')) {
 		print $FH "\t",CORBA::Python::Cdecl_var->NameAttr($self->{symbtab}, $type, 'return', '_ret'),";\n";
 	}
 	foreach (@{$node->{list_param}}) {	# parameter
@@ -425,11 +425,11 @@ sub visitOperation {
 	}
 	my @fmt_in = ();
 	my @fmt_out = ();
-	my $args_in = "";
-	my $args_out = "";
-	unless ($type->isa("VoidType")) {
+	my $args_in = q{};
+	my $args_out = q{};
+	unless ($type->isa('VoidType')) {
 		my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
-		if ($fmt eq "O") {
+		if ($fmt eq 'O') {
 			print $FH "\tPyObject * __ret;\n";
 			$args_out .= ", __ret"
 		} else {
@@ -440,18 +440,18 @@ sub visitOperation {
 	foreach (@{$node->{list_param}}) {	# parameter
 		my $type = $self->_get_defn($_->{type});
 		my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
-		if ($fmt eq "O") {
+		if ($fmt eq 'O') {
 			print $FH "\tPyObject * _",$_->{c_name},";\n";
 		}
 		if      ($_->{attr} eq "in") {
-			if ($fmt eq "O") {
+			if ($fmt eq 'O') {
 				$args_in .= ", &_" . $_->{c_name};
 			} else {
 				$args_in .= ", &" . $_->{c_name};
 			}
 			push @fmt_in, $fmt;
-		} elsif ($_->{attr} eq "inout") {
-			if ($fmt eq "O") {
+		} elsif ($_->{attr} eq 'inout') {
+			if ($fmt eq 'O') {
 				$args_in .= ", &_" . $_->{c_name};
 				$args_out .= ", _" . $_->{c_name};
 			} else {
@@ -460,8 +460,8 @@ sub visitOperation {
 			}
 			push @fmt_in, $fmt;
 			push @fmt_out, $fmt;
-		} elsif ($_->{attr} eq "out") {
-			if ($fmt eq "O") {
+		} elsif ($_->{attr} eq 'out') {
+			if ($fmt eq 'O') {
 				$args_out .= ", _" . $_->{c_name};
 			} else {
 				$args_out .= ", " . $_->{c_name};
@@ -476,10 +476,10 @@ sub visitOperation {
 		print $FH "\n";
 	}
 	foreach (@{$node->{list_param}}) {	# parameter
-		next if ($_->{attr} eq "out");
+		next if ($_->{attr} eq 'out');
 		my $type = $self->_get_defn($_->{type});
 		my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
-		if ($fmt eq "O") {
+		if ($fmt eq 'O') {
 			print $FH "\tPYOBJ_AS_",$type->{c_name},"(",$_->{c_name},", _",$_->{c_name},");\n";
 		}
 	}
@@ -488,7 +488,7 @@ sub visitOperation {
 	print $FH "\t_gstate = PyGILState_Ensure();\n";
 	print $FH "#endif\n";
 	$type = $self->_get_defn($node->{type});
-	if ($type->isa("VoidType")) {
+	if ($type->isa('VoidType')) {
 		print $FH "\t",$self->{itf}->{c_name},"_",$node->{c_name},"(\n";
 	} else {
 		print $FH "\t",CORBA::Python::Cname_call->NameAttr($self->{symbtab}, $type, 'return'),"_ret = ";
@@ -515,18 +515,18 @@ sub visitOperation {
 	} else {
 		print $FH "\tif (CORBA_NO_EXCEPTION == _ev._major)\n";
 		print $FH "\t{\n";
-		unless ($type->isa("VoidType")) {
+		unless ($type->isa('VoidType')) {
 			my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
-			if ($fmt eq "O") {
+			if ($fmt eq 'O') {
 				$self->_import_module($type);
 				print $FH "\t\tPYOBJ_FROM_",$type->{c_name},"(__ret, ",CORBA::Python::Cext_obj->NameAttr($self->{symbtab}, $type, 'return'),"_ret);\n";
 			}
 		}
 		foreach (@{$node->{list_param}}) {	# parameter
-			next if ($_->{attr} eq "in");
+			next if ($_->{attr} eq 'in');
 			my $type = $self->_get_defn($_->{type});
 			my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
-			if ($fmt eq "O") {
+			if ($fmt eq 'O') {
 				$self->_import_module($type);
 				print $FH "\t\tPYOBJ_FROM_",$type->{c_name},"(_",$_->{c_name},", ",CORBA::Python::Cext_obj->NameAttr($self->{symbtab}, $type, $_->{attr}),$_->{c_name},");\n";
 			}
@@ -634,24 +634,24 @@ sub new {
 	my $self = {};
 	bless($self, $class);
 	my ($parser, $incpath) = @_;
-	$self->{incpath} = $incpath || '';
-	$self->{prefix} = "hpy_";
+	$self->{incpath} = $incpath || q{};
+	$self->{prefix} = 'hpy_';
 	$self->{old_object} = exists $parser->YYData->{opt_O};
 	$self->{srcname} = $parser->YYData->{srcname};
 	$self->{srcname_size} = $parser->YYData->{srcname_size};
 	$self->{srcname_mtime} = $parser->YYData->{srcname_mtime};
 	$self->{symbtab} = $parser->YYData->{symbtab};
 	$self->{inc} = {};
-	my $basename = basename($self->{srcname}, ".idl");
-	my $filename = $self->{prefix} . $basename . ".h";
+	my $basename = basename($self->{srcname}, '.idl');
+	my $filename = $self->{prefix} . $basename . '.h';
 	$self->open_stream($filename);
 	$self->{done_hash} = {};
 	$self->{extended} = 1;
 	$self->{num_key} = 'num_cpyext';
-	$self->{error} = "return NULL";
+	$self->{error} = 'return NULL';
 	$self->{num_typedef} = 0;
 	$basename =~ s/\./_/g;
-	$self->{root_module} = "_" . $basename;
+	$self->{root_module} = '_' . $basename;
 	return $self;
 }
 
@@ -669,9 +669,9 @@ sub NameAttr {
 	my $proto = shift;
 	my ($symbtab, $type, $attr, $name) = @_;
 	my $class = ref $type;
-	$class = "BasicType" if ($type->isa("BasicType"));
-	$class = "BaseInterface" if ($type->isa("BaseInterface"));
-	$class = "BaseInterface" if ($type->isa("ForwardBaseInterface"));
+	$class = 'BasicType' if ($type->isa('BasicType'));
+	$class = 'BaseInterface' if ($type->isa('BaseInterface'));
+	$class = 'BaseInterface' if ($type->isa('ForwardBaseInterface'));
 	my $func = 'NameAttr' . $class;
 	if($proto->can($func)) {
 		return $proto->$func($symbtab, $type, $attr, $name);
@@ -896,9 +896,9 @@ sub NameAttr {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	my $class = ref $type;
-	$class = "BasicType" if ($type->isa("BasicType"));
-	$class = "BaseInterface" if ($type->isa("BaseInterface"));
-	$class = "BaseInterface" if ($type->isa("ForwardBaseInterface"));
+	$class = 'BasicType' if ($type->isa('BasicType'));
+	$class = 'BaseInterface' if ($type->isa('BaseInterface'));
+	$class = 'BaseInterface' if ($type->isa('ForwardBaseInterface'));
 	my $func = 'NameAttr' . $class;
 	if($proto->can($func)) {
 		return $proto->$func($symbtab, $type, $attr);
@@ -911,13 +911,13 @@ sub NameAttrBaseInterface {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrBaseInterface : ERROR_INTERNAL $attr \n";
 	}
@@ -930,17 +930,17 @@ sub NameAttrTypeDeclarator {
 		warn __PACKAGE__,"::NameAttrTypeDeclarator $type->{idf} : empty array_size.\n"
 				unless (@{$type->{array_size}});
 		if (      $attr eq 'in' ) {
-			return "";
+			return q{};
 		} elsif ( $attr eq 'inout' ) {
-			return "";
+			return q{};
 		} elsif ( $attr eq 'out' ) {
 			if (defined $type->{length}) {		# variable
-				return "";
+				return q{};
 			} else {
-				return "";
+				return q{};
 			}
 		} elsif ( $attr eq 'return' ) {
-			return "";
+			return q{};
 		} else {
 			warn __PACKAGE__,"::NameAttrTypeDeclarator : ERROR_INTERNAL $attr \n";
 		}
@@ -963,13 +963,13 @@ sub NameAttrBasicType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrBasicType : ERROR_INTERNAL $attr \n";
 	}
@@ -983,13 +983,13 @@ sub NameAttrStructType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrStructType : ERROR_INTERNAL $attr \n";
 	}
@@ -999,13 +999,13 @@ sub NameAttrUnionType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrUnionType : ERROR_INTERNAL $attr \n";
 	}
@@ -1015,13 +1015,13 @@ sub NameAttrEnumType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrEnumType : ERROR_INTERNAL $attr \n";
 	}
@@ -1031,13 +1031,13 @@ sub NameAttrSequenceType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrSequenceType : ERROR_INTERNAL $attr \n";
 	}
@@ -1047,13 +1047,13 @@ sub NameAttrStringType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrStringType : ERROR_INTERNAL $attr \n";
 	}
@@ -1063,13 +1063,13 @@ sub NameAttrWideStringType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrWideStringType : ERROR_INTERNAL $attr \n";
 	}
@@ -1079,13 +1079,13 @@ sub NameAttrFixedPtType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrFixedPtType : ERROR_INTERNAL $attr \n";
 	}
@@ -1105,9 +1105,9 @@ sub NameAttr {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	my $class = ref $type;
-	$class = "BasicType" if ($type->isa("BasicType"));
-	$class = "BaseInterface" if ($type->isa("BaseInterface"));
-	$class = "BaseInterface" if ($type->isa("ForwardBaseInterface"));
+	$class = 'BasicType' if ($type->isa('BasicType'));
+	$class = 'BaseInterface' if ($type->isa('BaseInterface'));
+	$class = 'BaseInterface' if ($type->isa('ForwardBaseInterface'));
 	my $func = 'NameAttr' . $class;
 	if($proto->can($func)) {
 		return $proto->$func($symbtab, $type, $attr);
@@ -1120,13 +1120,13 @@ sub NameAttrBaseInterface {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "&";
+		return '&';
 	} else {
 		warn __PACKAGE__,"::NameAttrBaseInterface : ERROR_INTERNAL $attr \n";
 	}
@@ -1139,17 +1139,17 @@ sub NameAttrTypeDeclarator {
 		warn __PACKAGE__,"::NameAttrTypeDeclarator $type->{idf} : empty array_size.\n"
 				unless (@{$type->{array_size}});
 		if (      $attr eq 'in' ) {
-			return "&";
+			return '&';
 		} elsif ( $attr eq 'inout' ) {
-			return "&";
+			return '&';
 		} elsif ( $attr eq 'out' ) {
 			if (defined $type->{length}) {		# variable
-				return "&";
+				return '&';
 			} else {
-				return "&";
+				return '&';
 			}
 		} elsif ( $attr eq 'return' ) {
-			return "&";
+			return '&';
 		} else {
 			warn __PACKAGE__,"::NameAttrTypeDeclarator : ERROR_INTERNAL $attr \n";
 		}
@@ -1172,13 +1172,13 @@ sub NameAttrBasicType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "&";
+		return '&';
 	} else {
 		warn __PACKAGE__,"::NameAttrBasicType : ERROR_INTERNAL $attr \n";
 	}
@@ -1192,20 +1192,20 @@ sub NameAttrStructType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
 		if (defined $type->{length}) {		# variable
-			return "";
+			return q{};
 		} else {
-			return "&";
+			return '&';
 		}
 	} elsif ( $attr eq 'return' ) {
 		if (defined $type->{length}) {		# variable
-			return "";
+			return q{};
 		} else {
-			return "&";
+			return '&';
 		}
 	} else {
 		warn __PACKAGE__,"::NameAttrStructType : ERROR_INTERNAL $attr \n";
@@ -1216,20 +1216,20 @@ sub NameAttrUnionType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
 		if (defined $type->{length}) {		# variable
-			return "";
+			return q{};
 		} else {
-			return "&";
+			return '&';
 		}
 	} elsif ( $attr eq 'return' ) {
 		if (defined $type->{length}) {		# variable
-			return "";
+			return q{};
 		} else {
-			return "&";
+			return '&';
 		}
 	} else {
 		warn __PACKAGE__,"::NameAttrUnionType : ERROR_INTERNAL $attr \n";
@@ -1240,13 +1240,13 @@ sub NameAttrEnumType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "&";
+		return '&';
 	} else {
 		warn __PACKAGE__,"::NameAttrEnumType : ERROR_INTERNAL $attr \n";
 	}
@@ -1258,13 +1258,13 @@ sub NameAttrSequenceType {
 	my $max = 0;
 	$max = $type->{max}->{c_literal} if (exists $type->{max});
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrSequenceType : ERROR_INTERNAL $attr \n";
 	}
@@ -1274,13 +1274,13 @@ sub NameAttrStringType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrStringType : ERROR_INTERNAL $attr \n";
 	}
@@ -1290,13 +1290,13 @@ sub NameAttrWideStringType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrWideStringType : ERROR_INTERNAL $attr \n";
 	}
@@ -1306,13 +1306,13 @@ sub NameAttrFixedPtType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'inout' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'out' ) {
-		return "&";
+		return '&';
 	} elsif ( $attr eq 'return' ) {
-		return "&";
+		return '&';
 	} else {
 		warn __PACKAGE__,"::NameAttrFixedPtType : ERROR_INTERNAL $attr \n";
 	}
@@ -1328,8 +1328,8 @@ sub NameAttr {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	my $class = ref $type;
-	$class = "BaseInterface" if ($type->isa("BaseInterface"));
-	$class = "BaseInterface" if ($type->isa("ForwardBaseInterface"));
+	$class = 'BaseInterface' if ($type->isa('BaseInterface'));
+	$class = 'BaseInterface' if ($type->isa('ForwardBaseInterface'));
 	my $func = 'NameAttr' . $class;
 	if($proto->can($func)) {
 		return $proto->$func($symbtab, $type, $attr);
@@ -1342,13 +1342,13 @@ sub NameAttrBaseInterface {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'out' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrBaseInterface : ERROR_INTERNAL $attr \n";
 	}
@@ -1361,17 +1361,17 @@ sub NameAttrTypeDeclarator {
 		warn __PACKAGE__,"::NameAttrTypeDeclarator $type->{idf} : empty array_size.\n"
 				unless (@{$type->{array_size}});
 		if (      $attr eq 'in' ) {
-			return "";
+			return q{};
 		} elsif ( $attr eq 'inout' ) {
-			return "";
+			return q{};
 		} elsif ( $attr eq 'out' ) {
 			if (defined $type->{length}) {		# variable
-				return "";
+				return q{};
 			} else {
-				return "";
+				return q{};
 			}
 		} elsif ( $attr eq 'return' ) {
-			return "";
+			return q{};
 		} else {
 			warn __PACKAGE__,"::NameAttrTypeDeclarator : ERROR_INTERNAL $attr \n";
 		}
@@ -1393,13 +1393,13 @@ sub NameAttrFloatingPtType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'out' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrFloatingPtType : ERROR_INTERNAL $type->{value} \n";
 	}
@@ -1409,13 +1409,13 @@ sub NameAttrIntegerType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'out' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrIntegerType : ERROR_INTERNAL $type->{value} \n";
 	}
@@ -1425,13 +1425,13 @@ sub NameAttrOctetType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'out' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrOctetType : ERROR_INTERNAL $attr \n";
 	}
@@ -1441,13 +1441,13 @@ sub NameAttrCharType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'out' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrCharType : ERROR_INTERNAL $attr \n";
 	}
@@ -1460,13 +1460,13 @@ sub NameAttrBooleanType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'out' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrBooleanType : ERROR_INTERNAL $attr \n";
 	}
@@ -1480,20 +1480,20 @@ sub NameAttrStructType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'out' ) {
 		if (defined $type->{length}) {		# variable
-			return "*";
+			return '*';
 		} else {
-			return "";
+			return q{};
 		}
 	} elsif ( $attr eq 'return' ) {
 		if (defined $type->{length}) {		# variable
-			return "*";
+			return '*';
 		} else {
-			return "";
+			return q{};
 		}
 	} else {
 		warn __PACKAGE__,"::NameAttrStructType : ERROR_INTERNAL $attr \n";
@@ -1504,20 +1504,20 @@ sub NameAttrUnionType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'out' ) {
 		if (defined $type->{length}) {		# variable
-			return "*";
+			return '*';
 		} else {
-			return "";
+			return q{};
 		}
 	} elsif ( $attr eq 'return' ) {
 		if (defined $type->{length}) {		# variable
-			return "*";
+			return '*';
 		} else {
-			return "";
+			return q{};
 		}
 	} else {
 		warn __PACKAGE__,"::NameAttrUnionType : ERROR_INTERNAL $attr \n";
@@ -1528,13 +1528,13 @@ sub NameAttrEnumType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'out' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrEnumType : ERROR_INTERNAL $attr \n";
 	}
@@ -1544,13 +1544,13 @@ sub NameAttrSequenceType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'out' ) {
-		return "*";
+		return '*';
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrSequenceType : ERROR_INTERNAL $attr \n";
 	}
@@ -1560,13 +1560,13 @@ sub NameAttrStringType {
 	my $proto = shift;
 	my ($symbtab, $type, $attr) = @_;
 	if (      $attr eq 'in' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'inout' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'out' ) {
-		return "";
+		return q{};
 	} elsif ( $attr eq 'return' ) {
-		return "";
+		return q{};
 	} else {
 		warn __PACKAGE__,"::NameAttrStringType : ERROR_INTERNAL $attr \n";
 	}

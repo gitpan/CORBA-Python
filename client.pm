@@ -28,7 +28,7 @@ sub new {
 	if (exists $parser->YYData->{opt_J}) {
 		$self->{base_package} = $parser->YYData->{opt_J};
 	} else {
-		$self->{base_package} = "";
+		$self->{base_package} = q{};
 	}
 	$self->{done_hash} = {};
 	$self->{marshal} = 1;
@@ -36,7 +36,7 @@ sub new {
 	$self->{compare} = 1;
 	$self->{id} = 1;
 	$self->{old_object} = exists $parser->YYData->{opt_O};
-	$self->{indent} = "";
+	$self->{indent} = q{};
 	$self->{out} = undef;
 	$self->{import} = "import PyIDL as CORBA\n"
 					. "import PyIDL.cdr as CDR\n"
@@ -100,7 +100,7 @@ sub visitRegularInterface {
 	print $FH "\n";
 	print $FH "    def __init__(self, conn):\n";
 	print $FH "        self.conn = conn\n";
-	print $FH "        if not hasattr(conn, 'send') :\n";
+	print $FH "        if not hasattr(conn, 'send'):\n";
 	print $FH "            raise CORBA.SystemException('IDL:CORBA/INITIALIZE:1.0', 10, CORBA.CORBA_COMPLETED_NO)\n";
 	print $FH "\n";
 	$self->{repos_id} = $node->{repos_id};
@@ -110,12 +110,11 @@ sub visitRegularInterface {
 	if ($self->{id}) {
 		print $FH "    def _get_id(cls):\n";
 		print $FH "        return '",$node->{repos_id},"'\n";
-		print $FH "\n";
 		print $FH "    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	print $FH "\n";
-	$self->{indent} = "";
+	$self->{indent} = q{};
 	delete $self->{itf};
 }
 
@@ -164,7 +163,7 @@ sub visitAbstractInterface {
 	foreach (@{$node->{list_decl}}) {
 		$self->_get_defn($_)->visit($self);
 	}
-	$self->{indent} = "";
+	$self->{indent} = q{};
 	delete $self->{itf};
 }
 
@@ -196,7 +195,7 @@ sub visitOperation {
 	print $FH "        \"\"\" Operation ",$node->{repos_id}," \"\"\"\n" if ($node->{py_name} !~ /^_/);
 	print $FH "        (request_header, request_body) = self._",$node->{py_name},"__marshal_request(*args)\n";
 	if (exists $node->{modifier}) {		# oneway
-		print $FH "        RPC_GIOP.RequestOneWay(self.conn, request_header, request_body)\t\t# oneway\n";
+		print $FH "        RPC_GIOP.RequestOneWay(self.conn, request_header, request_body)       # oneway\n";
 	} else {
 		print $FH "        (status, service_context, reply) = RPC_GIOP.RequestReply(self.conn, request_header, request_body)\n";
 		print $FH "        return self._",$node->{py_name},"__demarshal_reply(status, service_context, reply)\n";
@@ -211,11 +210,11 @@ sub visitOperation {
 	}
 	print $FH "):\n";
 	print $FH "        _request_header = GIOP.RequestHeader_1_2(\n";
-	print $FH "            request_id=0,\t\t# overloaded by RPC_GIOP.Request* \n";
+	print $FH "            request_id=0,       # overloaded by RPC_GIOP.Request* \n";
 	if (exists $node->{modifier}) {		# oneway
-		print $FH "            response_flags=0,\t\t# NONE\n";
+		print $FH "            response_flags=0,       # NONE\n";
 	} else {
-		print $FH "            response_flags=3,\t\t# WITH_TARGET\n";
+		print $FH "            response_flags=3,       # WITH_TARGET\n";
 	}
 	print $FH "            reserved='\\0\\0\\0',\n";
 	print $FH "            target=GIOP.TargetAddress(object_key=self._get_id()),\n";
@@ -239,10 +238,10 @@ sub visitOperation {
 
 	unless (exists $node->{modifier}) {		# !oneway
 		print $FH "    def _",$node->{py_name},"__demarshal_reply(self, _status, _service_context, _reply):\n";
-		print $FH "        if _status == GIOP.NO_EXCEPTION :\n";
+		print $FH "        if _status == GIOP.NO_EXCEPTION:\n";
 		my $nb = 0;
 		my $type = $self->_get_defn($node->{type});
-		unless ($type->isa("VoidType")) {
+		unless ($type->isa('VoidType')) {
 			if (exists $type->{full}) {
 				print $FH "            _return = ",$self->_get_scoped_name($type, $self->{itf}),".demarshal(_reply)\n";
 			} else {
@@ -269,7 +268,7 @@ sub visitOperation {
 		print $FH "(" if ($nb > 1);
 		my $first = 1;
 		$type = $self->_get_defn($node->{type});
-		unless ($type->isa("VoidType")) {
+		unless ($type->isa('VoidType')) {
 			print $FH "_return";
 			$first = 0;
 		}
@@ -281,23 +280,23 @@ sub visitOperation {
 		}
 		print $FH ")" if ($nb > 1);
 		print $FH "\n";
-		print $FH "        elif _status == GIOP.USER_EXCEPTION :\n";
+		print $FH "        elif _status == GIOP.USER_EXCEPTION:\n";
 		print $FH "            _exception_id = CORBA.demarshal(_reply, 'string')\n";
 		if (exists $node->{list_raise}) {
 			my $if_elif = "if";
 			foreach (@{$node->{list_raise}}) {
 				my $defn = $self->_get_defn($_);
-				print $FH "            ",$if_elif," _exception_id == '",$defn->{repos_id},"' :\n";
+				print $FH "            ",$if_elif," _exception_id == '",$defn->{repos_id},"':\n";
 				print $FH "                _exception = ",$self->_get_scoped_name($defn, $self->{itf}),".demarshal(_reply)\n";
 				print $FH "                raise _exception\n";
 				$if_elif = "elif";
 			}
-			print $FH "            else :\n";
+			print $FH "            else:\n";
 			print $FH "                raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		} else {
 			print $FH "            raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		}
-		print $FH "        elif _status == GIOP.SYSTEM_EXCEPTION :\n";
+		print $FH "        elif _status == GIOP.SYSTEM_EXCEPTION:\n";
 		print $FH "            _exception_id = CORBA.demarshal(_reply, 'string')\n";
 		print $FH "            _minor_code_value = CORBA.demarshal(_reply, 'unsigned_long')\n";
 		print $FH "            _completion_status = CORBA.demarshal(_reply, 'unsigned_long')\n";
@@ -306,7 +305,7 @@ sub visitOperation {
 		print $FH "                _minor_code_value,\n";
 		print $FH "                _completion_status\n";
 		print $FH "            )\n";
-		print $FH "        else :\n";
+		print $FH "        else:\n";
 		print $FH "            raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)\n";
 		print $FH "\n";
 	}

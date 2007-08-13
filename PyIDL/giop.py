@@ -1,11 +1,11 @@
 #   This file was generated (by idl2py.pl). DO NOT modify it.
-# From file : giop.idl, 9058 octets, Fri Aug 08 13:00:54 2003
+# From file : giop.idl, 9058 octets, Tue Jun 12 18:19:56 2007
+
+""" Module IDL:omg.org/GIOP:1.0 """
 
 import PyIDL as CORBA
 
 import PyIDL.iop as IOP
-
-""" Module IDL:omg.org/GIOP:1.0 """
 
 class Version(object):
     """ Struct IDL:omg.org/GIOP/Version:1.0 """
@@ -36,22 +36,25 @@ class Version(object):
             CORBA.marshal(output, 'octet', self.major)
             CORBA.marshal(output, 'octet', self.minor)
 
-    def demarshal(cls, input):
-            major = CORBA.demarshal(input, 'octet')
-            minor = CORBA.demarshal(input, 'octet')
+    def demarshal(cls, input_):
+            major = CORBA.demarshal(input_, 'octet')
+            minor = CORBA.demarshal(input_, 'octet')
             return cls(major, minor)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.major != obj.major :
+        if self.major != obj.major:
             return False
-        if self.minor != obj.minor :
+        if self.minor != obj.minor:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -63,29 +66,33 @@ class Version(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/Version:1.0'
-
     corba_id = classmethod(_get_id)
 
 class Principal(str):
     """ Typedef IDL:omg.org/GIOP/Principal:1.0 """
 
+    def __init__(self, val):
+        if val != None:
+            if not isinstance(val, str):
+                raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
+        str.__init__(val)
+
     def marshal(self, output):
         CORBA.marshal(output, 'long', len(self))
-        for e in self :
-            CORBA.marshal(output, 'octet', ord(e))
+        for elt in self:
+            CORBA.marshal(output, 'octet', ord(elt))
 
-    def demarshal(cls, input):
-        nb = CORBA.demarshal(input, 'long')
+    def demarshal(cls, input_):
+        length = CORBA.demarshal(input_, 'long')
         lst = []
-        for i in xrange(nb) :
-            lst.append(CORBA.demarshal(input, 'octet'))
+        for _ in xrange(length):
+            lst.append(CORBA.demarshal(input_, 'octet'))
         val = ''.join(map(chr, lst))
         return cls(val)
     demarshal = classmethod(demarshal)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/Principal:1.0'
-
     corba_id = classmethod(_get_id)
 
 class MsgType_1_1(CORBA.Enum):
@@ -96,7 +103,6 @@ class MsgType_1_1(CORBA.Enum):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/MsgType_1_1:1.0'
-
     corba_id = classmethod(_get_id)
 
 Request = MsgType_1_1('Request', 0)
@@ -126,9 +132,9 @@ class MessageHeader_1_0(object):
 
     def _setmagic(self, magic):
         _e0 = magic
-        if len(_e0) != 4 :
+        if len(_e0) != 4:
             raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check('char', _e1)
         self._magic = magic
 
@@ -175,42 +181,45 @@ class MessageHeader_1_0(object):
 
     def marshal(self, output):
             _e0 = self.magic
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.marshal(output, 'char', _e1)
             self.GIOP_version.marshal(output)
             CORBA.marshal(output, 'boolean', self.byte_order)
             CORBA.marshal(output, 'octet', self.message_type)
             CORBA.marshal(output, 'unsigned_long', self.message_size)
 
-    def demarshal(cls, input):
+    def demarshal(cls, input_):
             _lst0 = []
-            for _i0 in xrange(4) :
-                _lst0.append(CORBA.demarshal(input, 'char'))
+            for _i0 in xrange(4):
+                _lst0.append(CORBA.demarshal(input_, 'char'))
             _lst0 = ''.join(_lst0)
             magic = _lst0
-            GIOP_version = Version.demarshal(input)
-            byte_order = CORBA.demarshal(input, 'boolean')
-            message_type = CORBA.demarshal(input, 'octet')
-            message_size = CORBA.demarshal(input, 'unsigned_long')
+            GIOP_version = Version.demarshal(input_)
+            byte_order = CORBA.demarshal(input_, 'boolean')
+            message_type = CORBA.demarshal(input_, 'octet')
+            message_size = CORBA.demarshal(input_, 'unsigned_long')
             return cls(magic, GIOP_version, byte_order, message_type, message_size)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.magic != obj.magic :
+        if self.magic != obj.magic:
             return False
-        if self.GIOP_version != obj.GIOP_version :
+        if self.GIOP_version != obj.GIOP_version:
             return False
-        if self.byte_order != obj.byte_order :
+        if self.byte_order != obj.byte_order:
             return False
-        if self.message_type != obj.message_type :
+        if self.message_type != obj.message_type:
             return False
-        if self.message_size != obj.message_size :
+        if self.message_size != obj.message_size:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -225,7 +234,6 @@ class MessageHeader_1_0(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_0:1.0'
-
     corba_id = classmethod(_get_id)
 
 class MessageHeader_1_1(object):
@@ -240,9 +248,9 @@ class MessageHeader_1_1(object):
 
     def _setmagic(self, magic):
         _e0 = magic
-        if len(_e0) != 4 :
+        if len(_e0) != 4:
             raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check('char', _e1)
         self._magic = magic
 
@@ -289,42 +297,45 @@ class MessageHeader_1_1(object):
 
     def marshal(self, output):
             _e0 = self.magic
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.marshal(output, 'char', _e1)
             self.GIOP_version.marshal(output)
             CORBA.marshal(output, 'octet', self.flags)
             CORBA.marshal(output, 'octet', self.message_type)
             CORBA.marshal(output, 'unsigned_long', self.message_size)
 
-    def demarshal(cls, input):
+    def demarshal(cls, input_):
             _lst0 = []
-            for _i0 in xrange(4) :
-                _lst0.append(CORBA.demarshal(input, 'char'))
+            for _i0 in xrange(4):
+                _lst0.append(CORBA.demarshal(input_, 'char'))
             _lst0 = ''.join(_lst0)
             magic = _lst0
-            GIOP_version = Version.demarshal(input)
-            flags = CORBA.demarshal(input, 'octet')
-            message_type = CORBA.demarshal(input, 'octet')
-            message_size = CORBA.demarshal(input, 'unsigned_long')
+            GIOP_version = Version.demarshal(input_)
+            flags = CORBA.demarshal(input_, 'octet')
+            message_type = CORBA.demarshal(input_, 'octet')
+            message_size = CORBA.demarshal(input_, 'unsigned_long')
             return cls(magic, GIOP_version, flags, message_type, message_size)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.magic != obj.magic :
+        if self.magic != obj.magic:
             return False
-        if self.GIOP_version != obj.GIOP_version :
+        if self.GIOP_version != obj.GIOP_version:
             return False
-        if self.flags != obj.flags :
+        if self.flags != obj.flags:
             return False
-        if self.message_type != obj.message_type :
+        if self.message_type != obj.message_type:
             return False
-        if self.message_size != obj.message_size :
+        if self.message_size != obj.message_size:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -339,35 +350,32 @@ class MessageHeader_1_1(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_1:1.0'
-
     corba_id = classmethod(_get_id)
 
 class MessageHeader_1_2(MessageHeader_1_1):
     """ Typedef IDL:omg.org/GIOP/MessageHeader_1_2:1.0 """
 
-    def __init__(self, *args, **kw):
+    def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], MessageHeader_1_1):
             self.__dict__ = dict(args[0].__dict__)
         else:
-            super(MessageHeader_1_2, self).__init__(*args, **kw)
+            super(MessageHeader_1_2, self).__init__(*args, **kwargs)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_2:1.0'
-
     corba_id = classmethod(_get_id)
 
 class MessageHeader_1_3(MessageHeader_1_1):
     """ Typedef IDL:omg.org/GIOP/MessageHeader_1_3:1.0 """
 
-    def __init__(self, *args, **kw):
+    def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], MessageHeader_1_1):
             self.__dict__ = dict(args[0].__dict__)
         else:
-            super(MessageHeader_1_3, self).__init__(*args, **kw)
+            super(MessageHeader_1_3, self).__init__(*args, **kwargs)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/MessageHeader_1_3:1.0'
-
     corba_id = classmethod(_get_id)
 
 class RequestHeader_1_0(object):
@@ -411,7 +419,7 @@ class RequestHeader_1_0(object):
     def _setobject_key(self, object_key):
         _e0 = object_key
         CORBA.check('long', len(_e0))
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check('octet', ord(_e1))
         self._object_key = object_key
 
@@ -444,44 +452,47 @@ class RequestHeader_1_0(object):
             CORBA.marshal(output, 'boolean', self.response_expected)
             _e0 = self.object_key
             CORBA.marshal(output, 'long', len(_e0))
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.marshal(output, 'octet', ord(_e1))
             CORBA.marshal(output, 'string', self.operation)
             self.requesting_principal.marshal(output)
 
-    def demarshal(cls, input):
-            service_context = IOP.ServiceContextList.demarshal(input)
-            request_id = CORBA.demarshal(input, 'unsigned_long')
-            response_expected = CORBA.demarshal(input, 'boolean')
-            _len0 = CORBA.demarshal(input, 'long')
+    def demarshal(cls, input_):
+            service_context = IOP.ServiceContextList.demarshal(input_)
+            request_id = CORBA.demarshal(input_, 'unsigned_long')
+            response_expected = CORBA.demarshal(input_, 'boolean')
+            _len0 = CORBA.demarshal(input_, 'long')
             _lst0 = []
-            for _i0 in xrange(_len0) :
-                _lst0.append(CORBA.demarshal(input, 'octet'))
+            for _i0 in xrange(_len0):
+                _lst0.append(CORBA.demarshal(input_, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             object_key = _lst0
-            operation = CORBA.demarshal(input, 'string')
-            requesting_principal = Principal.demarshal(input)
+            operation = CORBA.demarshal(input_, 'string')
+            requesting_principal = Principal.demarshal(input_)
             return cls(service_context, request_id, response_expected, object_key, operation, requesting_principal)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.service_context != obj.service_context :
+        if self.service_context != obj.service_context:
             return False
-        if self.request_id != obj.request_id :
+        if self.request_id != obj.request_id:
             return False
-        if self.response_expected != obj.response_expected :
+        if self.response_expected != obj.response_expected:
             return False
-        if self.object_key != obj.object_key :
+        if self.object_key != obj.object_key:
             return False
-        if self.operation != obj.operation :
+        if self.operation != obj.operation:
             return False
-        if self.requesting_principal != obj.requesting_principal :
+        if self.requesting_principal != obj.requesting_principal:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -497,7 +508,6 @@ class RequestHeader_1_0(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_0:1.0'
-
     corba_id = classmethod(_get_id)
 
 class RequestHeader_1_1(object):
@@ -541,9 +551,9 @@ class RequestHeader_1_1(object):
 
     def _setreserved(self, reserved):
         _e0 = reserved
-        if len(_e0) != 3 :
+        if len(_e0) != 3:
             raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check('octet', ord(_e1))
         self._reserved = reserved
 
@@ -555,7 +565,7 @@ class RequestHeader_1_1(object):
     def _setobject_key(self, object_key):
         _e0 = object_key
         CORBA.check('long', len(_e0))
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check('octet', ord(_e1))
         self._object_key = object_key
 
@@ -587,55 +597,58 @@ class RequestHeader_1_1(object):
             CORBA.marshal(output, 'unsigned_long', self.request_id)
             CORBA.marshal(output, 'boolean', self.response_expected)
             _e0 = self.reserved
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.marshal(output, 'octet', ord(_e1))
             _e0 = self.object_key
             CORBA.marshal(output, 'long', len(_e0))
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.marshal(output, 'octet', ord(_e1))
             CORBA.marshal(output, 'string', self.operation)
             self.requesting_principal.marshal(output)
 
-    def demarshal(cls, input):
-            service_context = IOP.ServiceContextList.demarshal(input)
-            request_id = CORBA.demarshal(input, 'unsigned_long')
-            response_expected = CORBA.demarshal(input, 'boolean')
+    def demarshal(cls, input_):
+            service_context = IOP.ServiceContextList.demarshal(input_)
+            request_id = CORBA.demarshal(input_, 'unsigned_long')
+            response_expected = CORBA.demarshal(input_, 'boolean')
             _lst0 = []
-            for _i0 in xrange(3) :
-                _lst0.append(CORBA.demarshal(input, 'octet'))
+            for _i0 in xrange(3):
+                _lst0.append(CORBA.demarshal(input_, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             reserved = _lst0
-            _len0 = CORBA.demarshal(input, 'long')
+            _len0 = CORBA.demarshal(input_, 'long')
             _lst0 = []
-            for _i0 in xrange(_len0) :
-                _lst0.append(CORBA.demarshal(input, 'octet'))
+            for _i0 in xrange(_len0):
+                _lst0.append(CORBA.demarshal(input_, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             object_key = _lst0
-            operation = CORBA.demarshal(input, 'string')
-            requesting_principal = Principal.demarshal(input)
+            operation = CORBA.demarshal(input_, 'string')
+            requesting_principal = Principal.demarshal(input_)
             return cls(service_context, request_id, response_expected, reserved, object_key, operation, requesting_principal)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.service_context != obj.service_context :
+        if self.service_context != obj.service_context:
             return False
-        if self.request_id != obj.request_id :
+        if self.request_id != obj.request_id:
             return False
-        if self.response_expected != obj.response_expected :
+        if self.response_expected != obj.response_expected:
             return False
-        if self.reserved != obj.reserved :
+        if self.reserved != obj.reserved:
             return False
-        if self.object_key != obj.object_key :
+        if self.object_key != obj.object_key:
             return False
-        if self.operation != obj.operation :
+        if self.operation != obj.operation:
             return False
-        if self.requesting_principal != obj.requesting_principal :
+        if self.requesting_principal != obj.requesting_principal:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -652,27 +665,25 @@ class RequestHeader_1_1(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_1:1.0'
-
     corba_id = classmethod(_get_id)
 
 class AddressingDisposition(int):
     """ Typedef IDL:omg.org/GIOP/AddressingDisposition:1.0 """
 
     def __init__(self, val):
-        int.__init__(val)
         CORBA.check('short', val)
+        int.__init__(val)
 
     def marshal(self, output):
         CORBA.marshal(output, 'short', self)
 
-    def demarshal(cls, input):
-        val = CORBA.demarshal(input, 'short')
+    def demarshal(cls, input_):
+        val = CORBA.demarshal(input_, 'short')
         return cls(val)
     demarshal = classmethod(demarshal)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/AddressingDisposition:1.0'
-
     corba_id = classmethod(_get_id)
 
 # Constant: IDL:omg.org/GIOP/KeyAddr:1.0
@@ -706,7 +717,7 @@ class IORAddressingInfo(object):
         def _setprofiles(self, profiles):
             _e0 = profiles
             CORBA.check('long', len(_e0))
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.check(TaggedProfile, _e1)
             self._profiles = profiles
 
@@ -719,29 +730,32 @@ class IORAddressingInfo(object):
                 CORBA.marshal(output, 'string', self.type_id)
                 _e0 = self.profiles
                 CORBA.marshal(output, 'long', len(_e0))
-                for _e1 in _e0 :
+                for _e1 in _e0:
                     _e1.marshal(output)
 
-        def demarshal(cls, input):
-                type_id = CORBA.demarshal(input, 'string')
-                _len0 = CORBA.demarshal(input, 'long')
+        def demarshal(cls, input_):
+                type_id = CORBA.demarshal(input_, 'string')
+                _len0 = CORBA.demarshal(input_, 'long')
                 _lst0 = []
-                for _i0 in xrange(_len0) :
-                    _lst0.append(TaggedProfile.demarshal(input))
+                for _i0 in xrange(_len0):
+                    _lst0.append(TaggedProfile.demarshal(input_))
                 profiles = _lst0
                 return cls(type_id, profiles)
         demarshal = classmethod(demarshal)
 
         def __eq__(self, obj):
-            if obj == None :
+            if obj == None:
                 return False
-            if isinstance(obj, type(self)) == False :
+            if not isinstance(obj, type(self)):
                 return False
-            if self.type_id != obj.type_id :
+            if self.type_id != obj.type_id:
                 return False
-            if self.profiles != obj.profiles :
+            if self.profiles != obj.profiles:
                 return False
             return True
+
+        def __ne__(self, obj):
+            return not self.__eq__(obj)
 
         def __repr__(self):
             lst = []
@@ -753,7 +767,6 @@ class IORAddressingInfo(object):
 
         def _get_id(cls):
             return 'IDL:omg.org/IOP/IOR:1.0'
-
         corba_id = classmethod(_get_id)
 
     def __init__(self, selected_profile_index, ior):
@@ -782,22 +795,25 @@ class IORAddressingInfo(object):
             CORBA.marshal(output, 'unsigned_long', self.selected_profile_index)
             self.ior.marshal(output)
 
-    def demarshal(cls, input):
-            selected_profile_index = CORBA.demarshal(input, 'unsigned_long')
-            ior = IOP.IOR.demarshal(input)
+    def demarshal(cls, input_):
+            selected_profile_index = CORBA.demarshal(input_, 'unsigned_long')
+            ior = IOP.IOR.demarshal(input_)
             return cls(selected_profile_index, ior)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.selected_profile_index != obj.selected_profile_index :
+        if self.selected_profile_index != obj.selected_profile_index:
             return False
-        if self.ior != obj.ior :
+        if self.ior != obj.ior:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -809,7 +825,6 @@ class IORAddressingInfo(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/IORAddressingInfo:1.0'
-
     corba_id = classmethod(_get_id)
 
 class TargetAddress(object):
@@ -834,7 +849,7 @@ class TargetAddress(object):
         def _setprofile_data(self, profile_data):
             _e0 = profile_data
             CORBA.check('long', len(_e0))
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.check('octet', ord(_e1))
             self._profile_data = profile_data
 
@@ -847,30 +862,33 @@ class TargetAddress(object):
                 self.tag.marshal(output)
                 _e0 = self.profile_data
                 CORBA.marshal(output, 'long', len(_e0))
-                for _e1 in _e0 :
+                for _e1 in _e0:
                     CORBA.marshal(output, 'octet', ord(_e1))
 
-        def demarshal(cls, input):
-                tag = ProfileId.demarshal(input)
-                _len0 = CORBA.demarshal(input, 'long')
+        def demarshal(cls, input_):
+                tag = ProfileId.demarshal(input_)
+                _len0 = CORBA.demarshal(input_, 'long')
                 _lst0 = []
-                for _i0 in xrange(_len0) :
-                    _lst0.append(CORBA.demarshal(input, 'octet'))
+                for _i0 in xrange(_len0):
+                    _lst0.append(CORBA.demarshal(input_, 'octet'))
                 _lst0 = ''.join(map(chr, _lst0))
                 profile_data = _lst0
                 return cls(tag, profile_data)
         demarshal = classmethod(demarshal)
 
         def __eq__(self, obj):
-            if obj == None :
+            if obj == None:
                 return False
-            if isinstance(obj, type(self)) == False :
+            if not isinstance(obj, type(self)):
                 return False
-            if self.tag != obj.tag :
+            if self.tag != obj.tag:
                 return False
-            if self.profile_data != obj.profile_data :
+            if self.profile_data != obj.profile_data:
                 return False
             return True
+
+        def __ne__(self, obj):
+            return not self.__eq__(obj)
 
         def __repr__(self):
             lst = []
@@ -882,33 +900,32 @@ class TargetAddress(object):
 
         def _get_id(cls):
             return 'IDL:omg.org/IOP/TaggedProfile:1.0'
-
         corba_id = classmethod(_get_id)
 
     def __init__(self, *args, **kwargs):
-        if len(args) == 2 :
+        if len(args) == 2:
             _d, _v = args
             CORBA.check(AddressingDisposition, _d)
-            if _d == AddressingDisposition(KeyAddr) :
+            if _d == AddressingDisposition(KeyAddr):
                 _e0 = _v
                 CORBA.check('long', len(_e0))
-                for _e1 in _e0 :
+                for _e1 in _e0:
                     CORBA.check('octet', ord(_e1))
-            elif _d == AddressingDisposition(ProfileAddr) :
+            elif _d == AddressingDisposition(ProfileAddr):
                 CORBA.check(IOP.TaggedProfile, _v)
-            elif _d == AddressingDisposition(ReferenceAddr) :
+            elif _d == AddressingDisposition(ReferenceAddr):
                 CORBA.check(IORAddressingInfo, _v)
-            else :
+            else:
                 raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
             self.__d = _d
             self.__v = _v
-        elif 'object_key' in kwargs :
+        elif 'object_key' in kwargs:
             self._setobject_key(kwargs['object_key'])
-        elif 'profile' in kwargs :
+        elif 'profile' in kwargs:
             self._setprofile(kwargs['profile'])
-        elif 'ior' in kwargs :
+        elif 'ior' in kwargs:
             self._setior(kwargs['ior'])
-        else :
+        else:
             raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
 
     def _get_d(self):
@@ -917,13 +934,13 @@ class TargetAddress(object):
     _d = property(fget=_get_d)
 
     def _get_v(self):
-        if self.__d == AddressingDisposition(KeyAddr) :
+        if self.__d == AddressingDisposition(KeyAddr):
             return self.__v
-        elif self.__d == AddressingDisposition(ProfileAddr) :
+        elif self.__d == AddressingDisposition(ProfileAddr):
             return self.__v
-        elif self.__d == AddressingDisposition(ReferenceAddr) :
+        elif self.__d == AddressingDisposition(ReferenceAddr):
             return self.__v
-        else :
+        else:
             return None
 
     _v = property(fget=_get_v)
@@ -931,13 +948,13 @@ class TargetAddress(object):
     def _setobject_key(self, object_key):
         _e0 = object_key
         CORBA.check('long', len(_e0))
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check('octet', ord(_e1))
         self.__d = AddressingDisposition(KeyAddr)
         self.__v = object_key
 
     def _getobject_key(self):
-        if self.__d == AddressingDisposition(KeyAddr) :
+        if self.__d == AddressingDisposition(KeyAddr):
             return self.__v
         return None
 
@@ -949,7 +966,7 @@ class TargetAddress(object):
         self.__v = profile
 
     def _getprofile(self):
-        if self.__d == AddressingDisposition(ProfileAddr) :
+        if self.__d == AddressingDisposition(ProfileAddr):
             return self.__v
         return None
 
@@ -961,7 +978,7 @@ class TargetAddress(object):
         self.__v = ior
 
     def _getior(self):
-        if self.__d == AddressingDisposition(ReferenceAddr) :
+        if self.__d == AddressingDisposition(ReferenceAddr):
             return self.__v
         return None
 
@@ -969,48 +986,51 @@ class TargetAddress(object):
 
     def marshal(self, output):
         self._d.marshal(output)
-        if self._d == AddressingDisposition(KeyAddr) :
+        if self._d == AddressingDisposition(KeyAddr):
             _e0 = self.__v
             CORBA.marshal(output, 'long', len(_e0))
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.marshal(output, 'octet', ord(_e1))
-        elif self._d == AddressingDisposition(ProfileAddr) :
+        elif self._d == AddressingDisposition(ProfileAddr):
             self.__v.marshal(output)
-        elif self._d == AddressingDisposition(ReferenceAddr) :
+        elif self._d == AddressingDisposition(ReferenceAddr):
             self.__v.marshal(output)
-        else :
+        else:
             raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
 
-    def demarshal(cls, input):
-        _d = AddressingDisposition.demarshal(input)
-        if _d == AddressingDisposition(KeyAddr) :
-            _len0 = CORBA.demarshal(input, 'long')
+    def demarshal(cls, input_):
+        _d = AddressingDisposition.demarshal(input_)
+        if _d == AddressingDisposition(KeyAddr):
+            _len0 = CORBA.demarshal(input_, 'long')
             _lst0 = []
-            for _i0 in xrange(_len0) :
-                _lst0.append(CORBA.demarshal(input, 'octet'))
+            for _i0 in xrange(_len0):
+                _lst0.append(CORBA.demarshal(input_, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             object_key = _lst0
             return cls(_d, object_key)
-        elif _d == AddressingDisposition(ProfileAddr) :
-            profile = IOP.TaggedProfile.demarshal(input)
+        elif _d == AddressingDisposition(ProfileAddr):
+            profile = IOP.TaggedProfile.demarshal(input_)
             return cls(_d, profile)
-        elif _d == AddressingDisposition(ReferenceAddr) :
-            ior = IORAddressingInfo.demarshal(input)
+        elif _d == AddressingDisposition(ReferenceAddr):
+            ior = IORAddressingInfo.demarshal(input_)
             return cls(_d, ior)
-        else :
+        else:
             raise CORBA.SystemException('IDL:CORBA/MARSHAL:1.0', 9, CORBA.CORBA_COMPLETED_MAYBE)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, TargetAddress) == True :
-            if self._d == obj._d :
+        if isinstance(obj, type(self)):
+            if self._d == obj._d:
                 return self._v == obj._v
-            else :
+            else:
                 return False
-        else :
+        else:
             return False
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -1022,7 +1042,6 @@ class TargetAddress(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/TargetAddress:1.0'
-
     corba_id = classmethod(_get_id)
 
 class RequestHeader_1_2(object):
@@ -1056,9 +1075,9 @@ class RequestHeader_1_2(object):
 
     def _setreserved(self, reserved):
         _e0 = reserved
-        if len(_e0) != 3 :
+        if len(_e0) != 3:
             raise CORBA.SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA.CORBA_COMPLETED_MAYBE)
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check('octet', ord(_e1))
         self._reserved = reserved
 
@@ -1098,44 +1117,47 @@ class RequestHeader_1_2(object):
             CORBA.marshal(output, 'unsigned_long', self.request_id)
             CORBA.marshal(output, 'octet', self.response_flags)
             _e0 = self.reserved
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.marshal(output, 'octet', ord(_e1))
             self.target.marshal(output)
             CORBA.marshal(output, 'string', self.operation)
             self.service_context.marshal(output)
 
-    def demarshal(cls, input):
-            request_id = CORBA.demarshal(input, 'unsigned_long')
-            response_flags = CORBA.demarshal(input, 'octet')
+    def demarshal(cls, input_):
+            request_id = CORBA.demarshal(input_, 'unsigned_long')
+            response_flags = CORBA.demarshal(input_, 'octet')
             _lst0 = []
-            for _i0 in xrange(3) :
-                _lst0.append(CORBA.demarshal(input, 'octet'))
+            for _i0 in xrange(3):
+                _lst0.append(CORBA.demarshal(input_, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             reserved = _lst0
-            target = TargetAddress.demarshal(input)
-            operation = CORBA.demarshal(input, 'string')
-            service_context = IOP.ServiceContextList.demarshal(input)
+            target = TargetAddress.demarshal(input_)
+            operation = CORBA.demarshal(input_, 'string')
+            service_context = IOP.ServiceContextList.demarshal(input_)
             return cls(request_id, response_flags, reserved, target, operation, service_context)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.request_id != obj.request_id :
+        if self.request_id != obj.request_id:
             return False
-        if self.response_flags != obj.response_flags :
+        if self.response_flags != obj.response_flags:
             return False
-        if self.reserved != obj.reserved :
+        if self.reserved != obj.reserved:
             return False
-        if self.target != obj.target :
+        if self.target != obj.target:
             return False
-        if self.operation != obj.operation :
+        if self.operation != obj.operation:
             return False
-        if self.service_context != obj.service_context :
+        if self.service_context != obj.service_context:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -1151,21 +1173,19 @@ class RequestHeader_1_2(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_2:1.0'
-
     corba_id = classmethod(_get_id)
 
 class RequestHeader_1_3(RequestHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/RequestHeader_1_3:1.0 """
 
-    def __init__(self, *args, **kw):
+    def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], RequestHeader_1_2):
             self.__dict__ = dict(args[0].__dict__)
         else:
-            super(RequestHeader_1_3, self).__init__(*args, **kw)
+            super(RequestHeader_1_3, self).__init__(*args, **kwargs)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/RequestHeader_1_3:1.0'
-
     corba_id = classmethod(_get_id)
 
 class ReplyStatusType_1_2(CORBA.Enum):
@@ -1176,7 +1196,6 @@ class ReplyStatusType_1_2(CORBA.Enum):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/ReplyStatusType_1_2:1.0'
-
     corba_id = classmethod(_get_id)
 
 NO_EXCEPTION = ReplyStatusType_1_2('NO_EXCEPTION', 0)
@@ -1226,25 +1245,28 @@ class ReplyHeader_1_2(object):
             self.reply_status.marshal(output)
             self.service_context.marshal(output)
 
-    def demarshal(cls, input):
-            request_id = CORBA.demarshal(input, 'unsigned_long')
-            reply_status = ReplyStatusType_1_2.demarshal(input)
-            service_context = IOP.ServiceContextList.demarshal(input)
+    def demarshal(cls, input_):
+            request_id = CORBA.demarshal(input_, 'unsigned_long')
+            reply_status = ReplyStatusType_1_2.demarshal(input_)
+            service_context = IOP.ServiceContextList.demarshal(input_)
             return cls(request_id, reply_status, service_context)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.request_id != obj.request_id :
+        if self.request_id != obj.request_id:
             return False
-        if self.reply_status != obj.reply_status :
+        if self.reply_status != obj.reply_status:
             return False
-        if self.service_context != obj.service_context :
+        if self.service_context != obj.service_context:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -1257,21 +1279,19 @@ class ReplyHeader_1_2(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/ReplyHeader_1_2:1.0'
-
     corba_id = classmethod(_get_id)
 
 class ReplyHeader_1_3(ReplyHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/ReplyHeader_1_3:1.0 """
 
-    def __init__(self, *args, **kw):
+    def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], ReplyHeader_1_2):
             self.__dict__ = dict(args[0].__dict__)
         else:
-            super(ReplyHeader_1_3, self).__init__(*args, **kw)
+            super(ReplyHeader_1_3, self).__init__(*args, **kwargs)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/ReplyHeader_1_3:1.0'
-
     corba_id = classmethod(_get_id)
 
 class SystemExceptionReplyBody(object):
@@ -1314,25 +1334,28 @@ class SystemExceptionReplyBody(object):
             CORBA.marshal(output, 'unsigned_long', self.minor_code_value)
             CORBA.marshal(output, 'unsigned_long', self.completion_status)
 
-    def demarshal(cls, input):
-            exception_id = CORBA.demarshal(input, 'string')
-            minor_code_value = CORBA.demarshal(input, 'unsigned_long')
-            completion_status = CORBA.demarshal(input, 'unsigned_long')
+    def demarshal(cls, input_):
+            exception_id = CORBA.demarshal(input_, 'string')
+            minor_code_value = CORBA.demarshal(input_, 'unsigned_long')
+            completion_status = CORBA.demarshal(input_, 'unsigned_long')
             return cls(exception_id, minor_code_value, completion_status)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.exception_id != obj.exception_id :
+        if self.exception_id != obj.exception_id:
             return False
-        if self.minor_code_value != obj.minor_code_value :
+        if self.minor_code_value != obj.minor_code_value:
             return False
-        if self.completion_status != obj.completion_status :
+        if self.completion_status != obj.completion_status:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -1345,7 +1368,6 @@ class SystemExceptionReplyBody(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/SystemExceptionReplyBody:1.0'
-
     corba_id = classmethod(_get_id)
 
 class CancelRequestHeader(object):
@@ -1366,19 +1388,22 @@ class CancelRequestHeader(object):
     def marshal(self, output):
             CORBA.marshal(output, 'unsigned_long', self.request_id)
 
-    def demarshal(cls, input):
-            request_id = CORBA.demarshal(input, 'unsigned_long')
+    def demarshal(cls, input_):
+            request_id = CORBA.demarshal(input_, 'unsigned_long')
             return cls(request_id)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.request_id != obj.request_id :
+        if self.request_id != obj.request_id:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -1389,7 +1414,6 @@ class CancelRequestHeader(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/CancelRequestHeader:1.0'
-
     corba_id = classmethod(_get_id)
 
 class LocateRequestHeader_1_0(object):
@@ -1411,7 +1435,7 @@ class LocateRequestHeader_1_0(object):
     def _setobject_key(self, object_key):
         _e0 = object_key
         CORBA.check('long', len(_e0))
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check('octet', ord(_e1))
         self._object_key = object_key
 
@@ -1424,30 +1448,33 @@ class LocateRequestHeader_1_0(object):
             CORBA.marshal(output, 'unsigned_long', self.request_id)
             _e0 = self.object_key
             CORBA.marshal(output, 'long', len(_e0))
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.marshal(output, 'octet', ord(_e1))
 
-    def demarshal(cls, input):
-            request_id = CORBA.demarshal(input, 'unsigned_long')
-            _len0 = CORBA.demarshal(input, 'long')
+    def demarshal(cls, input_):
+            request_id = CORBA.demarshal(input_, 'unsigned_long')
+            _len0 = CORBA.demarshal(input_, 'long')
             _lst0 = []
-            for _i0 in xrange(_len0) :
-                _lst0.append(CORBA.demarshal(input, 'octet'))
+            for _i0 in xrange(_len0):
+                _lst0.append(CORBA.demarshal(input_, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             object_key = _lst0
             return cls(request_id, object_key)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.request_id != obj.request_id :
+        if self.request_id != obj.request_id:
             return False
-        if self.object_key != obj.object_key :
+        if self.object_key != obj.object_key:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -1459,21 +1486,19 @@ class LocateRequestHeader_1_0(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_0:1.0'
-
     corba_id = classmethod(_get_id)
 
 class LocateRequestHeader_1_1(LocateRequestHeader_1_0):
     """ Typedef IDL:omg.org/GIOP/LocateRequestHeader_1_1:1.0 """
 
-    def __init__(self, *args, **kw):
+    def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], LocateRequestHeader_1_0):
             self.__dict__ = dict(args[0].__dict__)
         else:
-            super(LocateRequestHeader_1_1, self).__init__(*args, **kw)
+            super(LocateRequestHeader_1_1, self).__init__(*args, **kwargs)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_1:1.0'
-
     corba_id = classmethod(_get_id)
 
 class LocateRequestHeader_1_2(object):
@@ -1505,22 +1530,25 @@ class LocateRequestHeader_1_2(object):
             CORBA.marshal(output, 'unsigned_long', self.request_id)
             self.target.marshal(output)
 
-    def demarshal(cls, input):
-            request_id = CORBA.demarshal(input, 'unsigned_long')
-            target = TargetAddress.demarshal(input)
+    def demarshal(cls, input_):
+            request_id = CORBA.demarshal(input_, 'unsigned_long')
+            target = TargetAddress.demarshal(input_)
             return cls(request_id, target)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.request_id != obj.request_id :
+        if self.request_id != obj.request_id:
             return False
-        if self.target != obj.target :
+        if self.target != obj.target:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -1532,21 +1560,19 @@ class LocateRequestHeader_1_2(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_2:1.0'
-
     corba_id = classmethod(_get_id)
 
 class LocateRequestHeader_1_3(LocateRequestHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/LocateRequestHeader_1_3:1.0 """
 
-    def __init__(self, *args, **kw):
+    def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], LocateRequestHeader_1_2):
             self.__dict__ = dict(args[0].__dict__)
         else:
-            super(LocateRequestHeader_1_3, self).__init__(*args, **kw)
+            super(LocateRequestHeader_1_3, self).__init__(*args, **kwargs)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateRequestHeader_1_3:1.0'
-
     corba_id = classmethod(_get_id)
 
 class LocateStatusType_1_2(CORBA.Enum):
@@ -1557,7 +1583,6 @@ class LocateStatusType_1_2(CORBA.Enum):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateStatusType_1_2:1.0'
-
     corba_id = classmethod(_get_id)
 
 UNKNOWN_OBJECT = LocateStatusType_1_2('UNKNOWN_OBJECT', 0)
@@ -1596,22 +1621,25 @@ class LocateReplyHeader_1_2(object):
             CORBA.marshal(output, 'unsigned_long', self.request_id)
             self.locate_status.marshal(output)
 
-    def demarshal(cls, input):
-            request_id = CORBA.demarshal(input, 'unsigned_long')
-            locate_status = LocateStatusType_1_2.demarshal(input)
+    def demarshal(cls, input_):
+            request_id = CORBA.demarshal(input_, 'unsigned_long')
+            locate_status = LocateStatusType_1_2.demarshal(input_)
             return cls(request_id, locate_status)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.request_id != obj.request_id :
+        if self.request_id != obj.request_id:
             return False
-        if self.locate_status != obj.locate_status :
+        if self.locate_status != obj.locate_status:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -1623,21 +1651,19 @@ class LocateReplyHeader_1_2(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateReplyHeader_1_2:1.0'
-
     corba_id = classmethod(_get_id)
 
 class LocateReplyHeader_1_3(LocateReplyHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/LocateReplyHeader_1_3:1.0 """
 
-    def __init__(self, *args, **kw):
+    def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], LocateReplyHeader_1_2):
             self.__dict__ = dict(args[0].__dict__)
         else:
-            super(LocateReplyHeader_1_3, self).__init__(*args, **kw)
+            super(LocateReplyHeader_1_3, self).__init__(*args, **kwargs)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/LocateReplyHeader_1_3:1.0'
-
     corba_id = classmethod(_get_id)
 
 class FragmentHeader_1_2(object):
@@ -1658,19 +1684,22 @@ class FragmentHeader_1_2(object):
     def marshal(self, output):
             CORBA.marshal(output, 'unsigned_long', self.request_id)
 
-    def demarshal(cls, input):
-            request_id = CORBA.demarshal(input, 'unsigned_long')
+    def demarshal(cls, input_):
+            request_id = CORBA.demarshal(input_, 'unsigned_long')
             return cls(request_id)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.request_id != obj.request_id :
+        if self.request_id != obj.request_id:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -1681,20 +1710,18 @@ class FragmentHeader_1_2(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/FragmentHeader_1_2:1.0'
-
     corba_id = classmethod(_get_id)
 
 class FragmentHeader_1_3(FragmentHeader_1_2):
     """ Typedef IDL:omg.org/GIOP/FragmentHeader_1_3:1.0 """
 
-    def __init__(self, *args, **kw):
+    def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], FragmentHeader_1_2):
             self.__dict__ = dict(args[0].__dict__)
         else:
-            super(FragmentHeader_1_3, self).__init__(*args, **kw)
+            super(FragmentHeader_1_3, self).__init__(*args, **kwargs)
 
     def _get_id(cls):
         return 'IDL:omg.org/GIOP/FragmentHeader_1_3:1.0'
-
     corba_id = classmethod(_get_id)
 

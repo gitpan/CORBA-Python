@@ -12,7 +12,6 @@ cpy.pm
 cpyext.pm
 cpyemb.pm
 pyext.pm
-pyemb.pm
 idl2py.pl
 idl2pycli.pl
 idl2pysrv.pl

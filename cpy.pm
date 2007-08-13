@@ -13,9 +13,8 @@ use POSIX qw(ctime);
 sub open_stream {
 	my $self = shift;
 	my ($filename) = @_;
-	open(OUT, '>', $filename)
+	open $self->{out}, '>', $filename
 			or die "can't open $filename ($!).\n";
-	$self->{out} = \*OUT;
 	$self->{filename} = $filename;
 }
 
@@ -35,7 +34,7 @@ sub _split_name {
 	my $full = $node->{full};
 	my $c_mod;
 	my $py_mod;
-	my $classname = "";
+	my $classname = q{};
 	while (!$node->isa('Modules')) {
 		$full =~ s/(::[0-9A-Z_a-z]+)$//;
 		$classname = $1 . $classname;
@@ -192,7 +191,7 @@ sub visitTypeDeclarator {
 				unless (@{$node->{array_size}});
 		my @array = @{$node->{array_size}};
 		my $size;
-		if ( $type->isa("CharType") or $type->isa("OctetType") ) {
+		if ( $type->isa('CharType') or $type->isa('OctetType') ) {
 			$size = pop @array;
 		}
 		print $FH "static PyObject * _cls_",$node->{c_name}," = NULL;\n";
@@ -253,7 +252,7 @@ sub visitTypeDeclarator {
 			$nb ++;
 		}
 		$nb --;
-		if ( $type->isa("CharType") or $type->isa("OctetType") ) {
+		if ( $type->isa('CharType') or $type->isa('OctetType') ) {
 			push @tab, "\t" if (scalar @array);
 			if (exists $self->{embedded}) {
 				print $FH @tab,"\t\tif (PyString_Size(",$obj,") != ",$size->{c_literal},") { \\\n";
@@ -325,7 +324,7 @@ sub visitTypeDeclarator {
 			$nb ++;
 		}
 		$nb --;
-		if ( $type->isa("CharType") or $type->isa("OctetType") ) {
+		if ( $type->isa('CharType') or $type->isa('OctetType') ) {
 			print $FH @tab,"\t\t",$obj," = PyString_FromStringAndSize(",$args,", ",$size->{c_literal},"); /* New reference */ \\\n";
 		} else {
 			my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
@@ -355,7 +354,7 @@ sub visitTypeDeclarator {
 		print $FH "\t}\n";
 		print $FH "\n";
 		if (defined $node->{length}) {
-			my $start = "";
+			my $start = q{};
 			my $nb;
 			my $first = 1;
 			foreach (@{$node->{array_size}}) {
@@ -573,12 +572,12 @@ sub visitStructType {
 	print $FH "\t{ \\\n";
 	print $FH "\t\tPyObject * _member; \\\n";
 	my @fmt_inout = ();
-	my $args_in = "";
-	my $args_out = "";
+	my $args_in = q{};
+	my $args_out = q{};
 	foreach (@{$node->{list_member}}) {
 		my $defn = $self->_get_defn($_);
 		my $fmt = $self->_member_fmt($defn);
-		if ($fmt eq "O") {
+		if ($fmt eq 'O') {
 			print $FH "\t\tPyObject * _",$defn->{c_name},"; \\\n";
 			$args_in .= ", &_" . $defn->{c_name};
 			$args_out .= ", _" . $defn->{c_name};
@@ -625,7 +624,7 @@ sub visitStructType {
 	foreach (@{$node->{list_member}}) {
 		my $defn = $self->_get_defn($_);
 		my $fmt = $self->_member_fmt($defn);
-		if ($fmt eq "O") {
+		if ($fmt eq 'O') {
 			print $FH "\t\tPyObject * _",$defn->{c_name},"; \\\n";
 		}
 	}
@@ -648,7 +647,7 @@ sub visitStructType {
 	foreach (@{$node->{list_member}}) {
 		my $defn = $self->_get_defn($_);
 		my $fmt = $self->_member_fmt($defn);
-		if ($fmt eq "O") {
+		if ($fmt eq 'O') {
 			print $FH "\t\tPy_DECREF(_",$defn->{c_name},"); \\\n";
 		}
 	}
@@ -679,7 +678,7 @@ sub _member_fmt {
 	my ($member) = @_;
 
 	if (exists $member->{array_size}) {
-		return "O";
+		return 'O';
 	} else {
 		my $type = $self->_get_defn($member->{type});
 		return CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
@@ -692,16 +691,16 @@ sub _member_as {
 
 	my @tab = (defined $union) ? ("\t\t") : ();
 	my $obj = (defined $union) ? "_v" : "_" . $member->{c_name};
-	$union = "" unless (defined $union);
+	$union = q{} unless (defined $union);
 	my $args = "(val)." . $union . $member->{c_name};
 	my $fmt = $self->_member_fmt($member);
 	my $FH = $self->{out};
-	if ($fmt eq "O") {
+	if ($fmt eq 'O') {
 		my $type = $self->_get_defn($member->{type});
 		if (exists $member->{array_size}) {
 			my @array = @{$member->{array_size}};
 			my $size;
-			if ( $type->isa("CharType") or $type->isa("OctetType") ) {
+			if ( $type->isa('CharType') or $type->isa('OctetType') ) {
 				$size = pop @array;
 			}
 			my $nb = 0;
@@ -751,7 +750,7 @@ sub _member_as {
 				pop @tab if (scalar @array);
 			} else {
 				my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
-				if ($fmt eq "O") {
+				if ($fmt eq 'O') {
 					if (exists $self->{embedded}) {
 						print $FH @tab,"\t\t\tPYOBJ_CHECK_",$type->{c_name},"(_item",$nb,"); \\\n";
 					}
@@ -800,16 +799,16 @@ sub _member_from {
 
 	my @tab = (defined $union) ? ("\t\t") : ();
 	my $obj = (defined $union) ? "_v" : "_" . $member->{c_name};
-	$union = "" unless (defined $union);
+	$union = q{} unless (defined $union);
 	my $args = "(val)." . $union . $member->{c_name};
 	my $fmt = $self->_member_fmt($member);
 	my $FH = $self->{out};
-	if ($fmt eq "O") {
+	if ($fmt eq 'O') {
 		my $type = $self->_get_defn($member->{type});
 		if (exists $member->{array_size}) {
 			my @array = @{$member->{array_size}};
 			my $size;
-			if ( $type->isa("CharType") or $type->isa("OctetType") ) {
+			if ( $type->isa('CharType') or $type->isa('OctetType') ) {
 				$size = pop @array;
 			}
 			my $nb = 0;
@@ -827,13 +826,13 @@ sub _member_from {
 				$nb ++;
 			}
 			$nb --;
-			if ( $type->isa("CharType") or $type->isa("OctetType") ) {
+			if ( $type->isa('CharType') or $type->isa('OctetType') ) {
 				push @tab, "\t" if (scalar @array);
 				print $FH @tab,"\t\t",$obj," = PyString_FromStringAndSize(",$args,", ",$size->{c_literal},"); /* New reference */ \\\n";
 				pop @tab if (scalar @array);
 			} else {
 				my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
-				if ($fmt eq "O") {
+				if ($fmt eq 'O') {
 					print $FH @tab,"\t\t\tPYOBJ_FROM_",$type->{c_name},"(_item",$nb,", ",$args,"); \\\n";
 				} else {
 					print $FH @tab,"\t\t\t_item",$nb," = Py_BuildValue(\"",$fmt,"\", ",$args,"); /* New reference */ \\\n";
@@ -867,11 +866,11 @@ sub _member_free {
 
 	my $type = $self->_get_defn($member->{type});
 	if (defined $type->{length}) {
-		my $tab = (defined $union) ? "\t" : "";
-		$union = "" unless (defined $union);
+		my $tab = (defined $union) ? "\t" : q{};
+		$union = q{} unless (defined $union);
 		my $FH = $self->{out};
 		if (exists $member->{array_size}) {
-			my $start = "";
+			my $start = q{};
 			my $nb;
 			my $first = 1;
 			foreach (@{$member->{array_size}}) {
@@ -964,7 +963,7 @@ sub visitUnionType {
 	print $FH "\t\t\t",$self->{error},"; \\\n";
 	print $FH "\t\t} \\\n";
 	my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
-	if ($fmt eq "O") {
+	if ($fmt eq 'O') {
 		print $FH "\t\tPYOBJ_AS_",$type->{c_name},"((val)._d, _d); \\\n";
 	} else {
 		my $args = "&(val)._d";
@@ -1007,7 +1006,7 @@ sub visitUnionType {
 	print $FH "\t\tPyObject * _v; \\\n";
 	print $FH "\t\tPyObject * _d; \\\n";
 	print $FH "\t\tPyObject * _duo = PyTuple_New(2); /* New reference */ \\\n";
-	if ($fmt eq "O") {
+	if ($fmt eq 'O') {
 		print $FH "\t\tPYOBJ_FROM_",$type->{c_name},"(_d, (val)._d); \\\n";
 	} else {
 		my $args = "(val)._d";
@@ -1512,11 +1511,11 @@ sub visitException {
 		print $FH "\t} else { \\\n";
 		if ($len) {
 			my @fmt_out = ();
-			my $args_out = "";
+			my $args_out = q{};
 			foreach (@{$node->{list_member}}) {
 				my $defn = $self->_get_defn($_);
 				my $fmt = $self->_member_fmt($defn);
-				if ($fmt eq "O") {
+				if ($fmt eq 'O') {
 					print $FH "\t\tPyObject* _",$defn->{c_name},"; \\\n";
 					$args_out .= ", _" . $defn->{c_name};
 				} else {
@@ -1541,12 +1540,12 @@ sub visitException {
 		if ($len) {
 			print $FH "\t\tPyObject * _member; \\\n";
 			my @fmt_inout = ();
-			my $args_in = "";
-			my $args_out = "";
+			my $args_in = q{};
+			my $args_out = q{};
 			foreach (@{$node->{list_member}}) {
 				my $defn = $self->_get_defn($_);
 				my $fmt = $self->_member_fmt($defn);
-				if ($fmt eq "O") {
+				if ($fmt eq 'O') {
 					print $FH "\t\tPyObject * _",$defn->{c_name},"; \\\n";
 					$args_in .= ", &_" . $defn->{c_name};
 					$args_out .= ", _" . $defn->{c_name};
@@ -1670,11 +1669,11 @@ sub NameAttr {
 }
 
 sub NameAttrBaseInterface {
-	return "O";
+	return 'O';
 }
 
 sub NameAttrTypeDeclarator {
-	return "O";
+	return 'O';
 }
 
 sub NameAttrNativeType {
@@ -1685,11 +1684,11 @@ sub NameAttrFloatingPtType {
 	my $proto = shift;
 	my ($symbtab, $type) = @_;
 	if      ($type->{value} eq 'float') {
-		return "f";
+		return 'f';
 	} elsif ($type->{value} eq 'double') {
-		return "d";
+		return 'd';
 	} elsif ($type->{value} eq 'long double') {
-		return "d";
+		return 'd';
 	} else {
 		warn __PACKAGE__,"::NameAttrFloatingPtType : ERROR_INTERNAL $type->{value} \n";
 	}
@@ -1699,35 +1698,35 @@ sub NameAttrIntegerType {
 	my $proto = shift;
 	my ($symbtab, $type) = @_;
 	if      ($type->{value} eq 'short') {
-		return "h";
+		return 'h';
 	} elsif ($type->{value} eq 'unsigned short') {
-		return "H";
+		return 'H';
 	} elsif ($type->{value} eq 'long') {
-		return "l";
+		return 'l';
 	} elsif ($type->{value} eq 'unsigned long') {
-		return "k";
+		return 'k';
 	} elsif ($type->{value} eq 'long long') {
-		return "L";
+		return 'L';
 	} elsif ($type->{value} eq 'unsigned long long') {
-		return "K";
+		return 'K';
 	} else {
 		warn __PACKAGE__,"::NameAttrIntegerType : ERROR_INTERNAL $type->{value} \n";
 	}
 }
 
 sub NameAttrOctetType {
-	return "B";
+	return 'B';
 }
 
 sub NameAttrCharType {
-	return "c";
+	return 'c';
 }
 
 #sub NameAttrWideCharType {
 #}
 
 sub NameAttrBooleanType {
-	return "B";
+	return 'B';
 }
 
 sub NameAttrAnyType {
@@ -1735,27 +1734,27 @@ sub NameAttrAnyType {
 }
 
 sub NameAttrStructType {
-	return "O";
+	return 'O';
 }
 
 sub NameAttrUnionType {
-	return "O";
+	return 'O';
 }
 
 sub NameAttrEnumType {
-	return "O";
+	return 'O';
 }
 
 sub NameAttrSequenceType {
-	return "O";
+	return 'O';
 }
 
 sub NameAttrStringType {
-	return "s";
+	return 's';
 }
 
 sub NameAttrWideStringType {
-	return "u";
+	return 'u';
 }
 
 sub NameAttrFixedPtType {

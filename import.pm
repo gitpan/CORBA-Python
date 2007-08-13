@@ -23,9 +23,9 @@ sub new {
 	$self->{symbtab} = $parser->YYData->{symbtab};
 	$self->{module} = undef;
 	$self->{cpy_ext} = $cpy_ext;
-	my $basename = basename($parser->YYData->{srcname}, ".idl");
+	my $basename = basename($parser->YYData->{srcname}, '.idl');
 	$basename =~ s/\./_/g;
-	$self->{root_module} = "c_" . $basename;
+	$self->{root_module} = 'c_' . $basename;
 	return $self;
 }
 
@@ -51,8 +51,8 @@ sub _import {
 	if ($flag_c) {
 		if ($full) {
 			my @name = split /::/, $full;
-			$name[-1] = "c" . $name[-1];
-			$full = join "::", @name;
+			$name[-1] = 'c' . $name[-1];
+			$full = join '::', @name;
 		} else {
 			$full = $self->{root_module};
 		}

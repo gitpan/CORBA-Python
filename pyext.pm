@@ -7,7 +7,7 @@ use warnings;
 
 use CORBA::Python::class;
 
-package CORBA::Python::cPyExtendedVisitor;
+package CORBA::Python::PyExtendedVisitor;
 
 use base qw(CORBA::Python::classVisitor);
 
@@ -28,7 +28,7 @@ sub new {
 	if (exists $parser->YYData->{opt_J}) {
 		$self->{base_package} = $parser->YYData->{opt_J};
 	} else {
-		$self->{base_package} = "";
+		$self->{base_package} = q{};
 	}
 	$self->{done_hash} = {};
 	$self->{marshal} = 0;
@@ -36,7 +36,7 @@ sub new {
 	$self->{compare} = 1;
 	$self->{id} = 1;
 	$self->{old_object} = exists $parser->YYData->{opt_O};
-	$self->{indent} = "";
+	$self->{indent} = q{};
 	$self->{out} = undef;
 	$self->{import} = "import PyIDL as CORBA\n";
 	$self->{scope} = undef;
@@ -45,7 +45,7 @@ sub new {
 
 sub _setup_py {
 	my $self = shift;
-	my $filename = "setup.py";
+	my $filename = 'setup.py';
 	my $FH = new IO::File "> $filename"
 			or die "can't open $filename ($!).\n";
 
@@ -82,17 +82,17 @@ sub visitSpecification {
 	$self->empty_modules();
 	$self->{setup_packages} = [];
 	$self->{setup_ext_modules} = [];
-	$self->{setup_Extension} = "";
+	$self->{setup_Extension} = q{};
 	if ($self->{base_package}) {
 		$setup_name = $self->{base_package};
-		$filename = $setup_name . "/__init__.py";
+		$filename = $setup_name . '/__init__.py';
 		$self->{setup_name} = $setup_name;
 		push @{$self->{setup_packages}}, $setup_name;
 	} else {
-		my $basename = basename($self->{srcname}, ".idl");
+		my $basename = basename($self->{srcname}, '.idl');
 		$basename =~ s/\./_/g;
-		$setup_name = "_" . $basename;
-		$filename = $setup_name . ".py";
+		$setup_name = '_' . $basename;
+		$filename = $setup_name . '.py';
 		$empty = 1;
 		foreach (@{$node->{list_decl}}) {
 			my $defn = $self->_get_defn($_);
@@ -114,8 +114,8 @@ sub visitSpecification {
 		$self->_get_defn($_)->visit($self);
 	}
 	if ($self->{has_itf}) {
-		my $c_name = basename($self->{srcname}, ".idl");
-		my $ext_name = "ext_" . $setup_name;
+		my $c_name = basename($self->{srcname}, '.idl');
+		my $ext_name = 'ext_' . $setup_name;
 		push @{$self->{setup_ext_modules}}, $ext_name;
 		$self->{setup_Extension} .= $ext_name . " = Extension('c" . $setup_name . "',\n";
 		$self->{setup_Extension} .= "    sources = [ 'c" . $setup_name . "module.c', '" . $c_name . ".c', 'corba.c', 'cpyhelper.c' ],\n";
@@ -143,28 +143,27 @@ sub visitModules {
 	$setup_name =~ s/^:://;
 	$setup_name =~ s/::/\//g;
 	if ($self->{base_package}) {
-		$setup_name = $self->{base_package} . "/" . $setup_name;
+		$setup_name = $self->{base_package} . '/' . $setup_name;
 	}
 	$self->{setup_name} = $setup_name unless ($self->{setup_name});
 	push @{$self->{setup_packages}}, $setup_name;
-	my $filename = $setup_name . "/__init__.py";
-	$self->open_stream($filename, $node);
-	my $FH = $self->{out};
 	my $defn = $self->{symbtab}->Lookup($node->{full});
-	print $FH "\"\"\" Module ",$defn->{repos_id}," \"\"\"\n";
-	print $FH "\n";
+	my $doc_string = "\"\"\" Module " . $defn->{repos_id} . " \"\"\"";
+	my $filename = $setup_name . '/__init__.py';
+	$self->open_stream($filename, $node, $doc_string);
+	my $FH = $self->{out};
 	my $save_has_itf = $self->{has_itf};
 	$self->{has_itf} = 0;
 	foreach (@{$node->{list_decl}}) {
 		$_->visit($self);
 	}
 	if ($self->{has_itf}) {
-		my $c_name = basename($self->{srcname}, ".idl");
-		my $ext_name = "ext_" . $setup_name;
+		my $c_name = basename($self->{srcname}, '.idl');
+		my $ext_name = 'ext_' . $setup_name;
 		$ext_name =~ s/\//_/g;
 		my @name = split /::/, $node->{full};
 		shift @name;
-		$name[-1] = "c" . $name[-1];
+		$name[-1] = 'c' . $name[-1];
 		push @{$self->{setup_ext_modules}}, $ext_name;
 		$self->{setup_Extension} .= $ext_name . " = Extension('" . join(".", @name) . "',\n";
 		$self->{setup_Extension} .= "    include_dirs = [ '.' ],\n";
@@ -223,8 +222,8 @@ sub visitRegularInterface {
 	my @name = split /::/, $node->{full};
 	shift @name;
 	if (scalar @name > 1) {
-		$name[-2] = "c" . $name[-2];
-		print $FH "        self._native = ",join(".",@name),"()\n";
+		$name[-2] = 'c' . $name[-2];
+		print $FH "        self._native = ",join(".", @name),"()\n";
 	} else {
 		print $FH "        self._native = c",$self->{module},".",$name[0],"()\n";
 	}
@@ -236,12 +235,11 @@ sub visitRegularInterface {
 	if ($self->{id}) {
 		print $FH "    def _get_id(cls):\n";
 		print $FH "        return '",$node->{repos_id},"'\n";
-		print $FH "\n";
 		print $FH "    corba_id = classmethod(_get_id)\n";
 		print $FH "\n";
 	}
 	print $FH "\n";
-	$self->{indent} = "";
+	$self->{indent} = q{};
 	delete $self->{itf};
 }
 
@@ -290,7 +288,7 @@ sub visitAbstractInterface {
 	foreach (@{$node->{list_decl}}) {
 		$self->_get_defn($_)->visit($self);
 	}
-	$self->{indent} = "";
+	$self->{indent} = q{};
 	delete $self->{itf};
 }
 

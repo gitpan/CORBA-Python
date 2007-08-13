@@ -20,7 +20,6 @@ WriteMakefile(
                         'cpyext.pm'     => '$(INST_LIBDIR)/Python/cpyext.pm',
                         'cpyemb.pm'     => '$(INST_LIBDIR)/Python/cpyemb.pm',
                         'pyext.pm'      => '$(INST_LIBDIR)/Python/pyext.pm',
-                        'pyemb.pm'      => '$(INST_LIBDIR)/Python/pyemb.pm',
     },
     'EXE_FILES'     => [
                         'idl2py.pl',

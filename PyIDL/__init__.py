@@ -1,4 +1,6 @@
 
+""" PyIDL """
+
 _itf_embedded = dict()
 
 def Register(key, value):
@@ -15,71 +17,89 @@ def marshal(output, name, value):
     func = name + '__marshal'
     getattr(output, func)(value)
 
-def demarshal(input, name):
+def demarshal(input_, name):
     func = name + '__demarshal'
-    return getattr(input, func)()
+    return getattr(input_, func)()
 
-def check(type, value):
-    if isinstance(type, str):
-        if type == 'char':
+def check(type_, value):
+    if isinstance(type_, str):
+        if type_ == 'char':
             if not isinstance(value, str):
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
             if len(value) != 1:
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
-        elif type == 'wchar':
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
+        elif type_ == 'wchar':
             if not isinstance(value, basestring):
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
             if len(value) != 1:
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
-        elif type == 'octet':
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
+        elif type_ == 'octet':
             if value < 0 or value > 255:
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
-        elif type == 'short':
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
+        elif type_ == 'short':
             if value < -32768 or value > 32767:
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
-        elif type == 'unsigned_short':
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
+        elif type_ == 'unsigned_short':
             if value < 0 or value > 65535:
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
-        elif type == 'long':
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
+        elif type_ == 'long':
             if value < -2147483648 or value > 2147483647:
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
-        elif type == 'unsigned_long':
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
+        elif type_ == 'unsigned_long':
             if value < 0 or value > 4294967295L:
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
-        elif type == 'long_long':
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
+        elif type_ == 'long_long':
             if value < -9223372036854775808L or value > 9223372036854775807L:
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
-        elif type == 'unsigned_long_long':
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
+        elif type_ == 'unsigned_long_long':
             if value < 0 or value > 18446744073709551615L:
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
-        elif type == 'float':
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
+        elif type_ == 'float':
             pass
-        elif type == 'double':
+        elif type_ == 'double':
             pass
-        elif type == 'long_double':
+        elif type_ == 'long_double':
             pass
-        elif type == 'boolean':
+        elif type_ == 'boolean':
             pass
-        elif type == 'string':
+        elif type_ == 'string':
             if not isinstance(value, str):
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
-        elif type == 'wstring':
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
+        elif type_ == 'wstring':
             if not isinstance(value, basestring):
-                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
+                raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                      CORBA_COMPLETED_MAYBE)
         else:
-            raise "Internal Error: %s" % type
+            print "Internal Error: %s" % type_
+            raise SystemException('IDL:CORBA/INTERNAL:1.0', 8,
+                                  CORBA_COMPLETED_MAYBE)
     else:
-        if isinstance(value, type) == False:
-            raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2, CORBA_COMPLETED_MAYBE)
+        if not isinstance(value, type_):
+            raise SystemException('IDL:CORBA/BAD_PARAM:1.0', 2,
+                                  CORBA_COMPLETED_MAYBE)
 
 class UserException(Exception):
-    """ An IDL exception is translated into a Python class derived from CORBA.UserException. """
+    """ An IDL exception is translated into a Python class derived
+        from CORBA.UserException. """
     pass
 
 class SystemException(Exception):
     """ CORBA.SystemException """
 
     def __init__(self, repos_id, minor, completed):
+        Exception.__init__(self)
         self.repos_id = repos_id
         self.minor = minor
         self.completed = completed
@@ -97,20 +117,21 @@ CORBA_COMPLETED_MAYBE = 2   # The status of implementation completion is
 class Enum(object):
     """ base class for IDL enum """
 
-    def __init__(self, str, val):
+    def __init__(self, str_, val):
         self._val = val
-        self._enum_str[val] = str
+        self._enum_str[val] = str_
         self._enum[val] = self
 
     def marshal(self, output):
         output.long__marshal(self._val)
 
-    def demarshal(cls, input):
-        val = input.long__demarshal()
+    def demarshal(cls, input_):
+        val = input_.long__demarshal()
         if cls._enum.has_key(val):
             return cls._enum[val]
         else:
-            raise 'CORBA.MARSHAL'
+            raise SystemException('IDL:CORBA/MARSHAL:1.0', 9,
+                                  CORBA_COMPLETED_MAYBE)
     demarshal = classmethod(demarshal)
 
     def __repr__(self):

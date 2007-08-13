@@ -1,29 +1,28 @@
 #   This file was generated (by idl2py.pl). DO NOT modify it.
-# From file : iop.idl, 5190 octets, Fri Dec 27 20:11:20 2002
+# From file : iop.idl, 5190 octets, Tue Jun 12 18:19:58 2007
+
+""" Module IDL:omg.org/IOP:1.0 """
 
 import PyIDL as CORBA
 
-
-""" Module IDL:omg.org/IOP:1.0 """
 
 class ProfileId(long):
     """ Typedef IDL:omg.org/IOP/ProfileId:1.0 """
 
     def __init__(self, val):
-        int.__init__(val)
         CORBA.check('unsigned_long', val)
+        long.__init__(val)
 
     def marshal(self, output):
         CORBA.marshal(output, 'unsigned_long', self)
 
-    def demarshal(cls, input):
-        val = CORBA.demarshal(input, 'unsigned_long')
+    def demarshal(cls, input_):
+        val = CORBA.demarshal(input_, 'unsigned_long')
         return cls(val)
     demarshal = classmethod(demarshal)
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/ProfileId:1.0'
-
     corba_id = classmethod(_get_id)
 
 # Constant: IDL:omg.org/IOP/TAG_INTERNET_IOP:1.0
@@ -54,7 +53,7 @@ class TaggedProfile(object):
     def _setprofile_data(self, profile_data):
         _e0 = profile_data
         CORBA.check('long', len(_e0))
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check('octet', ord(_e1))
         self._profile_data = profile_data
 
@@ -67,30 +66,33 @@ class TaggedProfile(object):
             self.tag.marshal(output)
             _e0 = self.profile_data
             CORBA.marshal(output, 'long', len(_e0))
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.marshal(output, 'octet', ord(_e1))
 
-    def demarshal(cls, input):
-            tag = ProfileId.demarshal(input)
-            _len0 = CORBA.demarshal(input, 'long')
+    def demarshal(cls, input_):
+            tag = ProfileId.demarshal(input_)
+            _len0 = CORBA.demarshal(input_, 'long')
             _lst0 = []
-            for _i0 in xrange(_len0) :
-                _lst0.append(CORBA.demarshal(input, 'octet'))
+            for _i0 in xrange(_len0):
+                _lst0.append(CORBA.demarshal(input_, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             profile_data = _lst0
             return cls(tag, profile_data)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.tag != obj.tag :
+        if self.tag != obj.tag:
             return False
-        if self.profile_data != obj.profile_data :
+        if self.profile_data != obj.profile_data:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -102,7 +104,6 @@ class TaggedProfile(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/TaggedProfile:1.0'
-
     corba_id = classmethod(_get_id)
 
 class IOR(object):
@@ -124,7 +125,7 @@ class IOR(object):
     def _setprofiles(self, profiles):
         _e0 = profiles
         CORBA.check('long', len(_e0))
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check(TaggedProfile, _e1)
         self._profiles = profiles
 
@@ -137,29 +138,32 @@ class IOR(object):
             CORBA.marshal(output, 'string', self.type_id)
             _e0 = self.profiles
             CORBA.marshal(output, 'long', len(_e0))
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 _e1.marshal(output)
 
-    def demarshal(cls, input):
-            type_id = CORBA.demarshal(input, 'string')
-            _len0 = CORBA.demarshal(input, 'long')
+    def demarshal(cls, input_):
+            type_id = CORBA.demarshal(input_, 'string')
+            _len0 = CORBA.demarshal(input_, 'long')
             _lst0 = []
-            for _i0 in xrange(_len0) :
-                _lst0.append(TaggedProfile.demarshal(input))
+            for _i0 in xrange(_len0):
+                _lst0.append(TaggedProfile.demarshal(input_))
             profiles = _lst0
             return cls(type_id, profiles)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.type_id != obj.type_id :
+        if self.type_id != obj.type_id:
             return False
-        if self.profiles != obj.profiles :
+        if self.profiles != obj.profiles:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -171,27 +175,25 @@ class IOR(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/IOR:1.0'
-
     corba_id = classmethod(_get_id)
 
 class ComponentId(long):
     """ Typedef IDL:omg.org/IOP/ComponentId:1.0 """
 
     def __init__(self, val):
-        int.__init__(val)
         CORBA.check('unsigned_long', val)
+        long.__init__(val)
 
     def marshal(self, output):
         CORBA.marshal(output, 'unsigned_long', self)
 
-    def demarshal(cls, input):
-        val = CORBA.demarshal(input, 'unsigned_long')
+    def demarshal(cls, input_):
+        val = CORBA.demarshal(input_, 'unsigned_long')
         return cls(val)
     demarshal = classmethod(demarshal)
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/ComponentId:1.0'
-
     corba_id = classmethod(_get_id)
 
 class TaggedComponent(object):
@@ -213,7 +215,7 @@ class TaggedComponent(object):
     def _setcomponent_data(self, component_data):
         _e0 = component_data
         CORBA.check('long', len(_e0))
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check('octet', ord(_e1))
         self._component_data = component_data
 
@@ -226,30 +228,33 @@ class TaggedComponent(object):
             self.tag.marshal(output)
             _e0 = self.component_data
             CORBA.marshal(output, 'long', len(_e0))
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.marshal(output, 'octet', ord(_e1))
 
-    def demarshal(cls, input):
-            tag = ComponentId.demarshal(input)
-            _len0 = CORBA.demarshal(input, 'long')
+    def demarshal(cls, input_):
+            tag = ComponentId.demarshal(input_)
+            _len0 = CORBA.demarshal(input_, 'long')
             _lst0 = []
-            for _i0 in xrange(_len0) :
-                _lst0.append(CORBA.demarshal(input, 'octet'))
+            for _i0 in xrange(_len0):
+                _lst0.append(CORBA.demarshal(input_, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             component_data = _lst0
             return cls(tag, component_data)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.tag != obj.tag :
+        if self.tag != obj.tag:
             return False
-        if self.component_data != obj.component_data :
+        if self.component_data != obj.component_data:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -261,7 +266,6 @@ class TaggedComponent(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/TaggedComponent:1.0'
-
     corba_id = classmethod(_get_id)
 
 class MultipleComponentProfile(list):
@@ -270,26 +274,25 @@ class MultipleComponentProfile(list):
     def __init__(self, *params):
         list.__init__(self, *params)
         _e0 = list(*params)
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check(TaggedComponent, _e1)
 
     def marshal(self, output):
         _e0 = self
         CORBA.marshal(output, 'long', len(_e0))
-        for _e1 in _e0 :
+        for _e1 in _e0:
             _e1.marshal(output)
 
-    def demarshal(cls, input):
-        _len0 = CORBA.demarshal(input, 'long')
+    def demarshal(cls, input_):
+        _len0 = CORBA.demarshal(input_, 'long')
         _lst0 = []
-        for _i0 in xrange(_len0) :
-            _lst0.append(TaggedComponent.demarshal(input))
+        for _i0 in xrange(_len0):
+            _lst0.append(TaggedComponent.demarshal(input_))
         return cls(_lst0)
     demarshal = classmethod(demarshal)
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/MultipleComponentProfile:1.0'
-
     corba_id = classmethod(_get_id)
 
 # Constant: IDL:omg.org/IOP/TAG_ORB_TYPE:1.0
@@ -398,20 +401,19 @@ class ServiceId(long):
     """ Typedef IDL:omg.org/IOP/ServiceId:1.0 """
 
     def __init__(self, val):
-        int.__init__(val)
         CORBA.check('unsigned_long', val)
+        long.__init__(val)
 
     def marshal(self, output):
         CORBA.marshal(output, 'unsigned_long', self)
 
-    def demarshal(cls, input):
-        val = CORBA.demarshal(input, 'unsigned_long')
+    def demarshal(cls, input_):
+        val = CORBA.demarshal(input_, 'unsigned_long')
         return cls(val)
     demarshal = classmethod(demarshal)
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/ServiceId:1.0'
-
     corba_id = classmethod(_get_id)
 
 class ServiceContext(object):
@@ -433,7 +435,7 @@ class ServiceContext(object):
     def _setcontext_data(self, context_data):
         _e0 = context_data
         CORBA.check('long', len(_e0))
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check('octet', ord(_e1))
         self._context_data = context_data
 
@@ -446,30 +448,33 @@ class ServiceContext(object):
             self.context_id.marshal(output)
             _e0 = self.context_data
             CORBA.marshal(output, 'long', len(_e0))
-            for _e1 in _e0 :
+            for _e1 in _e0:
                 CORBA.marshal(output, 'octet', ord(_e1))
 
-    def demarshal(cls, input):
-            context_id = ServiceId.demarshal(input)
-            _len0 = CORBA.demarshal(input, 'long')
+    def demarshal(cls, input_):
+            context_id = ServiceId.demarshal(input_)
+            _len0 = CORBA.demarshal(input_, 'long')
             _lst0 = []
-            for _i0 in xrange(_len0) :
-                _lst0.append(CORBA.demarshal(input, 'octet'))
+            for _i0 in xrange(_len0):
+                _lst0.append(CORBA.demarshal(input_, 'octet'))
             _lst0 = ''.join(map(chr, _lst0))
             context_data = _lst0
             return cls(context_id, context_data)
     demarshal = classmethod(demarshal)
 
     def __eq__(self, obj):
-        if obj == None :
+        if obj == None:
             return False
-        if isinstance(obj, type(self)) == False :
+        if not isinstance(obj, type(self)):
             return False
-        if self.context_id != obj.context_id :
+        if self.context_id != obj.context_id:
             return False
-        if self.context_data != obj.context_data :
+        if self.context_data != obj.context_data:
             return False
         return True
+
+    def __ne__(self, obj):
+        return not self.__eq__(obj)
 
     def __repr__(self):
         lst = []
@@ -481,7 +486,6 @@ class ServiceContext(object):
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/ServiceContext:1.0'
-
     corba_id = classmethod(_get_id)
 
 class ServiceContextList(list):
@@ -490,26 +494,25 @@ class ServiceContextList(list):
     def __init__(self, *params):
         list.__init__(self, *params)
         _e0 = list(*params)
-        for _e1 in _e0 :
+        for _e1 in _e0:
             CORBA.check(ServiceContext, _e1)
 
     def marshal(self, output):
         _e0 = self
         CORBA.marshal(output, 'long', len(_e0))
-        for _e1 in _e0 :
+        for _e1 in _e0:
             _e1.marshal(output)
 
-    def demarshal(cls, input):
-        _len0 = CORBA.demarshal(input, 'long')
+    def demarshal(cls, input_):
+        _len0 = CORBA.demarshal(input_, 'long')
         _lst0 = []
-        for _i0 in xrange(_len0) :
-            _lst0.append(ServiceContext.demarshal(input))
+        for _i0 in xrange(_len0):
+            _lst0.append(ServiceContext.demarshal(input_))
         return cls(_lst0)
     demarshal = classmethod(demarshal)
 
     def _get_id(cls):
         return 'IDL:omg.org/IOP/ServiceContextList:1.0'
-
     corba_id = classmethod(_get_id)
 
 # Constant: IDL:omg.org/IOP/TransactionService:1.0

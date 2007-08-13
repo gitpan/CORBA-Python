@@ -1,5 +1,10 @@
 Revision history for Perl extension CORBA::Python.
 
+0.40  Mon Aug 13 08:30:00 2007
+	- some pylint cleanup
+	- remove pyemb.pm (merged in class.pm)
+	- some Perl Best Practices
+
 0.39  Mon Jun 18 08:30:00 2007
 	- fix in PyIDL/rpc_giop.py
 

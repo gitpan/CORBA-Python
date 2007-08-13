@@ -85,12 +85,12 @@ if (        exists $parser->YYData->{root}
 	$parser->YYData->{root}->visit(new CORBA::C::literalVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::C::lengthVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::C::typeVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::C::incskelVisitor($parser, '', ''));
-	$parser->YYData->{root}->visit(new CORBA::C::skeletonVisitor($parser, ''));
+	$parser->YYData->{root}->visit(new CORBA::C::incskelVisitor($parser, q{}, q{}));
+	$parser->YYData->{root}->visit(new CORBA::C::skeletonVisitor($parser, q{}));
 	$parser->YYData->{root}->visit(new CORBA::Python::nameVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::Python::importVisitor($parser, 1));
 	$parser->YYData->{root}->visit(new CORBA::Python::literalVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::Python::cPyExtendedVisitor($parser));
+	$parser->YYData->{root}->visit(new CORBA::Python::PyExtendedVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::Python::cExtendedVisitor($parser));
 	$parser->YYData->{root}->visit(new CORBA::Python::hExtendedVisitor($parser));
 }

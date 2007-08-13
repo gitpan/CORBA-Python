@@ -45,12 +45,12 @@ sub _get_scoped_name {
 	my $name = $node->{full};
 	if ($name =~ /^::[0-9A-Z_a-z]+$/) {
 		if ($scope_full) {
-			my $basename = basename($self->{srcname}, ".idl");
+			my $basename = basename($self->{srcname}, '.idl');
 			$basename =~ s/\./_/g;
 			if (exists $self->{server}) {
-				$name = "_" . $basename . "_skel." . $node->{py_name};
+				$name = '_' . $basename . '_skel.' . $node->{py_name};
 			} else {
-				$name = "_" . $basename . "." . $node->{py_name};
+				$name = '_' . $basename . '.' . $node->{py_name};
 			}
 		} else {
 			$name = $node->{py_name};
@@ -84,9 +84,9 @@ sub _get_scoped_name {
 			while ($name) {
 				my $defn = $self->{symbtab}->Lookup($name);
 				if ($defn->isa('Interface') and exists $self->{server}) {
-					$name2 = $defn->{py_name} . "_skel." . $name2;
+					$name2 = $defn->{py_name} . '_skel.' . $name2;
 				} else {
-					$name2 = $defn->{py_name} . "." . $name2;
+					$name2 = $defn->{py_name} . '.' . $name2;
 				}
 				$name =~ s/::[0-9A-Z_a-z]+$//;
 			}
@@ -196,7 +196,7 @@ sub _Eval {
 	if (      $elt->isa('BinaryOp') ) {
 		my $right = $self->_Eval($list_expr, $type, $scope);
 		my $left = $self->_Eval($list_expr, $type, $scope);
-		return "(" . $left . " " . $elt->{op} . " " . $right . ")";
+		return '(' . $left . ' ' . $elt->{op} . ' ' . $right . ')';
 	} elsif ( $elt->isa('UnaryOp') ) {
 		my $right = $self->_Eval($list_expr, $type, $scope);
 		return $elt->{op} . $right;
@@ -226,7 +226,7 @@ sub visitExpression {
 	if ($type->isa('TypeDeclarator')) {
 		my $type2 = $self->_get_defn($type->{type});
 		unless ($type2->isa('EnumType')) {
-			$node->{$self->{key}} = $type->{py_name} . "(" . $str . ")";
+			$node->{$self->{key}} = $type->{py_name} . '(' . $str . ')';
 			return;
 		}
 	}
@@ -240,7 +240,7 @@ sub visitIntegerLiteral {
 	$str =~ s/^\+//;
 	unless (exists $type->{auto}) {
 		if      ($node->{lexeme} =~ /^0+$/) {
-			$str = "0";
+			$str = '0';
 		} elsif ($node->{lexeme} =~ /^0[Xx]/) {
 			my $fmt;
 			if      ($type->{value} eq 'octet') {
@@ -267,7 +267,7 @@ sub visitIntegerLiteral {
 		if (       $type->{value} eq 'unsigned long'
 				or $type->{value} eq 'long long'
 				or $type->{value} eq 'unsigned long long' ) {
-			$str .= "L";
+			$str .= 'L';
 		}
 	}
 	$node->{$self->{key}} = $str;
@@ -276,7 +276,7 @@ sub visitIntegerLiteral {
 sub visitStringLiteral {
 	my $self = shift;
 	my ($node) = @_;
-	my @list = unpack "C*", $node->{value};
+	my @list = unpack 'C*', $node->{value};
 	my $str = "'";
 	foreach (@list) {
 		if ($_ < 32 or $_ >= 128) {
@@ -358,9 +358,9 @@ sub visitBooleanLiteral {
 	my $self = shift;
 	my ($node) = @_;
 	if ($node->{value} eq 'TRUE') {
-		$node->{$self->{key}} = "True";
+		$node->{$self->{key}} = 'True';
 	} else {
-		$node->{$self->{key}} = "False";
+		$node->{$self->{key}} = 'False';
 	}
 }
 

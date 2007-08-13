@@ -17,7 +17,8 @@ def _getRequestId():
     _request_id += 1
     return _request_id
 
-def _sendall(sock, data): # Method sendall exists for real sockets but not for simulated ones..
+def _sendall(sock, data):
+    # Method sendall exists for real sockets but not for simulated ones..
     pos = 0
     remaining = len(data)
     while remaining > 0:
@@ -86,7 +87,10 @@ def RequestReply(sock, request_header, request_body):
         message_type = CORBA.demarshal(header, 'octet')
         message_size = CORBA.demarshal(header, 'unsigned_long')
 
-        if magic == 'GIOP' and GIOP_version.major == 1 and GIOP_version.minor == 2 and message_type == 1:
+        if magic == 'GIOP' and \
+           GIOP_version.major == 1 and \
+           GIOP_version.minor == 2 and \
+           message_type == 1:
             _reply = _recvall(sock, message_size)
             reply = CDR.InputBuffer(_reply, endian)
             reply_header = GIOP.ReplyHeader_1_2.demarshal(reply)
@@ -94,13 +98,17 @@ def RequestReply(sock, request_header, request_body):
                 _LOGGER.info("reply id %d", reply_header.request_id)
                 return (reply_header.reply_status, reply_header.service_context, reply)
             elif request_header.request_id > reply_header.request_id:
-                _LOGGER.warning("bad request id %d (wanted %d).", reply_header.request_id, request_header.request_id)
+                _LOGGER.warning("bad request id %d (wanted %d).",
+                                reply_header.request_id, request_header.request_id)
             else:
-                _LOGGER.error("bad request id %d (wanted %d).", reply_header.request_id, request_header.request_id)
-                raise CORBA.SystemException('IDL:CORBA/INTERNAL:1.0', 8, CORBA.CORBA_COMPLETED_MAYBE)
+                _LOGGER.error("bad request id %d (wanted %d).",
+                              reply_header.request_id, request_header.request_id)
+                raise CORBA.SystemException('IDL:CORBA/INTERNAL:1.0', 8,
+                                            CORBA.CORBA_COMPLETED_MAYBE)
         else:
             _LOGGER.error("bad header")
-            raise CORBA.SystemException('IDL:CORBA/INTERNAL:1.0', 8, CORBA.CORBA_COMPLETED_MAYBE)
+            raise CORBA.SystemException('IDL:CORBA/INTERNAL:1.0', 8,
+                                        CORBA.CORBA_COMPLETED_MAYBE)
 
 
 class Servant(object):
@@ -117,8 +125,10 @@ class Servant(object):
 
         def checkHeaderField(name, got, expected):
             if got != expected:
-                _LOGGER.error("bad header field: %s got=%s expected=%s", name, got, expected)
-                raise CORBA.SystemException('IDL:CORBA/INTERNAL:1.0', 8, CORBA.CORBA_COMPLETED_MAYBE)
+                _LOGGER.error("bad header field: %s got=%s expected=%s",
+                              name, got, expected)
+                raise CORBA.SystemException('IDL:CORBA/INTERNAL:1.0', 8,
+                                            CORBA.CORBA_COMPLETED_MAYBE)
 
         input_buffer = CDR.InputBuffer(request)
         magic = ''
@@ -148,7 +158,8 @@ class Servant(object):
         remaining_data = input_buffer.read()
 
         if message_type != 0:
-            _LOGGER.error("unexpected message type %s (expected 0)", message_type)
+            _LOGGER.error("unexpected message type %s (expected 0)",
+                          message_type)
             return None, remaining_data
 
         request_header = GIOP.RequestHeader_1_2.demarshal(message)
@@ -162,16 +173,16 @@ class Servant(object):
             CORBA.marshal(reply_body, 'unsigned_long', 1)   # COMPLETED_NO
         else:
             classname = self.itf[interface]
-            op = request_header.operation
-            if not hasattr(classname, op):
-                _LOGGER.error("unknown operation '%s'.", op)
+            oper = request_header.operation
+            if not hasattr(classname, oper):
+                _LOGGER.error("unknown operation '%s'.", oper)
                 reply_status = GIOP.SYSTEM_EXCEPTION
                 reply_body = CDR.OutputBuffer()
                 CORBA.marshal(reply_body, 'string', 'IDL:CORBA/BAD_OPERATION:1.0')
                 CORBA.marshal(reply_body, 'unsigned_long', 13)
                 CORBA.marshal(reply_body, 'unsigned_long', 1)   # COMPLETED_NO
             else:
-                srv_op = '_skel_' + op
+                srv_op = '_skel_' + oper
                 (reply_status, reply_body) = getattr(classname, srv_op)(message)
                 if reply_status == None:
                     return (None, remaining_data)       # oneway
@@ -184,17 +195,17 @@ class Servant(object):
         ).marshal(reply)
         reply.write(reply_body.getvalue())
         reply_body.close()
-        buffer = CDR.OutputBuffer()
+        buff = CDR.OutputBuffer()
         GIOP.MessageHeader_1_1(
             magic='GIOP',
             GIOP_version=GIOP.Version(major=1, minor=2),
             flags=0x01,         # flags : little endian
             message_type=1,     # Reply
             message_size=len(reply.getvalue())
-        ).marshal(buffer)
-        buffer.write(reply.getvalue())
+        ).marshal(buff)
+        buff.write(reply.getvalue())
         reply.close()
-        s = buffer.getvalue()
-        buffer.close()
-        return (s, remaining_data)
+        str_ = buff.getvalue()
+        buff.close()
+        return (str_, remaining_data)
 
