@@ -7,11 +7,6 @@ use warnings;
 #			Python Language Mapping Specification, Version 1.2 November 2002
 #
 
-package CORBA::Python::class;
-
-use vars qw($VERSION);
-$VERSION = '0.40';
-
 package CORBA::Python::classVisitor;
 
 use File::Basename;

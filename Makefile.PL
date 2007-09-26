@@ -3,30 +3,19 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'          => 'CORBA::Python',
-    'VERSION_FROM'  => 'class.pm',
+    'VERSION_FROM'  => 'lib/CORBA/Python.pm',
     'ABSTRACT'      => 'IDL compiler to Python mapping',
     'PREREQ_PM'     => {
-                        'CORBA::IDL::node'  => 2.45,
-                        'CORBA::C::include' => 2.43,
+                        'CORBA::IDL'    => 2.47,
+                        'CORBA::C'      => 2.46,
     },
-    'PM'            => {
-                        'class.pm'      => '$(INST_LIBDIR)/Python/class.pm',
-                        'name.pm'       => '$(INST_LIBDIR)/Python/name.pm',
-                        'literal.pm'    => '$(INST_LIBDIR)/Python/literal.pm',
-                        'import.pm'     => '$(INST_LIBDIR)/Python/import.pm',
-                        'client.pm'     => '$(INST_LIBDIR)/Python/client.pm',
-                        'server.pm'     => '$(INST_LIBDIR)/Python/server.pm',
-                        'cpy.pm'        => '$(INST_LIBDIR)/Python/cpy.pm',
-                        'cpyext.pm'     => '$(INST_LIBDIR)/Python/cpyext.pm',
-                        'cpyemb.pm'     => '$(INST_LIBDIR)/Python/cpyemb.pm',
-                        'pyext.pm'      => '$(INST_LIBDIR)/Python/pyext.pm',
-    },
+    'INSTALLDIRS'   => 'site',
     'EXE_FILES'     => [
-                        'idl2py.pl',
-                        'idl2pycli.pl',
-                        'idl2pysrv.pl',
-                        'idl2pyemb.pl',
-                        'idl2pyext.pl',
+                        'bin/idl2py',
+                        'bin/idl2pycli',
+                        'bin/idl2pysrv',
+                        'bin/idl2pyemb',
+                        'bin/idl2pyext',
     ],
     'C'             => [],
     'AUTHOR'        => "Francois PERRAD (francois.perrad\@gadz.org)",
@@ -49,3 +38,4 @@ INSTALL
 
     return $script;
 }
+

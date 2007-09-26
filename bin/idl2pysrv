@@ -3,8 +3,10 @@
 use strict;
 use warnings;
 
+use CORBA::IDL;
 use CORBA::IDL::parser30;
 use CORBA::IDL::symbtab;
+use CORBA::Python;
 # visitors
 use CORBA::IDL::repos_id;
 use CORBA::Python::name;
@@ -26,13 +28,14 @@ if ($Parser::IDL_version lt '3.0') {
 if ($^O eq 'MSWin32') {
 	$parser->YYData->{preprocessor} = 'cpp -C ' . $cflags;
 #	$parser->YYData->{preprocessor} = 'CL /E /C /nologo ' . $cflags;	# Microsoft VC
-} else {
+}
+else {
 	$parser->YYData->{preprocessor} = 'cpp -C ' . $cflags;
 }
-$parser->getopts("hi:J:Ovx");
+$parser->getopts('hi:J:Ovx');
 if ($parser->YYData->{opt_v}) {
-	print "CORBA::Python $CORBA::Python::class::VERSION\n";
-	print "CORBA::IDL $CORBA::IDL::node::VERSION\n";
+	print "CORBA::Python $CORBA::Python::VERSION\n";
+	print "CORBA::IDL $CORBA::IDL::VERSION\n";
 	print "IDL $Parser::IDL_version\n";
 	print "$0\n";
 	print "Perl $] on $^O\n";
@@ -234,7 +237,7 @@ cpp, idl2html, idl2pycli, idl2py
 
 =head1 COPYRIGHT
 
-(c) 2005 Francois PERRAD, France. All rights reserved.
+(c) 2005-2007 Francois PERRAD, France. All rights reserved.
 
 This program and all CORBA::Python modules are distributed
 under the terms of the Artistic Licence.

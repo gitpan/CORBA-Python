@@ -1,4 +1,4 @@
-#   This file was generated (by idl2py.pl). DO NOT modify it.
+#   This file was generated (by idl2py). DO NOT modify it.
 # From file : iop.idl, 5190 octets, Tue Jun 12 18:19:58 2007
 
 """ Module IDL:omg.org/IOP:1.0 """

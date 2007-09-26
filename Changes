@@ -1,5 +1,9 @@
 Revision history for Perl extension CORBA::Python.
 
+0.41  Wed Sep 26 12:30:00 2007
+	- reorg: more compliant with CPAN requirements
+	- cpyemb.pm: add GIL management for multi-threaded application
+
 0.40  Mon Aug 13 08:30:00 2007
 	- some pylint cleanup
 	- remove pyemb.pm (merged in class.pm)

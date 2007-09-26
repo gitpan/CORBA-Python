@@ -1,4 +1,4 @@
-#   This file was generated (by idl2py.pl). DO NOT modify it.
+#   This file was generated (by idl2py). DO NOT modify it.
 # From file : giop.idl, 9058 octets, Tue Jun 12 18:19:56 2007
 
 """ Module IDL:omg.org/GIOP:1.0 """

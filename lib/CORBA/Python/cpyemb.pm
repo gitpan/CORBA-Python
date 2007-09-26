@@ -257,6 +257,9 @@ sub visitOperation {
 	print $FH "\tCORBA_Environment * _ev\n";
 	print $FH ")\n";
 	print $FH "{\n";
+	print $FH "#ifdef WITH_THREAD\n";
+	print $FH "\tPyGILState_STATE _gstate;\n";
+	print $FH "#endif\n";
 	if (exists $node->{list_raise}) {
 		print $FH "#ifdef CORBA_THREADED\n";
 		foreach (@{$node->{list_raise}}) {	# exception
@@ -329,6 +332,9 @@ sub visitOperation {
 		}
 	}
 	print $FH "\tCORBA_Environment __ev;\n";
+	print $FH "#ifdef WITH_THREAD\n";
+	print $FH "\t_gstate = PyGILState_Ensure();\n";
+	print $FH "#endif\n";
 	print $FH "\n";
 	foreach (@{$node->{list_param}}) {	# parameter
 		my $type = $self->_get_defn($_->{type});
@@ -521,6 +527,9 @@ sub visitOperation {
 	print $FH "\tif (NULL == _o) {\n";
 	print $FH "\t\tPy_XDECREF(_obj);\n";
 	print $FH "\t}\n";
+	print $FH "#ifdef WITH_THREAD\n";
+	print $FH "\tPyGILState_Release(_gstate);\n";
+	print $FH "#endif\n";
 	if ($type->isa('VoidType')) {
 		print $FH "\treturn;\n";
 	} else {
