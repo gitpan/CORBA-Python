@@ -3,97 +3,68 @@
 use strict;
 use warnings;
 
-use CORBA::IDL;
-use CORBA::IDL::parser30;
-use CORBA::IDL::symbtab;
-use CORBA::C;
+use CORBA::IDL      2.60;
+use CORBA::C        2.60;
 use CORBA::Python;
 # visitors
-use CORBA::IDL::repos_id;
-use CORBA::C::literal;
-use CORBA::C::name;
-use CORBA::C::include;
-use CORBA::C::type;
-use CORBA::Python::name;
-use CORBA::Python::import;
-use CORBA::Python::literal;
-use CORBA::Python::class;
-use CORBA::Python::server;
-use CORBA::Python::cpyemb;
+use CORBA::IDL::RepositoryIdVisitor;
+use CORBA::Python::PyEmbeddedVisitor;
+use CORBA::Python::CPyEmbeddedVisitor;
 
-my $parser = new Parser;
-$parser->YYData->{verbose_error} = 1;		# 0, 1
-$parser->YYData->{verbose_warning} = 1;		# 0, 1
-$parser->YYData->{verbose_info} = 1;		# 0, 1
-$parser->YYData->{verbose_deprecated} = 0;	# 0, 1 (concerns only version '2.4' and upper)
-$parser->YYData->{symbtab} = new CORBA::IDL::Symbtab($parser);
-my $cflags = '-D__idl2pyemb';
-if ($Parser::IDL_version lt '3.0') {
-	$cflags .= ' -D_PRE_3_0_COMPILER_';
-}
-if ($^O eq 'MSWin32') {
-	$parser->YYData->{preprocessor} = 'cpp -C ' . $cflags;
-#	$parser->YYData->{preprocessor} = 'CL /E /C /nologo ' . $cflags;	# Microsoft VC
-}
-else {
-	$parser->YYData->{preprocessor} = 'cpp -C ' . $cflags;
-}
+my $parser = CORBA::IDL::ParserFactory::create('3.0');
 $parser->getopts('hi:J:Ovx');
 if ($parser->YYData->{opt_v}) {
-	print "CORBA::Python $CORBA::Python::VERSION\n";
-	print "CORBA::C $CORBA::C::VERSION\n";
-	print "CORBA::IDL $CORBA::IDL::VERSION\n";
-	print "IDL $Parser::IDL_version\n";
-	print "$0\n";
-	print "Perl $] on $^O\n";
-	exit;
+    print "CORBA::Python $CORBA::Python::VERSION\n";
+    print "CORBA::C $CORBA::C::VERSION\n";
+    print "CORBA::IDL $CORBA::IDL::VERSION\n";
+    print "IDL $CORBA::IDL::Parser::IDL_VERSION\n";
+    print "$0\n";
+    print "Perl $] on $^O\n";
+    exit;
 }
 if ($parser->YYData->{opt_h}) {
-	use Pod::Usage;
-	pod2usage(-verbose => 1);
+    use Pod::Usage;
+    pod2usage(-verbose => 1);
 }
-$parser->YYData->{collision_allowed} = 1;
+
+my $cflags = '-D__idl2pyemb';
+if ($CORBA::IDL::Parser::IDL_VERSION lt '3.0') {
+    $cflags .= ' -D_PRE_3_0_COMPILER_';
+}
+my $preprocessor;
+if ($^O eq 'MSWin32') {
+    $preprocessor = 'cpp -C ' . $cflags;
+#    $preprocessor = 'CL /E /C /nologo ' . $cflags;      # Microsoft VC
+}
+else {
+    $preprocessor = 'cpp -C ' . $cflags;
+}
+$parser->Configure(
+        'preprocessor'          => $preprocessor,
+        'verbose_error'         => 1,   # 0, 1
+        'verbose_warning'       => 1,   # 0, 1
+        'verbose_info'          => 1,   # 0, 1
+        'verbose_deprecated'    => 0,   # 0, 1 (concerns only version '2.4' and upper)
+        'collision_allowed'     => 1,
+);
 $parser->Run(@ARGV);
-$parser->YYData->{symbtab}->CheckForward();
-$parser->YYData->{symbtab}->CheckRepositoryID();
-
-if (exists $parser->YYData->{nb_error}) {
-	my $nb = $parser->YYData->{nb_error};
-	print "$nb error(s).\n"
-}
-if (        $parser->YYData->{verbose_warning}
-		and exists $parser->YYData->{nb_warning} ) {
-	my $nb = $parser->YYData->{nb_warning};
-	print "$nb warning(s).\n"
-}
-if (        $parser->YYData->{verbose_info}
-		and exists $parser->YYData->{nb_info} ) {
-	my $nb = $parser->YYData->{nb_info};
-	print "$nb info(s).\n"
-}
-if (        $parser->YYData->{verbose_deprecated}
-		and exists $parser->YYData->{nb_deprecated} ) {
-	my $nb = $parser->YYData->{nb_deprecated};
-	print "$nb deprecated(s).\n"
-}
-
-if (        exists $parser->YYData->{root}
-		and ! exists $parser->YYData->{nb_error} ) {
-	$parser->YYData->{root}->visit(new CORBA::IDL::repositoryIdVisitor($parser));
-	if (        $Parser::IDL_version ge '3.0'
-			and $parser->YYData->{opt_x} ) {
-		$parser->YYData->{symbtab}->Export();
-	}
-	$parser->YYData->{root}->visit(new CORBA::C::nameVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::C::literalVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::C::lengthVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::C::typeVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::C::incdefVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::Python::nameVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::Python::importVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::Python::literalVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::Python::cEmbeddedVisitor($parser));
-	$parser->YYData->{root}->visit(new CORBA::Python::PyEmbeddedVisitor($parser));
+$parser->DisplayStatus();
+my $root = $parser->getRoot();
+if (defined $root) {
+    $root->visit(new CORBA::IDL::RepositoryIdVisitor($parser));
+    if ($parser->YYData->{opt_x}) {
+        $parser->Export();
+    }
+    $root->visit(new CORBA::C::NameVisitor($parser));
+    $root->visit(new CORBA::C::LiteralVisitor($parser));
+    $root->visit(new CORBA::C::LengthVisitor($parser));
+    $root->visit(new CORBA::C::TypeVisitor($parser));
+    $root->visit(new CORBA::C::IncDefVisitor($parser));
+    $root->visit(new CORBA::Python::NameVisitor($parser));
+    $root->visit(new CORBA::Python::ImportVisitor($parser));
+    $root->visit(new CORBA::Python::LiteralVisitor($parser));
+    $root->visit(new CORBA::Python::CPyEmbeddedVisitor($parser));
+    $root->visit(new CORBA::Python::PyEmbeddedVisitor($parser));
 }
 
 __END__
@@ -214,7 +185,7 @@ First, copy additional files in current directory
 
 Second, run :
 
-    idl2pyemb.pl Calc.idl
+    idl2pyemb Calc.idl
 
 Third, create your implementation F<MyCalc.py> which inherits of F<_Calc.py>
 

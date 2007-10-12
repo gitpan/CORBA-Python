@@ -1,9 +1,14 @@
 use strict;
+use warnings;
 
 package CORBA::Python;
 
-use vars qw($VERSION);
-$VERSION = '0.41';
+our $VERSION = '2.60';
+
+use CORBA::Python::NameVisitor;
+use CORBA::Python::ImportVisitor;
+use CORBA::Python::LiteralVisitor;
+use CORBA::Python::ClassVisitor;
 
 1;
 

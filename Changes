@@ -1,5 +1,9 @@
 Revision history for Perl extension CORBA::Python.
 
+2.60  Fri Oct 12 08:30:00 2007
+	- compatible with CORBA::IDL 2.60
+	- some Perl Best Practices
+
 0.41  Wed Sep 26 12:30:00 2007
 	- reorg: more compliant with CPAN requirements
 	- cpyemb.pm: add GIL management for multi-threaded application

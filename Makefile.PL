@@ -6,8 +6,8 @@ WriteMakefile(
     'VERSION_FROM'  => 'lib/CORBA/Python.pm',
     'ABSTRACT'      => 'IDL compiler to Python mapping',
     'PREREQ_PM'     => {
-                        'CORBA::IDL'    => 2.47,
-                        'CORBA::C'      => 2.46,
+                        'CORBA::IDL'    => 2.60,
+                        'CORBA::C'      => 2.60,
     },
     'INSTALLDIRS'   => 'site',
     'EXE_FILES'     => [
