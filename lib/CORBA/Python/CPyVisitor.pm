@@ -1,5 +1,3 @@
-use strict;
-use warnings;
 
 #
 #           Interface Definition Language (OMG IDL CORBA v3.0)
@@ -7,7 +5,10 @@ use warnings;
 
 package CORBA::Python::CPyVisitor;
 
-our $VERSION = '2.60';
+use strict;
+use warnings;
+
+our $VERSION = '2.61';
 
 use File::Basename;
 use POSIX qw(ctime);
@@ -57,6 +58,84 @@ sub _split_name {
     $classname =~ s/^:://;
     $classname =~ s/::/\./g;
     return ($c_mod, $py_mod, $classname);
+}
+
+sub _get_cpy_format {
+    my $self = shift;
+    my ($type) = @_;
+
+    if ( $type->isa('BaseInterface')
+      or $type->isa('ForwardBaseInterface')
+      or $type->isa('TypeDeclarator')
+      or $type->isa('StructType')
+      or $type->isa('UnionType')
+      or $type->isa('EnumType')
+      or $type->isa('SequenceType') ) {
+        return 'O';
+    }
+    elsif ( $type->isa('FloatingPtType') ) {
+        if    ( $type->{value} eq 'float' ) {
+            return 'f';
+        }
+        elsif ( $type->{value} eq 'double' ) {
+            return 'd';
+        }
+        elsif ( $type->{value} eq 'long double' ) {
+            return 'd';
+        }
+        else {
+            warn "_get_cpy_format FloatingPtType : ERROR_INTERNAL $type->{value} \n";
+        }
+    }
+    elsif ( $type->isa('IntegerType') ) {
+        if    ( $type->{value} eq 'short' ) {
+            return 'h';
+        }
+        elsif ( $type->{value} eq 'unsigned short' ) {
+            return 'H';
+        }
+        elsif ( $type->{value} eq 'long' ) {
+            return 'l';
+        }
+        elsif ( $type->{value} eq 'unsigned long' ) {
+            return 'k';
+        }
+        elsif ( $type->{value} eq 'long long' ) {
+            return 'L';
+        }
+        elsif ( $type->{value} eq 'unsigned long long' ) {
+            return 'K';
+        }
+        else {
+            warn "_get_cpy_format IntegerType : ERROR_INTERNAL $type->{value} \n";
+        }
+    }
+    elsif ( $type->isa('OctetType')
+         or $type->isa('BooleanType') ) {
+        return 'B';
+    }
+    elsif ( $type->isa('CharType') ) {
+        return 'c';
+    }
+    elsif ( $type->isa('StringType') ) {
+        return 's';
+    }
+    elsif ( $type->isa('WideStringType') ) {
+        return 'u';
+    }
+    elsif ( $type->isa('AnyType') ) {
+        warn "_get_cpy_format AnyType : not supplied \n";
+    }
+    elsif ( $type->isa('FixedPtType') ) {
+        warn "_get_cpy_format FixedPtType : not supplied \n";
+    }
+    elsif ( $type->isa('NativeType') ) {
+        warn "_get_cpy_format NativeType : not supplied \n";
+    }
+    else {
+        my $class = ref $type;
+        warn "Please implement '$class' in '_get_cpy_format'.\n";
+    }
 }
 
 #
@@ -271,7 +350,7 @@ sub visitTypeDeclarator {
             pop @tab if (scalar @array);
         }
         else {
-            my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+            my $fmt = $self->_get_cpy_format($type);
             if ($fmt eq 'O') {
                 if (exists $self->{embedded}) {
                     print $FH @tab,"\t\t\tPYOBJ_CHECK_",$type->{c_name},"(_item",$nb,"); \\\n";
@@ -335,7 +414,7 @@ sub visitTypeDeclarator {
             print $FH @tab,"\t\t",$obj," = PyString_FromStringAndSize(",$args,", ",$size->{c_literal},"); /* New reference */ \\\n";
         }
         else {
-            my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+            my $fmt = $self->_get_cpy_format($type);
             if ($fmt eq 'O') {
                 print $FH @tab,"\t\tPYOBJ_FROM_",$type->{c_name},"(_item",$nb,", ",$args,"); \\\n";
             }
@@ -410,7 +489,7 @@ sub visitTypeDeclarator {
         }
     }
     else {
-        my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+        my $fmt = $self->_get_cpy_format($type);
         if ($fmt eq 'O') {
             print $FH "static PyObject * _cls_",$node->{c_name}," = NULL;\n";
             print $FH "\n";
@@ -700,7 +779,7 @@ sub _member_fmt {
     }
     else {
         my $type = $self->_get_defn($member->{type});
-        return CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+        return $self->_get_cpy_format($type);
     }
 }
 
@@ -769,7 +848,7 @@ sub _member_as {
                 pop @tab if (scalar @array);
             }
             else {
-                my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+                my $fmt = $self->_get_cpy_format($type);
                 if ($fmt eq 'O') {
                     if (exists $self->{embedded}) {
                         print $FH @tab,"\t\t\tPYOBJ_CHECK_",$type->{c_name},"(_item",$nb,"); \\\n";
@@ -855,7 +934,7 @@ sub _member_from {
                 pop @tab if (scalar @array);
             }
             else {
-                my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+                my $fmt = $self->_get_cpy_format($type);
                 if ($fmt eq 'O') {
                     print $FH @tab,"\t\t\tPYOBJ_FROM_",$type->{c_name},"(_item",$nb,", ",$args,"); \\\n";
                 }
@@ -990,7 +1069,7 @@ sub visitUnionType {
     }
     print $FH "\t\t\t",$self->{error},"; \\\n";
     print $FH "\t\t} \\\n";
-    my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+    my $fmt = $self->_get_cpy_format($type);
     if ($fmt eq 'O') {
         print $FH "\t\tPYOBJ_AS_",$type->{c_name},"((val)._d, _d); \\\n";
     }
@@ -1381,7 +1460,7 @@ sub visitSequenceType {
         }
         print $FH "\t\t\t\t",$self->{error},"; \\\n";
         print $FH "\t\t\t} \\\n";
-        my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+        my $fmt = $self->_get_cpy_format($type);
         if ($fmt eq 'O') {
             if (exists $self->{embedded}) {
             print $FH "\t\t\tPYOBJ_CHECK_",$type->{c_name},"(_item); \\\n";
@@ -1693,127 +1772,6 @@ sub visitTypePrefix {
 
 sub visitCodeFragment {
     # empty
-}
-
-##############################################################################
-
-package CORBA::Python::CPy_format;
-
-sub NameAttr {
-    my $proto = shift;
-    my ($symbtab, $type) = @_;
-    my $class = ref $type;
-    $class = 'BaseInterface' if ($type->isa('BaseInterface'));
-    $class = 'BaseInterface' if ($type->isa('ForwardBaseInterface'));
-    my $func = 'NameAttr' . $class;
-    if ($proto->can($func)) {
-        return $proto->$func($symbtab, $type);
-    }
-    else {
-        warn "Please implement a function '$func' in '",__PACKAGE__,"'.\n";
-    }
-}
-
-sub NameAttrBaseInterface {
-    return 'O';
-}
-
-sub NameAttrTypeDeclarator {
-    return 'O';
-}
-
-sub NameAttrNativeType {
-    warn __PACKAGE__,"::NameAttrNativeType : not supplied \n";
-}
-
-sub NameAttrFloatingPtType {
-    my $proto = shift;
-    my ($symbtab, $type) = @_;
-    if    ($type->{value} eq 'float') {
-        return 'f';
-    }
-    elsif ($type->{value} eq 'double') {
-        return 'd';
-    }
-    elsif ($type->{value} eq 'long double') {
-        return 'd';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrFloatingPtType : ERROR_INTERNAL $type->{value} \n";
-    }
-}
-
-sub NameAttrIntegerType {
-    my $proto = shift;
-    my ($symbtab, $type) = @_;
-    if    ($type->{value} eq 'short') {
-        return 'h';
-    }
-    elsif ($type->{value} eq 'unsigned short') {
-        return 'H';
-    }
-    elsif ($type->{value} eq 'long') {
-        return 'l';
-    }
-    elsif ($type->{value} eq 'unsigned long') {
-        return 'k';
-    }
-    elsif ($type->{value} eq 'long long') {
-        return 'L';
-    }
-    elsif ($type->{value} eq 'unsigned long long') {
-        return 'K';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrIntegerType : ERROR_INTERNAL $type->{value} \n";
-    }
-}
-
-sub NameAttrOctetType {
-    return 'B';
-}
-
-sub NameAttrCharType {
-    return 'c';
-}
-
-#sub NameAttrWideCharType {
-#}
-
-sub NameAttrBooleanType {
-    return 'B';
-}
-
-sub NameAttrAnyType {
-    warn __PACKAGE__,"::NameAttrAnyType : not supplied \n";
-}
-
-sub NameAttrStructType {
-    return 'O';
-}
-
-sub NameAttrUnionType {
-    return 'O';
-}
-
-sub NameAttrEnumType {
-    return 'O';
-}
-
-sub NameAttrSequenceType {
-    return 'O';
-}
-
-sub NameAttrStringType {
-    return 's';
-}
-
-sub NameAttrWideStringType {
-    return 'u';
-}
-
-sub NameAttrFixedPtType {
-    warn __PACKAGE__,"::NameAttrFixedPtType : not supplied \n";
 }
 
 1;

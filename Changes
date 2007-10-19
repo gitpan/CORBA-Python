@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+2.61  Fri Oct 19 08:30:00 2007
+	- compatible with CORBA::IDL 2.61
+
 2.60  Fri Oct 12 08:30:00 2007
 	- compatible with CORBA::IDL 2.60
 	- some Perl Best Practices

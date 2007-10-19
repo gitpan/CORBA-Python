@@ -1,5 +1,3 @@
-use strict;
-use warnings;
 
 #
 #           Interface Definition Language (OMG IDL CORBA v3.0)
@@ -7,7 +5,10 @@ use warnings;
 
 package CORBA::Python::CPyEmbeddedVisitor;
 
-our $VERSION = '2.60';
+use strict;
+use warnings;
+
+our $VERSION = '2.61';
 
 use CORBA::Python::CPyVisitor;
 use base qw(CORBA::Python::CPyVisitor);
@@ -42,6 +43,216 @@ sub new {
     my $filename = $basename . '.c';
     $self->open_stream($filename);
     return $self;
+}
+
+sub _get_c_obj_from {
+    my $self = shift;
+    my ($type, $attr) = @_;
+
+    if ( $type->isa('BaseInterface')
+      or $type->isa('FloatingPtType')
+      or $type->isa('IntegerType')
+      or $type->isa('OctetType')
+      or $type->isa('CharType')
+      or $type->isa('BooleanType')
+      or $type->isa('EnumType') ) {
+        if (    $attr eq 'in' ) {
+            return q{};
+        }
+        elsif ( $attr eq 'inout' ) {
+            return '*';
+        }
+    }
+    elsif ( $type->isa('StringType') ) {
+        if (    $attr eq 'in' ) {
+            return q{};
+        }
+        elsif ( $attr eq 'inout' ) {
+            return q{};
+        }
+    }
+    elsif ( $type->isa('StructType')
+         or $type->isa('UnionType')
+         or $type->isa('SequenceType') ) {
+        if (    $attr eq 'in' ) {
+            return '*';
+        }
+        elsif ( $attr eq 'inout' ) {
+            return '*';
+        }
+    }
+    elsif ( $type->isa('TypeDeclarator') ) {
+        if (exists $type->{array_size}) {
+            warn "_get_c_obj_from TypeDeclarator $type->{idf} : empty array_size.\n"
+                    unless (@{$type->{array_size}});
+            if (    $attr eq 'in' ) {
+                return q{};
+            }
+            elsif ( $attr eq 'inout' ) {
+                return q{};
+            }
+        }
+        else {
+            my $type = $type->{type};
+            unless (ref $type) {
+                $type = $self->{symbtab}->Lookup($type);
+            }
+            return $self->_get_c_obj_from($type, $attr);
+        }
+    }
+    elsif ( $type->isa('NativeType') ) {
+        warn "_get_c_obj_from NativeType : not supplied \n";
+        return;
+    }
+    elsif ( $type->isa('AnyType') ) {
+        warn "_get_c_obj_from AnyType : not supplied \n";
+        return;
+    }
+    else {
+        my $class = ref $type;
+        warn "Please implement '$class' in '_get_c_obj_from'.\n";
+        return;
+    }
+}
+
+sub _get_c_obj_as {
+    my $self = shift;
+    my ($type, $attr) = @_;
+
+    if ( $type->isa('BaseInterface')
+      or $type->isa('FloatingPtType')
+      or $type->isa('IntegerType')
+      or $type->isa('OctetType')
+      or $type->isa('CharType')
+      or $type->isa('BooleanType')
+      or $type->isa('EnumType')
+      or $type->isa('StringType') ) {
+        if    ( $attr eq 'inout' ) {
+            return q{};
+        }
+        elsif ( $attr eq 'out' ) {
+            return q{};
+        }
+        elsif ( $attr eq 'return' ) {
+            return q{};
+        }
+    }
+    elsif ( $type->isa('StructType')
+         or $type->isa('UnionType') ) {
+        if    ( $attr eq 'inout' ) {
+            return q{};
+        }
+        elsif ( $attr eq 'out' ) {
+            if (defined $type->{length}) {      # variable
+                return '*';
+            }
+            else {
+                return q{};
+            }
+        }
+        elsif ( $attr eq 'return' ) {
+            if (defined $type->{length}) {      # variable
+                return '*';
+            }
+            else {
+                return q{};
+            }
+        }
+    }
+    elsif ( $type->isa('SequenceType') ) {
+        if    ( $attr eq 'inout' ) {
+            return q{};
+        }
+        elsif ( $attr eq 'out' ) {
+            return '*';
+        }
+        elsif ( $attr eq 'return' ) {
+            return q{};
+        }
+    }
+    elsif ( $type->isa('TypeDeclarator') ) {
+        if (exists $type->{array_size}) {
+            warn "_get_c_obj_as TypeDeclarator $type->{idf} : empty array_size.\n"
+                    unless (@{$type->{array_size}});
+            if (    $attr eq 'inout' ) {
+                return q{};
+            }
+            elsif ( $attr eq 'out' ) {
+                if (defined $type->{length}) {      # variable
+                    return q{};
+                }
+                else {
+                    return q{};
+                }
+            }
+            elsif ( $attr eq 'return' ) {
+                return q{};
+            }
+        }
+        else {
+            my $type = $type->{type};
+            unless (ref $type) {
+                $type = $self->{symbtab}->Lookup($type);
+            }
+            return $self->_get_c_obj_as($type, $attr);
+        }
+    }
+    elsif ( $type->isa('NativeType') ) {
+        warn "_get_c_obj_as NativeType : not supplied \n";
+        return;
+    }
+    elsif ( $type->isa('AnyType') ) {
+        warn "_get_c_obj_as AnyType : not supplied \n";
+        return;
+    }
+    else {
+        my $class = ref $type;
+        warn "Please implement '$class' in '_get_c_obj_as'.\n";
+        return;
+    }
+}
+
+sub _get_c_free_out {
+    my $self = shift;
+    my ($type) = @_;
+
+    if ( $type->isa('BaseInterface')
+      or $type->isa('StructType')
+      or $type->isa('UnionType')
+      or $type->isa('SequenceType') ) {
+        return '*';
+    }
+    elsif ( $type->isa('StringType')
+         or $type->isa('WideStringType') ) {
+        return q{};
+    }
+    elsif ( $type->isa('TypeDeclarator') ) {
+        if (exists $type->{array_size}) {
+            warn "_get_c_free_out TypeDeclarator $type->{idf} : empty array_size.\n"
+                    unless (@{$type->{array_size}});
+            return q{};
+        }
+        else {
+            my $type = $type->{type};
+            unless (ref $type) {
+                $type = $self->{symbtab}->Lookup($type);
+            }
+            return $self->_get_c_free_out($type);
+        }
+    }
+    elsif ( $type->isa('NativeType') ) {
+        warn "_get_c_free_out NativeType : not supplied \n";
+        return;
+    }
+    elsif ( $type->isa('AnyType') ) {
+        warn "_get_c_free_out AnyType : not supplied \n";
+        return;
+    }
+    else {
+        my $class = ref $type;
+        warn "Please implement '$class' in '_get_c_free_out'.\n";
+        return;
+    }
 }
 
 #
@@ -293,7 +504,7 @@ sub visitOperation {
     my $args_in = q{};
     my $args_out = q{};
     unless ($type->isa('VoidType')) {
-        my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+        my $fmt = $self->_get_cpy_format($type);
         if ($fmt eq 'O') {
             print $FH "\tPyObject * __ret;\n";
             $args_out .= ', &__ret'
@@ -305,7 +516,7 @@ sub visitOperation {
     }
     foreach (@{$node->{list_param}}) {  # parameter
         my $type = $self->_get_defn($_->{type});
-        my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+        my $fmt = $self->_get_cpy_format($type);
         if ($fmt eq 'O') {
             print $FH "\tPyObject * _arg_",$_->{c_name}," = NULL;\n";
         }
@@ -347,11 +558,11 @@ sub visitOperation {
     print $FH "\n";
     foreach (@{$node->{list_param}}) {  # parameter
         my $type = $self->_get_defn($_->{type});
-        my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+        my $fmt = $self->_get_cpy_format($type);
         if (        $_->{attr} eq 'out'
                 and $fmt eq 'O'
                 and defined $type->{length} ) {
-            print $FH "\t",CORBA::Python::Cfree_out->NameAttr($self->{symbtab}, $type),$_->{c_name}," = NULL;\n";
+            print $FH "\t",$self->_get_c_free_out($type),$_->{c_name}," = NULL;\n";
         }
     }
     print $FH "\n";
@@ -405,9 +616,9 @@ sub visitOperation {
     foreach (@{$node->{list_param}}) {  # parameter
         next if ($_->{attr} eq 'out');
         my $type = $self->_get_defn($_->{type});
-        my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+        my $fmt = $self->_get_cpy_format($type);
         if ($fmt eq 'O') {
-            print $FH "\tPYOBJ_FROM_",$type->{c_name},"(_arg_",$_->{c_name},", ",CORBA::Python::Cobj_from->NameAttr($self->{symbtab}, $type, $_->{attr}), $_->{c_name},");\n";
+            print $FH "\tPYOBJ_FROM_",$type->{c_name},"(_arg_",$_->{c_name},", ",$self->_get_c_obj_from($type, $_->{attr}), $_->{c_name},");\n";
         }
     }
     print $FH "\n";
@@ -446,19 +657,19 @@ sub visitOperation {
             print $FH "\t\t}\n";
         }
         unless ($type->isa('VoidType')) {
-            my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+            my $fmt = $self->_get_cpy_format($type);
             if ($fmt eq 'O') {
                 print $FH "\t\tPYOBJ_CHECK_",$type->{c_name},"(__ret);\n";
-                print $FH "\t\tPYOBJ_AS_",$type->{c_name},"(",CORBA::Python::Cobj_as->NameAttr($self->{symbtab}, $type, 'return'),"_ret, __ret);\n";
+                print $FH "\t\tPYOBJ_AS_",$type->{c_name},"(",$self->_get_c_obj_as($type, 'return'),"_ret, __ret);\n";
             }
         }
         foreach (@{$node->{list_param}}) {  # parameter
             next if ($_->{attr} eq 'in');
             my $type = $self->_get_defn($_->{type});
-            my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+            my $fmt = $self->_get_cpy_format($type);
             if ($fmt eq 'O') {
                 print $FH "\t\tPYOBJ_CHECK_",$type->{c_name},"(_arg_",$_->{c_name},");\n";
-                print $FH "\t\tPYOBJ_AS_",$_->{attr},"_",$type->{c_name},"(",CORBA::Python::Cobj_as->NameAttr($self->{symbtab}, $type, $_->{attr}), $_->{c_name},", _arg_",$_->{c_name},");\n";
+                print $FH "\t\tPYOBJ_AS_",$_->{attr},"_",$type->{c_name},"(",$self->_get_c_obj_as($type, $_->{attr}), $_->{c_name},", _arg_",$_->{c_name},");\n";
             }
         }
     }
@@ -552,11 +763,11 @@ sub visitOperation {
     print $FH "err:\n";
     foreach (@{$node->{list_param}}) {  # parameter
         my $type = $self->_get_defn($_->{type});
-        my $fmt = CORBA::Python::CPy_format->NameAttr($self->{symbtab}, $type);
+        my $fmt = $self->_get_cpy_format($type);
         if (        $_->{attr} eq 'out'
                 and $fmt eq 'O'
                 and defined $type->{length} ) {
-            print $FH "\tFREE_out_",$type->{c_name},"(",CORBA::Python::Cfree_out->NameAttr($self->{symbtab}, $type),$_->{c_name},");\n";
+            print $FH "\tFREE_out_",$type->{c_name},"(",$self->_get_c_free_out($type),$_->{c_name},");\n";
         }
     }
     if (exists $node->{list_raise}) {
@@ -585,575 +796,6 @@ sub visitOperation {
 #
 #   3.14    Attribute Declaration       (inherited)
 #
-
-##############################################################################
-
-package CORBA::Python::Cobj_from;
-
-sub NameAttr {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    my $class = ref $type;
-    $class = 'BaseInterface' if ($type->isa('BaseInterface'));
-    $class = 'BaseInterface' if ($type->isa('ForwardBaseInterface'));
-    my $func = 'NameAttr' . $class;
-    if($proto->can($func)) {
-        return $proto->$func($symbtab, $type, $attr);
-    }
-    else {
-        warn "Please implement a function '$func' in '",__PACKAGE__,"'.\n";
-    }
-}
-
-sub NameAttrBaseInterface {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (    $attr eq 'in' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'inout' ) {
-        return '*';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrBaseInterface : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrTypeDeclarator {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (exists $type->{array_size}) {
-        warn __PACKAGE__,"::NameAttrTypeDeclarator $type->{idf} : empty array_size.\n"
-                unless (@{$type->{array_size}});
-        if (    $attr eq 'in' ) {
-            return q{};
-        }
-        elsif ( $attr eq 'inout' ) {
-            return q{};
-        }
-        else {
-            warn __PACKAGE__,"::NameAttrTypeDeclarator : ERROR_INTERNAL $attr \n";
-        }
-    }
-    else {
-        my $type = $type->{type};
-        unless (ref $type) {
-            $type = $symbtab->Lookup($type);
-        }
-        return $proto->NameAttr($symbtab, $type, $attr);
-    }
-}
-
-sub NameAttrNativeType {
-    warn __PACKAGE__,"::NameAttrNativeType : not supplied \n";
-}
-
-sub NameAttrFloatingPtType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (    $attr eq 'in' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'inout' ) {
-        return '*';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrFloatingPtType : ERROR_INTERNAL $type->{value} \n";
-    }
-}
-
-sub NameAttrIntegerType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (    $attr eq 'in' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'inout' ) {
-        return '*';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrIntegerType : ERROR_INTERNAL $type->{value} \n";
-    }
-}
-
-sub NameAttrOctetType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (    $attr eq 'in' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'inout' ) {
-        return '*';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrOctetType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrCharType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (    $attr eq 'in' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'inout' ) {
-        return '*';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrCharType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-#sub NameAttrWideCharType {
-#}
-
-sub NameAttrBooleanType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (    $attr eq 'in' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'inout' ) {
-        return '*';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrBooleanType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrAnyType {
-    warn __PACKAGE__,"::NameAttrAnyType : not supplied \n";
-}
-
-sub NameAttrStructType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (    $attr eq 'in' ) {
-        return '*';
-    }
-    elsif ( $attr eq 'inout' ) {
-        return '*';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrStructType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrUnionType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (    $attr eq 'in' ) {
-        return '*';
-    }
-    elsif ( $attr eq 'inout' ) {
-        return '*';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrUnionType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrEnumType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (    $attr eq 'in' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'inout' ) {
-        return '*';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrEnumType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrSequenceType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (    $attr eq 'in' ) {
-        return '*';
-    }
-    elsif ( $attr eq 'inout' ) {
-        return '*';
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrSequenceType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrStringType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (    $attr eq 'in' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'inout' ) {
-        return q{};
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrStringType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-#sub NameAttrWideStringType {
-#}
-
-##############################################################################
-
-package CORBA::Python::Cobj_as;
-
-# needs $type->{length}
-
-sub NameAttr {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    my $class = ref $type;
-    $class = 'BaseInterface' if ($type->isa('BaseInterface'));
-    $class = 'BaseInterface' if ($type->isa('ForwardBaseInterface'));
-    my $func = 'NameAttr' . $class;
-    if($proto->can($func)) {
-        return $proto->$func($symbtab, $type, $attr);
-    }
-    else {
-        warn "Please implement a function '$func' in '",__PACKAGE__,"'.\n";
-    }
-}
-
-sub NameAttrBaseInterface {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if    ( $attr eq 'inout' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'out' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'return' ) {
-        return q{};
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrBaseInterface : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrTypeDeclarator {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if (exists $type->{array_size}) {
-        warn __PACKAGE__,"::NameAttrTypeDeclarator $type->{idf} : empty array_size.\n"
-                unless (@{$type->{array_size}});
-        if (    $attr eq 'inout' ) {
-            return q{};
-        }
-        elsif ( $attr eq 'out' ) {
-            if (defined $type->{length}) {      # variable
-                return q{};
-            }
-            else {
-                return q{};
-            }
-        }
-        elsif ( $attr eq 'return' ) {
-            return q{};
-        }
-        else {
-            warn __PACKAGE__,"::NameAttrTypeDeclarator : ERROR_INTERNAL $attr \n";
-        }
-    }
-    else {
-        my $type = $type->{type};
-        unless (ref $type) {
-            $type = $symbtab->Lookup($type);
-        }
-        return $proto->NameAttr($symbtab, $type, $attr);
-    }
-}
-
-sub NameAttrNativeType {
-    my $proto = shift;
-    warn __PACKAGE__,"::NameAttrNativeType : not supplied \n";
-}
-
-sub NameAttrFloatingPtType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if    ( $attr eq 'inout' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'out' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'return' ) {
-        return q{};
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrFloatingPtType : ERROR_INTERNAL $type->{value} \n";
-    }
-}
-
-sub NameAttrIntegerType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if    ( $attr eq 'inout' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'out' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'return' ) {
-        return q{};
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrIntegerType : ERROR_INTERNAL $type->{value} \n";
-    }
-}
-
-sub NameAttrOctetType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if    ( $attr eq 'inout' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'out' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'return' ) {
-        return q{};
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrOctetType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrCharType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if    ( $attr eq 'inout' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'out' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'return' ) {
-        return q{};
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrCharType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-#sub NameAttrWideCharType {
-#}
-
-sub NameAttrBooleanType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if    ( $attr eq 'inout' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'out' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'return' ) {
-        return q{};
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrBooleanType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrAnyType {
-    warn __PACKAGE__,"::NameAttrAnyType : not supplied \n";
-}
-
-sub NameAttrStructType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if    ( $attr eq 'inout' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'out' ) {
-        if (defined $type->{length}) {      # variable
-            return '*';
-        }
-        else {
-            return q{};
-        }
-    }
-    elsif ( $attr eq 'return' ) {
-        if (defined $type->{length}) {      # variable
-            return '*';
-        }
-        else {
-            return q{};
-        }
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrStructType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrUnionType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if    ( $attr eq 'inout' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'out' ) {
-        if (defined $type->{length}) {      # variable
-            return '*';
-        }
-        else {
-            return q{};
-        }
-    }
-    elsif ( $attr eq 'return' ) {
-        if (defined $type->{length}) {      # variable
-            return '*';
-        }
-        else {
-            return q{};
-        }
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrUnionType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrEnumType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if    ( $attr eq 'inout' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'out' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'return' ) {
-        return q{};
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrEnumType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrSequenceType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if    ( $attr eq 'inout' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'out' ) {
-        return '*';
-    }
-    elsif ( $attr eq 'return' ) {
-        return q{};
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrSequenceType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-sub NameAttrStringType {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    if    ( $attr eq 'inout' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'out' ) {
-        return q{};
-    }
-    elsif ( $attr eq 'return' ) {
-        return q{};
-    }
-    else {
-        warn __PACKAGE__,"::NameAttrStringType : ERROR_INTERNAL $attr \n";
-    }
-}
-
-#sub NameAttrWideStringType {
-#}
-
-##############################################################################
-
-package CORBA::Python::Cfree_out;
-
-sub NameAttr {
-    my $proto = shift;
-    my ($symbtab, $type, $attr) = @_;
-    my $class = ref $type;
-    $class = 'BaseInterface' if ($type->isa('BaseInterface'));
-    $class = 'BaseInterface' if ($type->isa('ForwardBaseInterface'));
-    my $func = 'NameAttr' . $class;
-    if($proto->can($func)) {
-        return $proto->$func($symbtab, $type, $attr);
-    }
-    else {
-        warn "Please implement a function '$func' in '",__PACKAGE__,"'.\n";
-    }
-}
-
-sub NameAttrBaseInterface {
-    my $proto = shift;
-    my ($symbtab, $type) = @_;
-    return '*';
-}
-
-sub NameAttrTypeDeclarator {
-    my $proto = shift;
-    my ($symbtab, $type) = @_;
-    if (exists $type->{array_size}) {
-        warn __PACKAGE__,"::NameAttrTypeDeclarator $type->{idf} : empty array_size.\n"
-                unless (@{$type->{array_size}});
-        return q{};
-    }
-    else {
-        my $type = $type->{type};
-        unless (ref $type) {
-            $type = $symbtab->Lookup($type);
-        }
-        return $proto->NameAttr($symbtab, $type);
-    }
-}
-
-sub NameAttrNativeType {
-    my $proto = shift;
-    warn __PACKAGE__,"::NameAttrNativeType : not supplied \n";
-}
-
-sub NameAttrAnyType {
-    warn __PACKAGE__,"::NameAttrAnyType : not supplied \n";
-}
-
-sub NameAttrStructType {
-    my $proto = shift;
-    my ($symbtab, $type) = @_;
-    return '*';
-}
-
-sub NameAttrUnionType {
-    my $proto = shift;
-    my ($symbtab, $type) = @_;
-    return '*';
-}
-
-sub NameAttrSequenceType {
-    my $proto = shift;
-    my ($symbtab, $type) = @_;
-    return '*';
-}
-
-sub NameAttrStringType {
-    my $proto = shift;
-    my ($symbtab, $type) = @_;
-    return q{};
-}
-
-sub NameAttrWideStringType {
-    my $proto = shift;
-    my ($symbtab, $type) = @_;
-    return q{};
-}
 
 1;
 
