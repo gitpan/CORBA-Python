@@ -45,6 +45,7 @@ rpc1/Calc.idl
 rpc1/MyCalc.py
 rpc1/client.py
 rpc1/server.py
-test.pl
+t/CORBA-Python.t
+t/pod.t
 
 META.yml                                 Module meta-data (added by MakeMaker)

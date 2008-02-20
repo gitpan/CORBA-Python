@@ -8,7 +8,7 @@ package CORBA::Python::CPyEmbeddedVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.61';
+our $VERSION = '2.62';
 
 use CORBA::Python::CPyVisitor;
 use base qw(CORBA::Python::CPyVisitor);
@@ -276,14 +276,14 @@ sub visitSpecification {
     }
     print $FH "#include \"",$basename,".h\"\n";
     print $FH "\n";
-    print $FH "extern PyObject *find_class(PyObject *module, char *classname);\n";
-    print $FH "extern PyObject *lookup_itf(char *repos_id);\n";
-    print $FH "extern int parse_object(PyObject *obj, char *format, void *addr);\n";
+    print $FH "extern PyObject *find_class(PyObject *module, const char *classname);\n";
+    print $FH "extern PyObject *lookup_itf(const char *repos_id);\n";
+    print $FH "extern int parse_object(PyObject *obj, const char *format, void *addr);\n";
     print $FH "\n";
     print $FH "\n";
     print $FH "static PyObject* _cls_PyIDL_SystemException = NULL;\n";
     print $FH "\n";
-    print $FH "static PyObject* getclass_PyIDL_SystemException()\n";
+    print $FH "static PyObject* getclass_PyIDL_SystemException(void)\n";
     print $FH "{\n";
     print $FH "\tif (NULL == _cls_PyIDL_SystemException) {\n";
     print $FH "\t\tPyObject* mod = PyImport_AddModule(\"PyIDL\");  // Borrowed reference\n";
@@ -342,7 +342,7 @@ sub visitRegularInterface {
     if ($self->{srcname} eq $node->{filename}) {
         my ($c_mod, $py_mod, $classname) = $self->_split_name($node);
         print $FH "\n";
-        print $FH "PyObject * _new_",$node->{c_name},"(void)\n";
+        print $FH "static PyObject * _new_",$node->{c_name},"(void)\n";
         print $FH "{\n";
         print $FH "\tPyObject* _cls_",$node->{c_name},";\n";
         print $FH "\tPyObject* _obj_",$node->{c_name},";\n";

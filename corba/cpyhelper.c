@@ -1,10 +1,10 @@
 #include "Python.h"
 
 PyObject *
-find_class(PyObject *module, char *classname)
+find_class(PyObject *module, const char *classname)
 {
-	PyObject * mod; 
-	PyObject * obj; 
+	PyObject * mod;
+	PyObject * obj;
 	char * start;
 	char * name;
 	char * ap;
@@ -33,7 +33,7 @@ find_class(PyObject *module, char *classname)
 	while ((ap = strchr(name, '.')) != NULL) {
 		*ap = '\0';
 		obj = PyObject_GetAttrString(mod, name); // New reference
-		Py_DECREF(mod); 
+		Py_DECREF(mod);
 		mod = obj;
 		if (NULL == obj) {
 			(void)PyErr_Format(PyExc_RuntimeError, "no attr '%s' for finding '%s'", name, classname);
@@ -41,8 +41,8 @@ find_class(PyObject *module, char *classname)
 		}
 		name = ++ap;
 	}
-	obj = PyObject_GetAttrString(mod, name); // New reference 
-	Py_DECREF(mod); 
+	obj = PyObject_GetAttrString(mod, name); // New reference
+	Py_DECREF(mod);
 	if (NULL == obj) {
 		(void)PyErr_Format(PyExc_RuntimeError, "no attr '%s' for finding '%s'", name, classname);
 	}
@@ -52,10 +52,10 @@ err:
 }
 
 PyObject *
-lookup_itf(char *repos_id)
+lookup_itf(const char *repos_id)
 {
-	PyObject * class; 
-	PyObject * mod; 
+	PyObject * class;
+	PyObject * mod;
 	PyObject * dict;
 	static PyObject * func = NULL;
 
@@ -71,11 +71,11 @@ lookup_itf(char *repos_id)
 		func = PyDict_GetItemString(dict, "Lookup"); // Borrowed reference
 		if (NULL == func) {
 			return NULL;
-		}       
+		}
 		if (!PyCallable_Check(func)) {
 			func = NULL;
 			return NULL;
-		}       
+		}
 	}
 
 	class = PyObject_CallFunction(func, "s", repos_id);	// cls = PyIDL.Lookup(repos_id)
@@ -85,12 +85,12 @@ lookup_itf(char *repos_id)
 	return class;
 }
 
-int 
-parse_object(PyObject *obj, char *format, void *addr)
+int
+parse_object(PyObject *obj, const char *format, void *addr)
 {
 	PyObject * args;
 
-	if (NULL == obj) 
+	if (NULL == obj)
 		return -1;
 	args = PyTuple_New(1); // New reference
 	PyTuple_SetItem(args, 0, obj);
