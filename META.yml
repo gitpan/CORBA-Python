@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                CORBA-Python
-version:             2.62
+version:             2.63
 abstract:            IDL compiler to Python mapping
 license:             ~
 generated_by:        ExtUtils::MakeMaker version 6.36_02

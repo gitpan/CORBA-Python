@@ -8,7 +8,7 @@ package CORBA::Python::CPyVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.61';
+our $VERSION = '2.63';
 
 use File::Basename;
 use POSIX qw(ctime);
@@ -410,8 +410,11 @@ sub visitTypeDeclarator {
             $nb ++;
         }
         $nb --;
-        if ( $type->isa('CharType') or $type->isa('OctetType') ) {
+        if ($type->isa('CharType')) {
             print $FH @tab,"\t\t",$obj," = PyString_FromStringAndSize(",$args,", ",$size->{c_literal},"); /* New reference */ \\\n";
+        }
+        elsif ($type->isa('OctetType')) {
+            print $FH @tab,"\t\t",$obj," = PyString_FromStringAndSize((char *)",$args,", ",$size->{c_literal},"); /* New reference */ \\\n";
         }
         else {
             my $fmt = $self->_get_cpy_format($type);
@@ -541,7 +544,7 @@ sub visitTypeDeclarator {
             print $FH "static PyObject * _cls_",$node->{c_name}," = NULL;\n";
             print $FH "\n";
             if (exists $self->{embedded}) {
-                print $FH "#define PYOBJ_CHECK_",$node->{c_name},"\n";
+                print $FH "#define PYOBJ_CHECK_",$node->{c_name},"(obj)\n";
                 print $FH "#define PYOBJ_AS_inout_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(*(val), obj)\n";
                 print $FH "#define PYOBJ_AS_out_",$node->{c_name},"(val, obj) PYOBJ_AS_",$node->{c_name},"(*(val), obj)\n";
             }
@@ -928,9 +931,14 @@ sub _member_from {
                 $nb ++;
             }
             $nb --;
-            if ( $type->isa('CharType') or $type->isa('OctetType') ) {
+            if ($type->isa('CharType')) {
                 push @tab, "\t" if (scalar @array);
                 print $FH @tab,"\t\t",$obj," = PyString_FromStringAndSize(",$args,", ",$size->{c_literal},"); /* New reference */ \\\n";
+                pop @tab if (scalar @array);
+            }
+            elsif ($type->isa('OctetType')) {
+                push @tab, "\t" if (scalar @array);
+                print $FH @tab,"\t\t",$obj," = PyString_FromStringAndSize((char *)",$args,", ",$size->{c_literal},"); /* New reference */ \\\n";
                 pop @tab if (scalar @array);
             }
             else {
@@ -1263,7 +1271,7 @@ sub visitEnumType {
     if ($self->{assert}) {
         print $FH "\t\t\tassert(0 == \"PYOBJ_FROM_",$node->{c_name}," (obj == NULL)\"); \\\n";
     }
-    print $FH "\t\t\tPyErr_Format(PyExc_RuntimeError, \"can't retrieve enum '",$node->{py_name},"'(%ld)\", (val)); \\\n";
+    print $FH "\t\t\tPyErr_Format(PyExc_RuntimeError, \"can't retrieve enum '",$node->{py_name},"'(%lu)\", (val)); \\\n";
     print $FH "\t\t\t",$self->{error},"; \\\n";
     print $FH "\t\t} \\\n";
     print $FH "\t}\n";
@@ -1373,7 +1381,12 @@ sub visitSequenceType {
         else {
             print $FH "\t{ \\\n";
         }
-        print $FH "\t\t(obj) = PyString_FromStringAndSize((val)._buffer, (val)._length); /* New reference */ \\\n";
+        if ($type->isa('CharType')) {
+            print $FH "\t\t(obj) = PyString_FromStringAndSize((val)._buffer, (val)._length); /* New reference */ \\\n";
+        }
+        else {
+            print $FH "\t\t(obj) = PyString_FromStringAndSize((char *)((val)._buffer), (val)._length); /* New reference */ \\\n";
+        }
         print $FH "\t}\n";
         print $FH "\n";
     }

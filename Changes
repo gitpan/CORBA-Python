@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+2.63  Thu Feb 21 18:30:00 2008
+	- generate C with less warning
+
 2.62  Wed Feb 20 18:30:00 2008
 	- generate C with less warning
 
