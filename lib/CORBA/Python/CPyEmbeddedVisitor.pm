@@ -8,7 +8,7 @@ package CORBA::Python::CPyEmbeddedVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.62';
+our $VERSION = '2.64';
 
 use CORBA::Python::CPyVisitor;
 use base qw(CORBA::Python::CPyVisitor);
@@ -267,6 +267,7 @@ sub visitSpecification {
     $py_name =~ s/\./_/g;
     $self->{root_module} = $py_name;
     my $FH = $self->{out};
+    print $FH "/* ex: set ro: */\n";
     print $FH "/* This file was generated (by ",basename($0),"). DO NOT modify it */\n";
     print $FH "// From file : ",$self->{srcname},", ",$self->{srcname_size}," octets, ",POSIX::ctime($self->{srcname_mtime});
     print $FH "\n";
@@ -309,6 +310,12 @@ sub visitSpecification {
         $self->_get_defn($_)->visit($self);
     }
     print $FH "/* End Of File : ",$self->{filename}," */\n";
+    print $FH "\n";
+    print $FH "/*\n";
+    print $FH " * Local variables:\n";
+    print $FH " *   buffer-read-only: t\n";
+    print $FH " * End:\n";
+    print $FH " */\n";    
     close $FH;
 }
 

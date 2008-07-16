@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+2.64  Wed Jul 16 18:30:00 2008
+	- add Vi & Emacs macros
+
 2.63  Thu Feb 21 18:30:00 2008
 	- generate C with less warning
 

@@ -8,7 +8,7 @@ package CORBA::Python::CPyVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.63';
+our $VERSION = '2.64';
 
 use File::Basename;
 use POSIX qw(ctime);
@@ -23,7 +23,7 @@ sub open_stream {
 
 sub _get_defn {
     my $self = shift;
-    my ($defn) = @_;
+    my $defn = shift;
     if (ref $defn) {
         return $defn;
     }
@@ -146,6 +146,7 @@ sub visitSpecification {
     my $self = shift;
     my ($node) = @_;
     my $FH = $self->{out};
+    print $FH "/* ex: set ro: */\n";
     print $FH "/* This file was generated (by ",basename($0),"). DO NOT modify it */\n";
     print $FH "/* From file : ",$self->{srcname},", ",$self->{srcname_size}," octets, ",POSIX::ctime($self->{srcname_mtime});
     print $FH " */\n";
@@ -178,6 +179,12 @@ sub visitSpecification {
         $self->_get_defn($_)->visit($self);
     }
     print $FH "/* end of file : ",$self->{filename}," */\n";
+    print $FH "\n";
+    print $FH "/*\n";
+    print $FH " * Local variables:\n";
+    print $FH " *   buffer-read-only: t\n";
+    print $FH " * End:\n";
+    print $FH " */\n";    
     close $FH;
 }
 

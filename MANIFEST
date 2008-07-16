@@ -45,6 +45,7 @@ rpc1/Calc.idl
 rpc1/MyCalc.py
 rpc1/client.py
 rpc1/server.py
+rpc1/tserver.py
 t/CORBA-Python.t
 t/pod.t
 

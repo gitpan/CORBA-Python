@@ -1,5 +1,6 @@
+# ex: set ro:
 #   This file was generated (by idl2py). DO NOT modify it.
-# From file : IOP.idl, 5190 octets, Fri Oct 05 18:47:18 2007
+# From file : IOP.idl, 5190 octets, Fri Oct 05 19:47:18 2007
 
 """ Module IDL:omg.org/IOP:1.0 """
 
@@ -566,3 +567,7 @@ SecurityAttributeService = 15L
 # Constant: IDL:omg.org/IOP/ActivityService:1.0
 ActivityService = 16L
 
+
+# Local variables:
+#   buffer-read-only: t
+# End:

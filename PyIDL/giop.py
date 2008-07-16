@@ -1,5 +1,6 @@
+# ex: set ro:
 #   This file was generated (by idl2py). DO NOT modify it.
-# From file : GIOP.idl, 9058 octets, Fri Oct 05 18:47:18 2007
+# From file : GIOP.idl, 9058 octets, Fri Oct 05 19:47:18 2007
 
 """ Module IDL:omg.org/GIOP:1.0 """
 
@@ -1725,3 +1726,7 @@ class FragmentHeader_1_3(FragmentHeader_1_2):
         return 'IDL:omg.org/GIOP/FragmentHeader_1_3:1.0'
     corba_id = classmethod(_get_id)
 
+
+# Local variables:
+#   buffer-read-only: t
+# End:

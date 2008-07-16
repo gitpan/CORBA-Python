@@ -8,7 +8,7 @@ package CORBA::Python::PyExtendedVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.60';
+our $VERSION = '2.64';
 
 use CORBA::Python::ClassVisitor;
 use base qw(CORBA::Python::ClassVisitor);
@@ -127,6 +127,10 @@ sub visitSpecification {
     }
     unless ($empty) {
         my $FH = $self->{out};
+        print $FH "\n";
+        print $FH "# Local variables:\n";
+        print $FH "#   buffer-read-only: t\n";
+        print $FH "# End:\n";        
         close $FH;
     }
     $self->_setup_py();
@@ -175,6 +179,10 @@ sub visitModules {
         $self->{setup_Extension} .= ")\n";
     }
     $self->{has_itf} = $save_has_itf;
+    print $FH "\n";
+    print $FH "# Local variables:\n";
+    print $FH "#   buffer-read-only: t\n";
+    print $FH "# End:\n";
     close $FH;
     $self->{out} = $save_out;
 }

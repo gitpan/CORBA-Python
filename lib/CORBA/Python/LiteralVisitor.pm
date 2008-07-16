@@ -10,7 +10,7 @@ package CORBA::Python::LiteralVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.60';
+our $VERSION = '2.64';
 
 use File::Basename;
 
@@ -31,7 +31,7 @@ sub new {
 
 sub _get_defn {
     my $self = shift;
-    my ($defn) = @_;
+    my $defn = shift;
     if (ref $defn) {
         return $defn;
     }
@@ -202,24 +202,24 @@ sub _Eval {
     my $self = shift;
     my ($list_expr, $type, $scope) = @_;
     my $elt = $self->_get_defn(pop @{$list_expr});
-    if (    $elt->isa('BinaryOp') ) {
-        my $right = $self->_Eval($list_expr, $type, $scope);
-        my $left = $self->_Eval($list_expr, $type, $scope);
-        return '(' . $left . q{ } . $elt->{op} . q{ } . $right . ')';
+    if    ( $elt->isa('Literal') ) {
+        $elt->visit($self, $type);
+        return $elt->{$self->{key}};
+    }
+    elsif ( $elt->isa('Enum') ) {
+        return $self->_get_scoped_name($elt, $scope);
+    }
+    elsif ( $elt->isa('Constant') ) {
+        return $self->_get_scoped_name($elt, $scope);
     }
     elsif ( $elt->isa('UnaryOp') ) {
         my $right = $self->_Eval($list_expr, $type, $scope);
         return $elt->{op} . $right;
     }
-    elsif ( $elt->isa('Constant') ) {
-        return $self->_get_scoped_name($elt, $scope);
-    }
-    elsif ( $elt->isa('Enum') ) {
-        return $self->_get_scoped_name($elt, $scope);
-    }
-    elsif ( $elt->isa('Literal') ) {
-        $elt->visit($self, $type);
-        return $elt->{$self->{key}};
+    elsif ( $elt->isa('BinaryOp') ) {
+        my $right = $self->_Eval($list_expr, $type, $scope);
+        my $left = $self->_Eval($list_expr, $type, $scope);
+        return '(' . $left . q{ } . $elt->{op} . q{ } . $right . ')';
     }
     else {
         warn __PACKAGE__,"::_Eval: INTERNAL ERROR ",ref $elt,".\n";

@@ -10,7 +10,7 @@ package CORBA::Python::ImportVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.60';
+our $VERSION = '2.64';
 
 use File::Basename;
 
@@ -33,7 +33,7 @@ sub new {
 
 sub _get_defn {
     my $self = shift;
-    my ($defn) = @_;
+    my $defn = shift;
     if (ref $defn) {
         return $defn;
     }

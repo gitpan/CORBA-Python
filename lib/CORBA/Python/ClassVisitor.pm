@@ -10,7 +10,7 @@ package CORBA::Python::ClassVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.60';
+our $VERSION = '2.64';
 
 use File::Basename;
 use IO::File;
@@ -67,6 +67,7 @@ sub open_stream {
             or die "can't open $filename ($!).\n";
     $self->{filename} = $filename;
     my $FH = $self->{out};
+    print $FH "# ex: set ro:\n";
     print $FH "#   This file was generated (by ",basename($0),"). DO NOT modify it.\n";
     print $FH "# From file : ",$self->{srcname},", ",$self->{srcname_size}," octets, ",POSIX::ctime($self->{srcname_mtime});
     print $FH "\n";
@@ -132,7 +133,7 @@ sub open_stream {
 
 sub _get_defn {
     my $self = shift;
-    my ($defn) = @_;
+    my $defn = shift;
     if (ref $defn) {
         return $defn;
     }
@@ -297,6 +298,10 @@ sub visitSpecification {
     }
     unless ($empty) {
         my $FH = $self->{out};
+        print $FH "\n";
+        print $FH "# Local variables:\n";
+        print $FH "#   buffer-read-only: t\n";
+        print $FH "# End:\n";
         close $FH;
     }
     $self->_setup_py();
@@ -335,6 +340,10 @@ sub visitModules {
     foreach (@{$node->{list_decl}}) {
         $_->visit($self);
     }
+    print $FH "\n";
+    print $FH "# Local variables:\n";
+    print $FH "#   buffer-read-only: t\n";
+    print $FH "# End:\n";
     close $FH;
     $self->{out} = $save_out;
 }

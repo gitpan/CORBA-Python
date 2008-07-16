@@ -10,7 +10,7 @@ package CORBA::Python::NameVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.60';
+our $VERSION = '2.64';
 
 # builds $node->{py_name}
 
@@ -59,7 +59,7 @@ sub new {
 
 sub _get_defn {
     my $self = shift;
-    my ($defn) = @_;
+    my $defn = shift;
     if (ref $defn) {
         return $defn;
     }
@@ -78,7 +78,6 @@ sub _get_name {
     else {
         return $name;
     }
-    return $name;
 }
 
 #
