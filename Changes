@@ -1,5 +1,8 @@
 Revision history for Perl extension CORBA::Python.
 
+2.65  Mon Aug 25 18:30:00 2008
+	- fix many memory leak with C/Python (thank to S. Royen)
+
 2.64  Wed Jul 16 18:30:00 2008
 	- add Vi & Emacs macros
 

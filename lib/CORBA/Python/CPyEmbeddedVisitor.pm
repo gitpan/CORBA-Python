@@ -8,7 +8,7 @@ package CORBA::Python::CPyEmbeddedVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.64';
+our $VERSION = '2.65';
 
 use CORBA::Python::CPyVisitor;
 use base qw(CORBA::Python::CPyVisitor);
@@ -315,7 +315,7 @@ sub visitSpecification {
     print $FH " * Local variables:\n";
     print $FH " *   buffer-read-only: t\n";
     print $FH " * End:\n";
-    print $FH " */\n";    
+    print $FH " */\n";
     close $FH;
 }
 
@@ -364,7 +364,11 @@ sub visitRegularInterface {
             print $FH "\t\t_obj_",$node->{c_name}," = PyInstance_New(_cls_",$node->{c_name},", NULL, NULL); // New reference\n";
         }
         else {
-            print $FH "\t\t_obj_",$node->{c_name}," = PyObject_Call(_cls_",$node->{c_name},", PyTuple_New(0), NULL);\n";
+            print $FH "\t\t{\n";
+            print $FH "\t\t\tPyObject *_null_args = PyTuple_New(0);\n";
+            print $FH "\t\t\t_obj_",$node->{c_name}," = PyObject_Call(_cls_",$node->{c_name},", _null_args, NULL);\n";
+            print $FH "\t\t\tPy_DECREF(_null_args);\n";
+            print $FH "\t\t}\n";
         }
         if ($self->{assert}) {
             print $FH "\t\tassert(NULL != _obj_",$node->{c_name},");\n";
@@ -634,6 +638,15 @@ sub visitOperation {
     }
     else {
         print $FH "\t_result = PyObject_CallMethod(_obj, \"",$node->{py_name},"\", NULL); // New reference\n";
+    }
+    # immediately free in parameters because same name are use for inout and override pointer
+    foreach (@{$node->{list_param}}) {  # parameter
+        next if ($_->{attr} eq 'out');
+        my $type = $self->_get_defn($_->{type});
+        my $fmt = $self->_get_cpy_format($type);
+        if ($fmt eq 'O') {
+            print $FH "\tPy_DECREF(_arg_",$_->{c_name},");\n";
+        }
     }
     print $FH "\n";
     print $FH "\tif (NULL != _result) {\n";

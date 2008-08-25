@@ -8,7 +8,7 @@ package CORBA::Python::CPyVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.64';
+our $VERSION = '2.65';
 
 use File::Basename;
 use POSIX qw(ctime);
@@ -184,7 +184,7 @@ sub visitSpecification {
     print $FH " * Local variables:\n";
     print $FH " *   buffer-read-only: t\n";
     print $FH " * End:\n";
-    print $FH " */\n";    
+    print $FH " */\n";
     close $FH;
 }
 
@@ -431,7 +431,6 @@ sub visitTypeDeclarator {
             else {
                 print $FH @tab,"\t\t_item",$nb," = Py_BuildValue(\"",$fmt,"\", ",$args,"); /* New reference */ \\\n";
             }
-#           print $FH @tab,"\t\tPy_INCREF(_item",$nb,"); \\\n";
         }
         foreach (@array) {
             pop @tab;
@@ -447,6 +446,7 @@ sub visitTypeDeclarator {
         else {
             print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
         }
+        print $FH "\t\tPy_XDECREF(_args); \\\n";
         print $FH "\t\tassert(obj != NULL); \\\n";
         $obj = "_obj" . $self->{num_typedef};
         print $FH "\t\tPy_DECREF(",$obj,"); \\\n";
@@ -533,6 +533,7 @@ sub visitTypeDeclarator {
             else {
                 print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
             }
+            print $FH "\t\tPy_XDECREF(_args); \\\n";
             print $FH "\t\tassert(obj != NULL); \\\n";
             print $FH "\t\tPy_DECREF(",$obj,"); \\\n";
             print $FH "\t} \n";
@@ -560,7 +561,6 @@ sub visitTypeDeclarator {
             if ($self->{assert}) {
                 print $FH "\t\tassert(0 == \"PYOBJ_AS_",$node->{c_name}," parse_object\"); \\\n";
             }
-            print $FH "\t\tPy_DECREF(obj); \\\n";
             print $FH "\t\t",$self->{error},"; \\\n";
             if (exists $self->{embedded} and $fmt eq "s") {
                 print $FH "\t} \\\n";
@@ -591,6 +591,7 @@ sub visitTypeDeclarator {
             else {
                 print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
             }
+            print $FH "\t\tPy_XDECREF(_args); \\\n";
             print $FH "\t\tassert(obj != NULL); \\\n";
             print $FH "\t} \n";
             print $FH "\n";
@@ -711,6 +712,7 @@ sub visitStructType {
         my $defn = $self->_get_defn($_);
         $self->_member_as($defn);
     }
+    print $FH "\t\tPy_DECREF(_args); \\\n";
     print $FH "\t}\n";
     print $FH "\n";
     print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
@@ -956,7 +958,6 @@ sub _member_from {
                 else {
                     print $FH @tab,"\t\t\t_item",$nb," = Py_BuildValue(\"",$fmt,"\", ",$args,"); /* New reference */ \\\n";
                 }
-#               print $FH @tab,"\t\t\tPy_INCREF(_item",$nb,"); \\\n";
             }
             foreach (@array) {
                 pop @tab;
@@ -971,7 +972,6 @@ sub _member_from {
         }
         else {
             print $FH @tab,"\t\tPYOBJ_FROM_",$type->{c_name},"(",$obj,", (val).",$union,$member->{c_name},"); \\\n";
-#           print $FH @tab,"\t\tPy_INCREF(",$obj,"); \\\n";
         }
     }
     else {
@@ -1251,6 +1251,7 @@ sub visitEnumType {
     print $FH "\t\t\t",$self->{error},"; \\\n";
     print $FH "\t\t} \\\n";
     print $FH "\t\t(val) = PyInt_AsLong(_val); \\\n";
+    print $FH "\t\tPy_DECREF(_val); \\\n";
     print $FH "\t}\n";
     print $FH "\n";
     print $FH "#define PYOBJ_FROM_",$node->{c_name},"(obj, val) \\\n";
@@ -1266,6 +1267,7 @@ sub visitEnumType {
     print $FH "\tif (NULL == _cls_",$node->{c_name},") { \\\n";
     print $FH "\t\t",$self->{error},"; \\\n";
     print $FH "\t} else { \\\n";
+    print $FH "\t\tPyObject* _long; \\\n";
     print $FH "\t\tPyObject* _enum = PyObject_GetAttrString(_cls_",$node->{c_name},", \"_enum\"); /* New reference */ \\\n";
     print $FH "\t\tif (_enum == NULL) { \\\n";
     if ($self->{assert}) {
@@ -1273,14 +1275,19 @@ sub visitEnumType {
     }
     print $FH "\t\t\t",$self->{error},"; \\\n";
     print $FH "\t\t} \\\n";
-    print $FH "\t\t(obj) = PyDict_GetItem(_enum, PyInt_FromLong(val)); /* Borrowed reference */ \\\n";
+    print $FH "\t\t_long = PyInt_FromLong(val); \\\n";
+    print $FH "\t\t(obj) = PyDict_GetItem(_enum, _long); /* Borrowed reference */ \\\n";
+    print $FH "\t\tPy_DECREF(_long); \\\n";
     print $FH "\t\tif ((obj) == NULL) { \\\n";
+    print $FH "\t\t\tPy_DECREF(_enum); \\\n";
     if ($self->{assert}) {
         print $FH "\t\t\tassert(0 == \"PYOBJ_FROM_",$node->{c_name}," (obj == NULL)\"); \\\n";
     }
     print $FH "\t\t\tPyErr_Format(PyExc_RuntimeError, \"can't retrieve enum '",$node->{py_name},"'(%lu)\", (val)); \\\n";
     print $FH "\t\t\t",$self->{error},"; \\\n";
     print $FH "\t\t} \\\n";
+    print $FH "\t\tPy_INCREF((obj)); \\\n";
+    print $FH "\t\tPy_DECREF(_enum); \\\n";
     print $FH "\t}\n";
     print $FH "\n";
 }

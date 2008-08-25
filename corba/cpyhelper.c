@@ -89,11 +89,15 @@ int
 parse_object(PyObject *obj, const char *format, void *addr)
 {
 	PyObject * args;
+	int result;
 
 	if (NULL == obj)
 		return -1;
 	args = PyTuple_New(1); // New reference
-	PyTuple_SetItem(args, 0, obj);
-	return PyArg_ParseTuple(args, format, addr);
+	PyTuple_SetItem(args, 0, obj); // stolen reference
+	result = PyArg_ParseTuple(args, format, addr);
+	Py_INCREF(obj); // Increase reference to keep obj on args delete
+	Py_DECREF(args);
+	return result;
 }
 
