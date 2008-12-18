@@ -8,7 +8,7 @@ package CORBA::Python::CPyVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.65';
+our $VERSION = '2.66';
 
 use File::Basename;
 use POSIX qw(ctime);
@@ -752,6 +752,7 @@ sub visitStructType {
     else {
         print $FH "\t\tobj = PyObject_Call(_cls_",$node->{c_name},", _args, NULL); \\\n";
     }
+    print $FH "\t\tPy_XDECREF(_args); \\\n";
     print $FH "\t\tassert(obj != NULL); \\\n";
     foreach (@{$node->{list_member}}) {
         my $defn = $self->_get_defn($_);

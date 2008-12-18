@@ -10,7 +10,7 @@ package CORBA::Python::LiteralVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.64';
+our $VERSION = '2.66';
 
 use File::Basename;
 
@@ -25,7 +25,14 @@ sub new {
     $self->{key} = 'py_literal';
     $self->{srcname} = $parser->YYData->{srcname};
     $self->{symbtab} = $parser->YYData->{symbtab};
+    if (exists $parser->YYData->{opt_J}) {
+        $self->{base_package} = $parser->YYData->{opt_J};
+    }
+    else {
+        $self->{base_package} = q{};
+    }
     $self->{server} = 1 if (defined $server);
+    $self->{import_substitution} = {};
     return $self;
 }
 
@@ -85,6 +92,13 @@ sub _get_scoped_name {
                 $name =~ s/::/_skel\./;
             }
             $name =~ s/::/\./g;
+            if ($self->{base_package}) {
+                my $import_name = $name;
+                $import_name =~ s/\.[0-9A-Z_a-z]+$//;
+                if (exists $self->{import_substitution}->{$import_name}) {
+                    $name =~ s/$import_name/$self->{import_substitution}->{$import_name}/;
+                }
+            }
         }
         else {
             my $name2 = $node->{py_name};
@@ -141,6 +155,26 @@ sub visitImport {
 sub visitModules {
     my $self = shift;
     my ($node) = @_;
+    foreach my $name (sort keys %{$node->{py_import}}) {
+        next if ($name eq '::CORBA');
+        next if ($name eq '::IOP');
+        next if ($name eq '::GIOP');
+        unless ( $name eq '::' or $name eq q{} ) {
+            $name =~ s/^:://;
+            if (exists $self->{server}) {
+                $name =~ s/::/_skel\./g;
+                $name .= '_skel';
+            }
+            else {
+                $name =~ s/::/\./g;
+            }
+            if ($self->{base_package}) {
+                my $full_import_name = $self->{base_package} . '.' . $name;
+                $full_import_name =~ s/\//\./g;
+                $self->{import_substitution}->{$name} = $full_import_name;
+            }
+        }
+    }
     foreach (@{$node->{list_export}}) {
         $self->_get_defn($_)->visit($self);
     }

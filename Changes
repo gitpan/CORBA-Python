@@ -1,5 +1,9 @@
 Revision history for Perl extension CORBA::Python.
 
+2.66  Thu Dec 18 12:30:00 2008
+	- fix setter for Union
+	- fix Constant when Python package (option -J)
+
 2.65  Mon Aug 25 18:30:00 2008
 	- fix many memory leak with C/Python (thank to S. Royen)
 

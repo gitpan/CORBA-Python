@@ -10,7 +10,7 @@ package CORBA::Python::ClassVisitor;
 use strict;
 use warnings;
 
-our $VERSION = '2.64';
+our $VERSION = '2.66';
 
 use File::Basename;
 use IO::File;
@@ -2070,7 +2070,8 @@ sub visitUnionType {
                     my $elt = $self->_get_defn($case->{element});
                     my $label = ${$elt->{list_expr}}[0];
                     print $FH $self->{indent},"    def _set",$label,"(self, ",$label,"):\n";
-                    $self->_member_check($elt, $label, "        ", $node);
+                    my $member = $self->_get_defn($case->{element}->{value});
+                    $self->_member_check($member, $label, "        ", $node);
                     print $FH $self->{indent},"        self.__d = ",$_->{py_literal},"\n";
                     print $FH $self->{indent},"        self.__v = ",$label,"\n";
                     print $FH "\n";

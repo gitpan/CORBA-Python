@@ -3,7 +3,7 @@ use warnings;
 
 package CORBA::Python;
 
-our $VERSION = '2.65';
+our $VERSION = '2.66';
 
 use CORBA::Python::NameVisitor;
 use CORBA::Python::ImportVisitor;
